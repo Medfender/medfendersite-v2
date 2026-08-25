@@ -1,0 +1,13 @@
+{
+  "youtube": [
+    { "id": "yt-1", "title": "Live at Sofitel: So Lounge Set", "youtubeId": "dQw4w9WgXcQ" },
+    { "id": "yt-2", "title": "TONEX Capture Session Walkthrough", "youtubeId": "dQw4w9WgXcQ" },
+    { "id": "yt-3", "title": "HX Stomp XL Studio Demo", "youtubeId": "dQw4w9WgXcQ" }
+  ],
+  "gallery": [
+    { "id": "gal-1", "title": "Sofitel Performance", "imageUrl": "/images/gallery/live-1.jpg", "alt": "Live stage performance at Sofitel" },
+    { "id": "gal-2", "title": "Studio Capture Session", "imageUrl": "/images/gallery/live-2.jpg", "alt": "Close-up of pedalboard capture session" },
+    { "id": "gal-3", "title": "Backline Setup", "imageUrl": "/images/gallery/live-3.jpg", "alt": "Backline amplifier setup on stage" },
+    { "id": "gal-4", "title": "Line 6 HX Stomp XL", "imageUrl": "/images/presets/srv-pack.jpg", "alt": "HX Stomp XL pedalboard close-up" }
+  ]
+}

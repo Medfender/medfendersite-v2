@@ -1,0 +1,15 @@
+[
+  {
+    "id": "tonex-srv-pack",
+    "title": "SRV Ultimate Amp Capture Pack",
+    "category": "TONEX",
+    "price": 19.99,
+    "lemonSqueezyVariantId": "",
+    "demoAudio": "/audio/demos/srv-tone-demo.mp3",
+    "coverImage": "/images/presets/srv-pack.jpg",
+    "description": {
+      "en": "Direct capture of classic Texas blues amp tones with pristine low-end response.",
+      "fr": "Capture directe de sonorités blues texanes classiques avec une réponse précise des basses."
+    }
+  }
+]
