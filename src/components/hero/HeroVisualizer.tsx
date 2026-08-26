@@ -3,17 +3,13 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 
-const FREQUENCY_LABELS = [
-  { freq: 60, label: "60 Hz" },
-  { freq: 120, label: "120 Hz" },
-  { freq: 250, label: "250 Hz" },
-  { freq: 500, label: "500 Hz" },
-  { freq: 1000, label: "1 kHz" },
-  { freq: 2000, label: "2 kHz" },
-  { freq: 4000, label: "4 kHz" },
-  { freq: 8000, label: "8 kHz" },
-  { freq: 16000, label: "16 kHz" },
-];
+// Clean frequency tick array - well-spaced target frequencies
+const TICKS = [100, 250, 500, 1000, 2000, 4000, 8000, 16000];
+
+// Format labels dynamically
+const formatFreqLabel = (freq: number): string => {
+  return freq < 1000 ? `${freq} Hz` : `${freq / 1000} kHz`;
+};
 
 interface HeroVisualizerProps {
   isSectionInView: boolean;
@@ -212,18 +208,44 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
       }
 
       ctx.font = "10px 'JetBrains Mono', monospace";
-      ctx.textAlign = "center";
       ctx.textBaseline = "top";
 
-      FREQUENCY_LABELS.forEach(({ freq, label }) => {
-        const bin = getBinForFreq(freq);
-        const x = Math.min(w - 2, bin * (w / binsToUse));
+      // Accurate logarithmic mapping with canvas padding
+      const PADDING_X = 28;
+      const minFreq = 20;
+      const maxFreq = 20000;
+      const usableWidth = w - PADDING_X * 2;
+
+      const getXPosition = (freq: number) => {
+        const logMin = Math.log10(minFreq);
+        const logMax = Math.log10(maxFreq);
+        const logFreq = Math.log10(freq);
+        const ratio = (logFreq - logMin) / (logMax - logMin);
+        return PADDING_X + ratio * usableWidth;
+      };
+
+      TICKS.forEach((freq, index) => {
+        const x = getXPosition(freq);
+        const label = formatFreqLabel(freq);
+
+        // Draw tick line
         ctx.strokeStyle = "rgba(6,182,212,0.3)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(x, axisY);
         ctx.lineTo(x, axisY + 6);
         ctx.stroke();
+
+        // Set text alignment: left for first, center for middle, right for last
+        if (index === 0) {
+          ctx.textAlign = "left";
+        } else if (index === TICKS.length - 1) {
+          ctx.textAlign = "right";
+        } else {
+          ctx.textAlign = "center";
+        }
+
+        // Draw label
         ctx.fillStyle = "rgba(6,182,212,0.7)";
         ctx.fillText(label, x, axisY + 8);
       });

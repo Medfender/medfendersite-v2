@@ -22,10 +22,13 @@ interface AudioContextType {
   getActiveFrequencyData: () => Uint8Array | null;
   // Playback controls
   activeTrack: TrackInfo | null;
+  currentTrack: TrackInfo | null;
   playTrack: (track: TrackInfo) => void;
   pauseTrack: () => void;
   stopTrack: () => void;
   togglePlayStop: (track: TrackInfo) => void;
+  togglePlay: () => void;
+  pause: () => void;
   volume: number;
   setVolume: (val: number) => void;
   currentTime: number;
@@ -161,7 +164,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (audioRef.current) activeAudioRef.current = audioRef.current;
     if (activeTrack?.id !== track.id) {
       setActiveTrack(track);
-      audioRef.current.src = track.audioUrl;
+      audioRef.current.src = track.audioUrl || (track as any).src || '';
       audioRef.current.currentTime = 0;
     }
     try {
@@ -210,6 +213,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       playTrack(track);
     }
+  };
+
+  // Convenience aliases for VinylFeaturedPlayer
+  const currentTrack = activeTrack;
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      pauseTrack();
+    } else if (activeTrack) {
+      playTrack(activeTrack);
+    }
+  };
+
+  const pause = () => {
+    pauseTrack();
   };
 
   const setVolume = (val: number) => {
@@ -268,7 +286,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [isPlaying, setIsPlaying, setIsVisualizerActive]);
 
   return (
-    <AudioContextInstance.Provider
+    <>
+      <audio ref={audioRef} crossOrigin="anonymous" preload="metadata" style={{ display: "none" }} />
+      <AudioContextInstance.Provider
       value={{
         audioCtx: audioCtxRef.current,
         isPlaying,
@@ -285,10 +305,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         getActiveFrequencyData,
         // Playback controls
         activeTrack,
+        currentTrack,
         playTrack,
         pauseTrack,
         stopTrack,
         togglePlayStop,
+        togglePlay,
+        pause,
         volume,
         setVolume,
         currentTime,
@@ -301,6 +324,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     >
       {children}
     </AudioContextInstance.Provider>
+    </>
   );
 };
 

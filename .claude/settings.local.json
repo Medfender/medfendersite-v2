@@ -41,7 +41,18 @@
       "Bash(kill 761438)",
       "Bash(curl -s -o /dev/null -w \"Port 3000: %{http_code}\\\\n\" http://localhost:3000/)",
       "Read(//tmp/**)",
-      "Bash(kill 839054 *)"
+      "Bash(kill 839054 *)",
+      "Bash(pnpm lint *)",
+      "Bash(curl -s -o /tmp/out.html -w \"HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(pkill -f \"next\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(disown)",
+      "Bash(node node_modules/.bin/next build)",
+      "Bash(curl -s http://localhost:3000/api/featured-tracks)",
+      "Bash(curl -s -o /tmp/player.html http://localhost:3000/)",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3001/api/featured-tracks)"
     ]
   }
 }
