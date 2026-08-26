@@ -141,32 +141,35 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
         onPause={() => { setIsPlaying(false); setVisualizerActive(false); setIsThisPlaying(false); }}
         style={{ display: "none" }}
       />
-      <div className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white py-3 px-4 md:px-8 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+      <div className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
         isSectionInView
           ? 'opacity-100 translate-y-0 pointer-events-auto'
           : 'opacity-0 translate-y-8 pointer-events-none'
       }`}>
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3 md:gap-6">
-          {/* Header: Play Button + Track Info */}
-          <div className="flex items-center gap-3 shrink-0 w-full md:w-auto">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:px-4 md:px-8 w-full">
+          {/* Left Section: Play Button + Track Info */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleTogglePlay}
-              className="relative group w-12 h-12 min-w-[48px] min-h-[48px] shrink-0 aspect-square rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all duration-200"
+              className="relative group w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all duration-200 shrink-0 aspect-square"
               aria-label={isThisPlaying ? "Pause" : "Play"}
             >
-              <span className="text-base leading-none select-none">
-                {isThisPlaying ? (
-                  <span aria-label="Pause" title="Pause">❚❚</span>
-                ) : (
-                  <span aria-label="Play" title="Play">▶</span>
-                )}
-              </span>
+              {isThisPlaying ? (
+                <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-label="Pause">
+                  <rect x="6" y="4" width="4" height="16" />
+                  <rect x="14" y="4" width="4" height="16" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-label="Play">
+                  <polygon points="5,3 19,12 5,21" />
+                </svg>
+              )}
               {isThisPlaying && (
                 <span className="absolute inset-0 rounded-full border border-cyan-400 animate-ping opacity-30" />
               )}
             </button>
 
-            <div className="overflow-hidden min-w-0">
+            <div className="flex flex-col truncate min-w-0">
               <div className="flex items-center gap-2">
                 <h4 className="font-bold text-sm md:text-base text-white truncate tracking-wide">{featuredTrack.title}</h4>
                 <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50 shrink-0">Featured</span>
@@ -175,35 +178,36 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             </div>
           </div>
 
-          {/* Timeline Row: Current Time + Progress Slider + Duration */}
-          <div className="flex items-center gap-3 w-full md:flex-1 min-w-[200px] md:min-w-0 shrink-0">
-            <span className="text-xs font-mono text-neutral-400 w-10 text-right shrink-0">{formatTime(currentTime)}</span>
-            <div className="relative flex-1 flex items-center min-w-0">
-              <input
-                type="range"
-                min={0}
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleSeek}
-                className="w-full h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition"
-              />
-            </div>
-            <span className="text-xs font-mono text-neutral-400 w-10 shrink-0">{formatTime(duration)}</span>
+          {/* Middle Section: Timeline & Seek Bar */}
+          <div className="flex-1 flex items-center gap-2 min-w-0 w-full sm:px-2">
+            <span className="text-xs font-mono text-neutral-400 shrink-0">{formatTime(currentTime)}</span>
+            <input
+              type="range"
+              min={0}
+              max={duration || 100}
+              value={currentTime}
+              onChange={handleSeek}
+              className="flex-1 min-w-[100px] h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition"
+            />
+            <span className="text-xs font-mono text-neutral-400 shrink-0">{formatTime(duration)}</span>
           </div>
 
-          {/* Auxiliary Controls: Stop + VOL + Volume Slider + Visualizer */}
-          <div className="flex items-center gap-4 w-full md:w-auto shrink-0">
+          {/* Right Section: Stop Button + Volume + Spectrum */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={handleStop}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] shrink-0 aspect-square rounded-full bg-neutral-800/80 text-neutral-400 flex items-center justify-center hover:text-white hover:bg-neutral-700 border border-neutral-700/60 transition"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-800/80 text-neutral-400 flex items-center justify-center hover:text-white hover:bg-neutral-700 border border-neutral-700/60 transition shrink-0 aspect-square"
               aria-label="STOP"
             >
-              <span className="text-base leading-none select-none" aria-hidden="true">■</span>
+              <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
             </button>
-            <div className="flex items-center gap-2 shrink-0">
+
+            <div className="hidden sm:flex items-center gap-2 shrink-0">
               <button
                 onClick={handleToggleMute}
-                className="w-14 shrink-0 text-xs font-mono text-neutral-400 hover:text-white text-center transition-colors"
+                className="text-xs font-mono text-neutral-400 hover:text-white transition-colors shrink-0 whitespace-nowrap"
               >
                 {volume === 0 ? "MUTED" : "VOL"}
               </button>
@@ -214,15 +218,18 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
                 step="0.01"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition shrink-0"
+                className="w-16 md:w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition shrink-0"
               />
             </div>
-            <SpectrumVisualizer
-              audioRef={audioRef}
-              isActive={isThisPlaying}
-              width={150}
-              height={60}
-            />
+
+            <div className="hidden md:block shrink-0">
+              <SpectrumVisualizer
+                audioRef={audioRef}
+                isActive={isThisPlaying}
+                width={150}
+                height={60}
+              />
+            </div>
           </div>
         </div>
       </div>
