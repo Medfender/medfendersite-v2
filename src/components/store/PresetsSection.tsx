@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
-import presetsData from "@/content/presets.json";
-import PresetCard, { PresetItem } from "./PresetCard";
+import { packs } from "@/data/storeData";
+import PresetCard from "./PresetCard";
+import type { PackData } from "@/data/storeData";
 
 export default function PresetsSection() {
-  const presets = presetsData as PresetItem[];
+  const presets = packs as PackData[];
 
   return (
     <section className="w-full max-w-6xl mx-auto px-6 py-20">

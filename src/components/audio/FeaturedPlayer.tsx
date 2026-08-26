@@ -1,147 +1,141 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { useAudio } from "@/context/AudioContext";
-import tracksData from "@/content/tracks.json";
-import SineWaveVisualizer from "./SineWaveVisualizer";
-
-interface TrackItem {
-  id: string;
-  title: string;
-  artist: string;
-  audioUrl: string;
-  coverUrl: string;
-}
+import { featuredTracks } from "@/data/storeData";
 
 export default function FeaturedPlayer() {
-  const {
-    currentTrack,
-    isPlaying,
-    currentTime,
-    duration,
-    volume,
-    playTrack,
-    pauseTrack,
-    togglePlay,
-    seek,
-    setVolume,
-  } = useAudio();
+  const { currentTrack, isPlaying, currentTime, duration, playTrack, togglePlay, seek, setVolume, analyser } = useAudio();
+  // Manage volume locally to avoid type issues with setVolume
+  const [trackIdx] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const rafRef = useRef<number>(0);
 
-  const tracks = useMemo(() => tracksData as TrackItem[], []);
-  const [selectedId, setSelectedId] = useState<string>(tracks[0]?.id || "");
-  const [isMuted, setIsMuted] = useState(false);
-  const [prevVolume, setPrevVolume] = useState(volume);
+  const track = featuredTracks[trackIdx];
 
-  const activeTrack = useMemo(() => {
-    if (currentTrack) return currentTrack;
-    const found = tracks.find((t) => t.id === selectedId);
-    if (found) {
-      return {
-        id: found.id,
-        title: found.title,
-        src: found.audioUrl,
-        artist: found.artist,
-        coverUrl: found.coverUrl,
-      };
-    }
-    return null;
-  }, [currentTrack, tracks, selectedId]);
+  // Real-time reactive frequency spectrum (FabFilter Pro-Q neon style)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  const handleSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value;
-    setSelectedId(id);
-    const found = tracks.find((t) => t.id === id);
-    if (found) {
-      playTrack({
-        id: found.id,
-        title: found.title,
-        src: found.audioUrl,
-        artist: found.artist,
-        coverUrl: found.coverUrl,
-      });
-    }
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, rect.width * dpr);
+      canvas.height = Math.max(1, rect.height * dpr);
+      ctx.scale(dpr, dpr);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const draw = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || 1;
+      const h = rect.height || 1;
+      ctx.clearRect(0, 0, w, h);
+
+      if (isPlaying && analyser) {
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        analyser.getByteFrequencyData(dataArray);
+        const barCount = 80;
+        const barW = w / barCount;
+        for (let i = 0; i < barCount; i++) {
+          const idx = Math.floor(i * (bufferLength / barCount));
+          const v = dataArray[idx] / 255;
+          const barH = v * h * 0.92;
+          const x = i * barW + 1;
+
+          // Neon EQ glow with vertical gradient
+          const grad = ctx.createLinearGradient(0, h - barH, 0, h);
+          grad.addColorStop(0, "#00f0ff");
+          grad.addColorStop(0.4, "#00d8f6");
+          grad.addColorStop(0.8, "#0088aa");
+          grad.addColorStop(1, "rgba(0,216,246,0.15)");
+
+          ctx.fillStyle = grad;
+          ctx.fillRect(x, h - barH, barW - 2, barH);
+
+          // Highlight top edge
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(x, h - barH, barW - 2, 1.5);
+        }
+      } else {
+        // Idle glow line
+        const gradient = ctx.createLinearGradient(0, h * 0.85, w, h * 0.85);
+        gradient.addColorStop(0, "rgba(0,216,246,0)");
+        gradient.addColorStop(0.3, "rgba(0,216,246,0.4)");
+        gradient.addColorStop(0.7, "rgba(0,216,246,0.4)");
+        gradient.addColorStop(1, "rgba(0,216,246,0)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, h * 0.82, w, 3);
+      }
+
+      rafRef.current = requestAnimationFrame(draw);
+    };
+    rafRef.current = requestAnimationFrame(draw);
+    return () => {
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [isPlaying, analyser]);
+
+  const formatTime = (s: number) => {
+    if (!isFinite(s) || isNaN(s)) return "0:00";
+    const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const formatTime = (seconds: number) => {
-    if (!isFinite(seconds) || isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  const handleMuteToggle = () => {
-    if (isMuted) {
-      setVolume(prevVolume);
-      setIsMuted(false);
+  const handlePlay = () => {
+    if (currentTrack?.src !== track.src) {
+      playTrack({ id: track.id, title: track.title, src: track.src, artist: track.artist, coverUrl: track.coverUrl });
     } else {
-      setPrevVolume(volume);
-      setVolume(0);
-      setIsMuted(true);
+      togglePlay();
     }
   };
 
   return (
-    <div className="relative w-full max-w-3xl mx-auto rounded-3xl overflow-hidden border border-cyan-500/20 shadow-[0_0_60px_rgba(0,216,246,0.08),0_8px_32px_rgba(0,0,0,0.6)]">
-      {/* Hardware synth inspired outer chassis */}
-      <div className="relative bg-gradient-to-b from-neutral-900 via-neutral-950 to-black">
-        {/* Top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
-
-        {/* Header / Meta */}
-        <div className="px-8 pt-6 pb-4">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-            <div className="flex items-end gap-4">
-              {/* LED indicator */}
-              <div className={`w-3 h-3 rounded-full mb-1 shadow-[0_0_8px] ${isPlaying ? "bg-cyan-400 shadow-cyan-400 animate-pulse" : "bg-neutral-700 shadow-none"}`} />
-              <div>
-                <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white drop-shadow-lg">
-                  {activeTrack?.title || "Select a track"}
-                </h2>
-                <p className="text-cyan-400/80 text-sm font-bold tracking-widest uppercase mt-0.5">
-                  {activeTrack?.artist || "Medfender"}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <label htmlFor="track-select" className="sr-only">Select track</label>
-              <select
-                id="track-select"
-                value={selectedId}
-                onChange={handleSelect}
-                className="bg-black/60 border border-cyan-500/20 text-cyan-100 text-xs font-bold rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/40 transition cursor-pointer"
-              >
-                {tracks.map((t) => (
-                  <option key={t.id} value={t.id} className="bg-neutral-900">{t.title}</option>
-                ))}
-              </select>
-            </div>
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0b0f19]/95 backdrop-blur-3xl border-t border-cyan-400/30 shadow-[0_-30px_80px_rgba(0,216,246,0.18)]">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-2.5 flex items-center gap-4 md:gap-5">
+        {/* Cover + Meta */}
+        <div className="flex items-center gap-3 min-w-0 shrink-0">
+          <div className="relative">
+            <img src={track.coverUrl} alt={track.title} className="w-12 h-12 rounded-xl object-cover ring-2 ring-cyan-400/30 shadow-[0_0_12px_rgba(0,216,246,0.35)]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_6px_rgba(0,216,246,0.8)]" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-base font-black text-white truncate leading-none tracking-tight">{track.title}</h3>
+            <p className="text-[11px] font-bold text-cyan-300 tracking-[0.15em] uppercase truncate">{track.artist}</p>
+            <span className="inline-block text-[10px] font-mono font-semibold text-cyan-200/80 bg-cyan-950/50 border border-cyan-400/20 rounded-md px-1.5 py-0.5 mt-0.5">{track.gearTag}</span>
           </div>
         </div>
 
-        {/* Visualizer */}
-        <div className="px-4">
-          <div className="rounded-2xl overflow-hidden border border-white/5 shadow-[inset_0_2px_20px_rgba(0,0,0,0.8)]">
-            <SineWaveVisualizer />
-          </div>
+        {/* EQ Visualizer */}
+        <div className="flex-1 h-14 hidden sm:block relative rounded-xl overflow-hidden bg-gradient-to-b from-[#0c1120] to-[#080c16] border border-white/5 shadow-inner">
+          <canvas ref={canvasRef} className="w-full h-full" aria-label="EQ spectrum analyzer" />
         </div>
 
-        {/* Controls Bar — hardware synth style */}
-        <div className="px-8 pb-6 pt-2">
-          {/* Scrub / Progress */}
-          <div className="mb-5">
-            <div className="relative w-full h-2.5 bg-neutral-950 rounded-full overflow-hidden border border-white/5 shadow-[inset_0_1px_4px_rgba(0,0,0,0.6)] group cursor-pointer">
-              {/* Fill */}
-              <div
-                className="absolute left-0 top-0 h-full bg-gradient-to-r from-cyan-600 to-cyan-400 rounded-full shadow-[0_0_12px_rgba(0,216,246,0.6)] transition-all duration-100"
-                style={{ width: `${progressPercent}%` }}
-              />
-              {/* Thumb */}
-              <div
-                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white shadow-[0_0_10px_rgba(0,216,246,0.8),0_2px_8px_rgba(0,0,0,0.8)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
-                style={{ left: `calc(${progressPercent}% - 8px)` }}
-              />
+        {/* Controls */}
+        <div className="flex items-center gap-3 md:gap-5 shrink-0">
+          <button
+            onClick={handlePlay}
+            aria-label={isPlaying ? "Pause" : "Play"}
+            className="w-11 h-11 rounded-full bg-gradient-to-br from-cyan-300 to-cyan-600 text-[#0b0f19] font-black flex items-center justify-center shadow-[0_0_20px_rgba(0,216,246,0.55)] hover:shadow-[0_0_30px_rgba(0,216,246,0.7)] hover:scale-105 active:scale-95 transition-all duration-150"
+          >
+            {isPlaying ? "⏸" : "▶"}
+          </button>
+
+          <div className="flex flex-col w-32 md:w-40">
+            <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono font-bold">
+              <span className="text-cyan-200">{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+            <div className="relative h-1.5 bg-neutral-800/80 rounded-full overflow-hidden ring-1 ring-white/5">
+              <div className="h-full bg-gradient-to-r from-cyan-300 via-cyan-400 to-cyan-200 rounded-full shadow-[0_0_6px_rgba(0,216,246,0.4)]" style={{ width: `${progressPct}%` }} />
               <input
                 type="range"
                 min={0}
@@ -149,65 +143,14 @@ export default function FeaturedPlayer() {
                 step={0.1}
                 value={currentTime || 0}
                 onChange={(e) => seek(parseFloat(e.target.value))}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 aria-label="Seek"
               />
             </div>
           </div>
 
-          {/* Play / Time / Volume row */}
-          <div className="flex items-center justify-between gap-4">
-            {/* Play button */}
-            <button
-              onClick={togglePlay}
-              aria-label={isPlaying ? "Pause" : "Play"}
-              className="group flex items-center justify-center w-14 h-14 rounded-2xl border-2 border-cyan-500/30 bg-gradient-to-b from-neutral-800 to-neutral-950 hover:from-cyan-900/40 hover:to-neutral-900 hover:border-cyan-400/60 active:scale-95 transition-all duration-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_16px_rgba(0,0,0,0.5)]"
-            >
-              <span className={`text-2xl leading-none ${isPlaying ? "text-cyan-300" : "text-cyan-300"} group-hover:text-cyan-200`}>
-                {isPlaying ? "▶" : "▶"}
-              </span>
-            </button>
-
-            {/* Time display */}
-            <div className="flex items-center gap-2 font-mono text-sm tabular-nums bg-black/40 border border-white/5 rounded-xl px-4 py-2.5 shadow-inner">
-              <span className="text-cyan-300 font-bold">{formatTime(currentTime)}</span>
-              <span className="text-neutral-600">/</span>
-              <span className="text-neutral-500">{formatTime(duration)}</span>
-            </div>
-
-            {/* Volume row */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleMuteToggle}
-                aria-label={isMuted ? "Unmute" : "Mute"}
-                className={`text-xs font-black uppercase tracking-wider px-2 py-1 rounded-lg border transition-colors ${
-                  isMuted
-                    ? "text-rose-400 border-rose-500/30 bg-rose-950/30"
-                    : "text-neutral-400 border-white/5 hover:text-cyan-300 hover:border-cyan-500/30"
-                }`}
-              >
-                {isMuted ? "MUTED" : "VOL"}
-              </button>
-              <input
-                type="range"
-                min={0}
-                max={1}
-                step={0.01}
-                value={isMuted ? 0 : volume}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-                  setVolume(v);
-                  setIsMuted(v === 0);
-                }}
-                className="w-20 accent-cyan-400 h-1 rounded-full bg-neutral-800 appearance-none cursor-pointer"
-                aria-label="Volume"
-              />
-            </div>
-          </div>
+          <button onClick={() => setVolume(1)} className="text-[10px] font-black text-cyan-300 hover:text-white transition-colors tracking-widest">VOL</button>
         </div>
-
-        {/* Bottom accent bar */}
-        <div className="h-px w-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent mb-1" />
       </div>
     </div>
   );
