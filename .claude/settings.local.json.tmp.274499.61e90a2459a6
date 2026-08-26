@@ -12,7 +12,8 @@
       "Bash(pnpm build *)",
       "Bash(echo \"Exit code: $?\")",
       "Bash(echo \"Exit: $?\")",
-      "Bash(git commit -m 'Fix PresetCard JSX structure and commit visual polish with verification artifact *)"
+      "Bash(git commit -m 'Fix PresetCard JSX structure and commit visual polish with verification artifact *)",
+      "Bash(git commit *)"
     ]
   }
 }
