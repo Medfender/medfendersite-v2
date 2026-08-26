@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: "Medfender <noreply@medfender.site>",
+      from: "Medfender <onboarding@resend.dev>",
       to: ["contact@medfender.site"],
       subject: `New Inquiry — ${type} | ${subject || name}`,
       html,
