@@ -38,7 +38,7 @@ export default function PresetCard({ preset }: { preset: PackData }) {
 
 function ToneRow({ tone }: { tone: ToneItem }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const { registerAudioElement, stopTrack, activeTrack, isPlaying, connectAudioElement, setVisualizerActive, setCardVolume, pauseAllOtherMedia } = useAudio();
+  const { registerAudioElement, stopTrack, activeTrack, isPlaying, connectAudioElement, setVisualizerActive, setCardVolume, pauseAllOtherMedia, getActiveFrequencyData, setActiveAudioElement } = useAudio();
   const [playing, setPlaying] = useState(false);
   const [localVol, setLocalVol] = useState(0.85);
   const playPromiseRef = useRef<Promise<void> | null>(null);
@@ -157,6 +157,7 @@ function ToneRow({ tone }: { tone: ToneItem }) {
         audioRef.current.volume = 1.0;
         connectAudioElement(audioRef.current);
         setCardVolume(audioRef.current, localVol);
+        if (setActiveAudioElement) setActiveAudioElement(audioRef.current);
       }
     }
   }, [playing, localVol, tone.id, isPlaying, activeTrack, stopTrack, connectAudioElement, connectAudioElement, setVisualizerActive, pauseAllOtherMedia]);

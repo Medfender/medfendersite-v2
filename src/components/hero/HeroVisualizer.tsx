@@ -15,14 +15,17 @@ const FREQUENCY_LABELS = [
   { freq: 16000, label: "16 kHz" },
 ];
 
-export default function HeroVisualizer() {
+interface HeroVisualizerProps {
+  isSectionInView: boolean;
+}
+
+export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { getFrequencyData, isPlaying, activeTrack, isVisualizerActive } = useAudio();
+  const { getActiveFrequencyData, isPlaying, activeTrack, isVisualizerActive } = useAudio();
   const animFrameRef = useRef<number | null>(null);
   const peakInfoRef = useRef<{ bin: number; freq: number; db: number } | null>(null);
   const peakHoldRef = useRef<{ x: number; height: number; timestamp: number }[]>([]);
   const canvasSizeRef = useRef<{ w: number; h: number; dpr: number }>({ w: 800, h: 120, dpr: 1 });
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,8 +90,7 @@ export default function HeroVisualizer() {
       const gap = 1;
       const barW = Math.max(2, (w / binsToUse) - gap);
 
-      const audioEl = audioRef.current;
-      const freqData = audioEl ? getFrequencyData(audioEl) : null;
+      const freqData = getActiveFrequencyData ? getActiveFrequencyData() : null;
 
       if (freqData) {
         const dataArray = new Uint8Array(bufferLength);
@@ -241,10 +243,14 @@ export default function HeroVisualizer() {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
       window.removeEventListener("resize", onResize);
     };
-  }, [getFrequencyData, isPlaying, isVisualizerActive]);
+  }, [getActiveFrequencyData, isPlaying, isVisualizerActive]);
 
   return (
-    <div className="w-full relative overflow-hidden rounded-2xl bg-transparent backdrop-blur-none my-4 shadow-none border-none">
+    <div className={`w-full relative overflow-hidden rounded-2xl bg-transparent backdrop-blur-none my-4 shadow-none border-none transition-all duration-500 ease-in-out ${
+      isSectionInView
+        ? 'opacity-100 translate-y-0 pointer-events-auto'
+        : 'opacity-0 translate-y-8 pointer-events-none'
+    }`}>
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-2 px-1 gap-2">
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${isPlaying ? "bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(0,216,246,0.6)]" : "bg-neutral-600"}`} />

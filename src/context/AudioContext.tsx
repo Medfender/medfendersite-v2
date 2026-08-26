@@ -14,10 +14,12 @@ interface AudioContextType {
   setIsVisualizerActive: (val: boolean) => void;
   setVisualizerActive: (val: boolean) => void;
   connectAudioElement: (audioEl: HTMLAudioElement) => void;
+  setActiveAudioElement: (audioEl: HTMLAudioElement | null) => void;
   registerAudioElement: (audioEl: HTMLAudioElement) => (() => void) | void;
   setMasterVolume: (val: number) => void;
   setCardVolume: (audioEl: HTMLAudioElement | null, val: number) => void;
   getFrequencyData: (audioEl: HTMLAudioElement) => Uint8Array | null;
+  getActiveFrequencyData: () => Uint8Array | null;
   // Playback controls
   activeTrack: TrackInfo | null;
   playTrack: (track: TrackInfo) => void;
@@ -42,6 +44,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const gainNodesRef = useRef<Map<HTMLAudioElement, GainNode>>(new Map());
   const analysersRef = useRef<Map<HTMLAudioElement, AnalyserNode>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
@@ -131,6 +134,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return data;
   }, []);
 
+  const getActiveFrequencyData = useCallback(() => {
+    if (!activeAudioRef.current) return null;
+    return getFrequencyData(activeAudioRef.current);
+  }, [getFrequencyData]);
+
+  const setActiveAudioElement = useCallback((audioEl: HTMLAudioElement | null) => {
+    activeAudioRef.current = audioEl;
+  }, []);
+
   const registerAudioElement = useCallback((audioEl: HTMLAudioElement) => {
     connectAudioElement(audioEl);
     return () => {
@@ -145,6 +157,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (audioCtxRef.current?.state === "suspended") {
       await audioCtxRef.current.resume();
     }
+    if (audioRef.current) activeAudioRef.current = audioRef.current;
     if (activeTrack?.id !== track.id) {
       setActiveTrack(track);
       audioRef.current.src = track.audioUrl;
@@ -263,10 +276,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsVisualizerActive,
         setVisualizerActive: setIsVisualizerActive,
         connectAudioElement,
+        setActiveAudioElement,
         registerAudioElement,
         setMasterVolume,
         setCardVolume,
         getFrequencyData,
+        getActiveFrequencyData,
         // Playback controls
         activeTrack,
         playTrack,
