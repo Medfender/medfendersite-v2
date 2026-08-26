@@ -21,7 +21,7 @@ interface HeroVisualizerProps {
 
 export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { getActiveFrequencyData, isPlaying, activeTrack, isVisualizerActive } = useAudio();
+  const { getActiveFrequencyData, isPlaying, activeTrack, isVisualizerActive, activeAudioRef } = useAudio();
   const animFrameRef = useRef<number | null>(null);
   const peakInfoRef = useRef<{ bin: number; freq: number; db: number } | null>(null);
   const peakHoldRef = useRef<{ x: number; height: number; timestamp: number }[]>([]);
@@ -59,6 +59,10 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
     const getFreqForBin = (bin: number) => bin * binWidthHz;
 
     const render = () => {
+      const isAnyAudioPlaying = () => {
+        return activeAudioRef.current && !activeAudioRef.current.paused && activeAudioRef.current.currentTime > 0;
+      };
+
       animFrameRef.current = requestAnimationFrame(render);
       const { w, h } = canvasSizeRef.current;
 
@@ -99,7 +103,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
         }
         const totalEnergy = dataArray.reduce((acc, val) => acc + val, 0);
 
-        if (totalEnergy > 0 || isVisualizerActive) {
+        if ((totalEnergy > 0 || isVisualizerActive) && (isAnyAudioPlaying() || isVisualizerActive)) {
           let peakBin = 0;
           let peakValue = 0;
 

@@ -40,7 +40,8 @@
       "Bash(curl -s http://localhost:3000)",
       "Bash(kill 761438)",
       "Bash(curl -s -o /dev/null -w \"Port 3000: %{http_code}\\\\n\" http://localhost:3000/)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(kill 839054 *)"
     ]
   }
 }

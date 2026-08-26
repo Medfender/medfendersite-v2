@@ -33,6 +33,7 @@ interface AudioContextType {
   seek: (time: number) => void;
   // Global media coordination
   pauseAllOtherMedia: (activeAudioEl?: HTMLAudioElement | null) => void;
+  activeAudioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 const AudioContextInstance = createContext<AudioContextType | null>(null);
@@ -295,6 +296,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         seek,
         // Global media coordination
         pauseAllOtherMedia,
+        activeAudioRef,
       }}
     >
       {children}
