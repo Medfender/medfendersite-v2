@@ -30,14 +30,18 @@ export async function POST(req: Request) {
       return Response.json({ success: true, mock: true, message: "Email logged (RESEND_API_KEY not set)" });
     }
 
-    const data = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: "Medfender <noreply@medfender.site>",
       to: ["contact@medfender.site"],
       subject: `New Inquiry — ${type} | ${subject || name}`,
       html,
     });
 
-    return Response.json({ success: true, id: data.id });
+    if (error) {
+      return Response.json({ error: error.message }, { status: 500 });
+    }
+
+    return Response.json({ success: true, id: data?.id });
   } catch (err: any) {
     console.error("Contact POST error:", err);
     return Response.json({ error: err?.message || "Server error" }, { status: 500 });
