@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(echo *)"
+      "Bash(echo *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Update preset card checkout URL to fixed Lemon Squeezy embed link *)",
+      "Bash(git push *)",
+      "Read(//home/medfender/.claude/skills/**)",
+      "Read(//home/medfender/**)",
+      "Bash(npm run *)",
+      "Bash(python3 *)"
     ]
   }
 }

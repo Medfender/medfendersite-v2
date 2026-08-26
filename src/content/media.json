@@ -1,13 +1,18 @@
 {
   "youtube": [
-    { "id": "yt-1", "title": "Live at Sofitel: So Lounge Set", "youtubeId": "dQw4w9WgXcQ" },
-    { "id": "yt-2", "title": "TONEX Capture Session Walkthrough", "youtubeId": "dQw4w9WgXcQ" },
-    { "id": "yt-3", "title": "HX Stomp XL Studio Demo", "youtubeId": "dQw4w9WgXcQ" }
+    { "id": "yt-1", "title": "So Lounge Sofitel Experience", "youtubeId": "WmT5VzDx-V4" },
+    { "id": "yt-2", "title": "Relaxin' at Camarillo", "youtubeId": "nyoKPSkFJF4" },
+    { "id": "yt-3", "title": "Corazón Espinado (Middle Solo)", "youtubeId": "wTk4Wt-aWo0" },
+    { "id": "yt-4", "title": "Corazón Espinado (Part 2 Solo)", "youtubeId": "vQt73Hg6yX4" }
   ],
   "gallery": [
-    { "id": "gal-1", "title": "Sofitel Performance", "imageUrl": "/images/gallery/live-1.jpg", "alt": "Live stage performance at Sofitel" },
-    { "id": "gal-2", "title": "Studio Capture Session", "imageUrl": "/images/gallery/live-2.jpg", "alt": "Close-up of pedalboard capture session" },
-    { "id": "gal-3", "title": "Backline Setup", "imageUrl": "/images/gallery/live-3.jpg", "alt": "Backline amplifier setup on stage" },
-    { "id": "gal-4", "title": "Line 6 HX Stomp XL", "imageUrl": "/images/presets/srv-pack.jpg", "alt": "HX Stomp XL pedalboard close-up" }
+    { "id": "gallery-1", "title": "IMG_7746 - So Lounge Stage Left", "imageUrl": "/images/gallery/IMG_7746.JPG", "alt": "Performance shot from stage left" },
+    { "id": "gallery-2", "title": "IMG_7741 - Backstage Angle", "imageUrl": "/images/gallery/IMG_7741.JPG", "alt": "Backstage view of the setup" },
+    { "id": "gallery-3", "title": "IMG_7742 - Crowd View", "imageUrl": "/images/gallery/IMG_7742.JPG", "alt": "Audience perspective from the venue" },
+    { "id": "gallery-4", "title": "So Lounge Cover", "imageUrl": "/images/gallery/So Lounge.JPG", "alt": "Venue cover photo" },
+    { "id": "gallery-5", "title": "IMG_7747 - Gear Close-up", "imageUrl": "/images/gallery/IMG_7747.JPG", "alt": "Close-up of pedals and gear" },
+    { "id": "gallery-6", "title": "IMG_7748 - Low Angle", "imageUrl": "/images/gallery/IMG_7748.JPG", "alt": "Low angle performance shot" },
+    { "id": "gallery-7", "title": "IMG_7763 - Setup Detail", "imageUrl": "/images/gallery/IMG_7763.JPG", "alt": "Detailed shot of equipment setup" },
+    { "id": "gallery-8", "title": "Me Guitar 3 - Personal Shot", "imageUrl": "/images/gallery/Me Guitar 3.png", "alt": "Photographer shot of performer with guitar" }
   ]
 }

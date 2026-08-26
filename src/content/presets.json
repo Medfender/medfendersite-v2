@@ -5,11 +5,37 @@
     "category": "TONEX",
     "price": 19.99,
     "lemonSqueezyVariantId": "",
-    "demoAudio": "/audio/demos/srv-tone-demo.mp3",
-    "coverImage": "/images/presets/srv-pack.jpg",
+    "demoAudio": "/audio/demos/I'd Rather Go Blind.mp3",
+    "coverImage": "/images/presets/Impulse Response Everything Bundle — Official Tone Junkie Store.png",
     "description": {
       "en": "Direct capture of classic Texas blues amp tones with pristine low-end response.",
       "fr": "Capture directe de sonorités blues texanes classiques avec une réponse précise des basses."
-    }
+    },
+    "packContents": {
+      "tonexCaptures": [
+        "SRV Strat-Style Lead 59 @ 98dB gain",
+        "SRV Strat-Style Rhythm @ 90dB gain",
+        "SRV Strat-Style Solo @ 102dB gain",
+        "SRV Strat-Style Clean @ 84dB gain"
+      ],
+      "irs": [
+        "SRV 4x12 200W Open Back — 24-bit / 48kHz",
+        "SRV 2x12 Open Back — 24-bit / 48kHz",
+        "SRV 1x12 Closed Back — 24-bit / 48kHz"
+      ],
+      "specs": "24-bit / 48kHz WAV IRs, 1024-sample IR resolution, TONEX 4.5+ compatible",
+      "signalChain": [
+        "Wah (Cry Baby GCB95)",
+        "Drive (Klon KTR / OCD)",
+        "Amp (SRV-style 200W head → 4x12 cab)",
+        "FX Loop (Delay + Reverb)",
+        "Tone Stack (Bass / Middle / Treble)"
+      ]
+    },
+    "demoClips": [
+      { "id": "clean", "label": "Clean", "src": "/audio/demos/Nina Simone - I put a spell on you.mp3" },
+      { "id": "crunch", "label": "Crunch", "src": "/audio/demos/I'd Rather Go Blind.mp3" },
+      { "id": "lead", "label": "Lead", "src": "/audio/demos/Bishop Briggs - River (Lyrics).mp3" }
+    ]
   }
 ]
