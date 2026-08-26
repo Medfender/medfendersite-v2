@@ -5,7 +5,11 @@ import { featuredTrack } from "@/data/storeData";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumVisualizer from "./SpectrumVisualizer";
 
-export default function FeaturedPlayer() {
+interface FeaturedPlayerProps {
+  isSectionInView: boolean;
+}
+
+export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps) {
   const {
     activeTrack,
     isPlaying,
@@ -18,6 +22,7 @@ export default function FeaturedPlayer() {
     audioCtx,
     seek,
     setVolume,
+    setActiveAudioElement,
   } = useAudio();
 
   const trackInfo = {
@@ -57,6 +62,7 @@ export default function FeaturedPlayer() {
         setIsPlaying(true);
         setIsThisPlaying(true);
         setVisualizerActive(true);
+        if (audio && setActiveAudioElement) setActiveAudioElement(audio);
       } catch (err) {
         console.error("Playback failed:", err);
       }
@@ -99,6 +105,7 @@ export default function FeaturedPlayer() {
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
+      if (setActiveAudioElement) setActiveAudioElement(null);
     }
     setCurrentTime(0);
     setIsPlaying(false);
@@ -128,7 +135,11 @@ export default function FeaturedPlayer() {
         onPause={() => { setIsPlaying(false); setVisualizerActive(false); setIsThisPlaying(false); }}
         style={{ display: "none" }}
       />
-      <div className="fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white py-3 px-4 md:px-8 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
+      <div className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white py-3 px-4 md:px-8 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+        isSectionInView
+          ? 'opacity-100 translate-y-0 pointer-events-auto'
+          : 'opacity-0 translate-y-8 pointer-events-none'
+      }`}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-6">
           <div className="flex items-center gap-4 w-full md:w-auto">
             <button
