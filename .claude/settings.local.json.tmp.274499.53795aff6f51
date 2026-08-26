@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(echo *)",
-      "Bash(git add *)",
-      "Bash(git commit -m 'Update preset card checkout URL to fixed Lemon Squeezy embed link *)"
-    ]
-  }
-}
