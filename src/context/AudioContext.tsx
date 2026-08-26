@@ -120,7 +120,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       if (!audio) return;
 
       if (currentTrack?.src !== track.src) {
-        audio.src = track.src;
+        audio.src = encodeURI(track.src);
         audio.load();
         setCurrentTrack(track);
       } else if (currentTrack?.id === track.id) {
