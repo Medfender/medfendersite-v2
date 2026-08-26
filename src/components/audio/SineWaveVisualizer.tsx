@@ -6,7 +6,8 @@ import { useAudio } from "@/context/AudioContext";
 export default function SineWaveVisualizer() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number>(0);
-  const { analyser, isPlaying } = useAudio();
+  const { getFrequencyData, isPlaying, audioCtx } = useAudio();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -33,61 +34,79 @@ export default function SineWaveVisualizer() {
 
       ctx.clearRect(0, 0, w, h);
 
-      if (isPlaying && analyser) {
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-        analyser.getByteTimeDomainData(dataArray);
+      const audioEl = audioRef.current;
+      const freqData = audioEl ? getFrequencyData(audioEl) : null;
 
-        // Create a more dynamic visual style
-        ctx.lineWidth = 3.5;
+      if (isPlaying && freqData) {
+        const bufferLength = freqData.length;
+        const dataArray = new Uint8Array(bufferLength);
+        // Use frequency data for a more musical visualization
+        for (let i = 0; i < bufferLength; i++) {
+          dataArray[i] = freqData[i];
+        }
+
+        ctx.lineWidth = 2.5;
         ctx.strokeStyle = "#00d8f6";
         ctx.shadowColor = "#00d8f6";
-        ctx.shadowBlur = 20;
+        ctx.shadowBlur = 16;
 
-        // Add subtle particle effects around the waveform
         ctx.globalCompositeOperation = "lighter";
 
         ctx.beginPath();
-        ctx.lineWidth = 3.5;
-        ctx.strokeStyle = "#00d8f6";
 
         const sliceWidth = w / bufferLength;
         let x = 0;
 
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 128.0;
-          const y = (v * h) / 2;
+          const v = dataArray[i] / 255.0;
+          const y = h - v * h * 0.6; // Invert and scale
 
           if (i === 0) {
             ctx.moveTo(x, y);
           } else {
-            ctx.lineTo(x, y);
+            const prevV = dataArray[i - 1] / 255.0;
+            const prevY = h - prevV * h * 0.6;
+            const cpX = x - sliceWidth / 2;
+            const cpY = (prevY + y) / 2;
+            ctx.quadraticCurveTo(cpX, cpY, x, y);
           }
           x += sliceWidth;
         }
 
-        ctx.lineTo(w, h / 2);
         ctx.stroke();
 
-        // Add some particle effects
+        // Mirror below center line for symmetry
         ctx.globalCompositeOperation = "lighter";
-        for (let i = 0; i < 5; i++) {
-          const particleX = w * Math.random();
-          const particleY = h / 2 + (Math.random() - 0.5) * 20;
-          const particleSize = 2 + Math.random() * 3;
+        ctx.beginPath();
+        ctx.strokeStyle = "rgba(168, 85, 247, 0.4)";
+        ctx.shadowColor = "rgba(168, 85, 247, 0.5)";
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 1.5;
 
-          ctx.beginPath();
-          ctx.arc(particleX, particleY, particleSize, 0, Math.PI * 2);
-          ctx.fillStyle = "rgba(0,216,246,0.15)";
-          ctx.fill();
+        x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const v = dataArray[i] / 255.0;
+          const y = v * h * 0.4; // Mirror below
+
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            const prevV = dataArray[i - 1] / 255.0;
+            const prevY = prevV * h * 0.4;
+            const cpX = x - sliceWidth / 2;
+            const cpY = (prevY + y) / 2;
+            ctx.quadraticCurveTo(cpX, cpY, x, y);
+          }
+          x += sliceWidth;
         }
+        ctx.stroke();
       } else {
         // Subtle flat baseline with enhanced glow
         ctx.beginPath();
         ctx.lineWidth = 2.0;
-        ctx.strokeStyle = "rgba(0,216,246,0.4)";
-        ctx.shadowColor = "rgba(0,216,246,0.3)";
-        ctx.shadowBlur = 10;
+        ctx.strokeStyle = "rgba(0,216,246,0.3)";
+        ctx.shadowColor = "rgba(0,216,246,0.2)";
+        ctx.shadowBlur = 8;
 
         ctx.moveTo(0, h / 2);
         ctx.lineTo(w, h / 2);
@@ -103,7 +122,7 @@ export default function SineWaveVisualizer() {
       window.removeEventListener("resize", resize);
       cancelAnimationFrame(rafRef.current);
     };
-  }, [isPlaying, analyser]);
+  }, [isPlaying, getFrequencyData]);
 
   return (
     <canvas

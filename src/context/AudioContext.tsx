@@ -1,212 +1,294 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useRef,
-  useState,
-  useCallback,
-  useEffect,
-} from "react";
+import React, { createContext, useContext, useRef, useState, useCallback } from "react";
+import { ToneItem } from "@/data/storeData";
+import { previewController } from "@/components/store/PresetCard";
 
-export interface AudioTrack {
-  id: string;
-  title: string;
-  src: string;
-  artist?: string;
-  coverUrl?: string;
-}
+type TrackInfo = ToneItem;
 
-interface AudioState {
-  currentTrack: AudioTrack | null;
+interface AudioContextType {
+  audioCtx: AudioContext | null;
   isPlaying: boolean;
+  setIsPlaying: (val: boolean) => void;
+  isVisualizerActive: boolean;
+  setIsVisualizerActive: (val: boolean) => void;
+  setVisualizerActive: (val: boolean) => void;
+  connectAudioElement: (audioEl: HTMLAudioElement) => void;
+  registerAudioElement: (audioEl: HTMLAudioElement) => (() => void) | void;
+  setMasterVolume: (val: number) => void;
+  setCardVolume: (audioEl: HTMLAudioElement | null, val: number) => void;
+  getFrequencyData: (audioEl: HTMLAudioElement) => Uint8Array | null;
+  // Playback controls
+  activeTrack: TrackInfo | null;
+  playTrack: (track: TrackInfo) => void;
+  pauseTrack: () => void;
+  stopTrack: () => void;
+  togglePlayStop: (track: TrackInfo) => void;
+  volume: number;
+  setVolume: (val: number) => void;
   currentTime: number;
   duration: number;
-  volume: number;
-  analyser: AnalyserNode | null;
+  seek: (time: number) => void;
+  // Global media coordination
+  pauseAllOtherMedia: (activeAudioEl?: HTMLAudioElement | null) => void;
 }
 
-interface AudioContextValue extends AudioState {
-  playTrack: (track: AudioTrack) => void;
-  pauseTrack: () => void;
-  togglePlay: () => void;
-  seek: (timeInSeconds: number) => void;
-  setVolume: (level: number) => void;
-}
+const AudioContextInstance = createContext<AudioContextType | null>(null);
 
-const AudioContext = createContext<AudioContextValue | null>(null);
-
-export function AudioProvider({ children }: { children: React.ReactNode }) {
+export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sourceNodesRef = useRef<Map<HTMLAudioElement, MediaElementAudioSourceNode>>(new Map());
+  const gainNodesRef = useRef<Map<HTMLAudioElement, GainNode>>(new Map());
+  const analysersRef = useRef<Map<HTMLAudioElement, AnalyserNode>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const webAudioContextRef = useRef<AudioContext | null>(null);
-  const analyserNodeRef = useRef<AnalyserNode | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
-  const [currentTrack, setCurrentTrack] = useState<AudioTrack | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+  const [activeTrack, setActiveTrack] = useState<TrackInfo | null>(null);
+  const [volume, setVolumeState] = useState(0.85);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolumeState] = useState<number>(1);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
 
-  // Initialize persistent audio element once
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const initAudio = useCallback(() => {
+    if (!audioCtxRef.current) {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioCtxClass();
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 256;
+      analyser.smoothingTimeConstant = 0.82;
 
-    const audio = new Audio();
-    audio.preload = "metadata";
-    audioRef.current = audio;
+      audioCtxRef.current = ctx;
+      analyserRef.current = analyser;
+    }
 
-    // Initialize Web Audio API
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    webAudioContextRef.current = ctx;
-
-    const analyserNode = ctx.createAnalyser();
-    analyserNode.fftSize = 256;
-    analyserNodeRef.current = analyserNode;
-    setAnalyser(analyserNode);
-
-    // Connect audio element to analyser
-    const source = ctx.createMediaElementSource(audio);
-    source.connect(analyserNode);
-    analyserNode.connect(ctx.destination);
-    sourceNodeRef.current = source;
-
-    // Event listeners
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const handleLoadedMetadata = () => setDuration(audio.duration || 0);
-    const handleEnded = () => setIsPlaying(false);
-    const handlePlay = () => setIsPlaying(true);
-    const handlePause = () => setIsPlaying(false);
-    const handleVolumeChange = () => setVolumeState(audio.volume);
-
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
-    audio.addEventListener("ended", handleEnded);
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    audio.addEventListener("volumechange", handleVolumeChange);
-
-    return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
-      audio.removeEventListener("ended", handleEnded);
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      audio.removeEventListener("volumechange", handleVolumeChange);
-
-      if (audio.src) {
-        audio.pause();
-        audio.src = "";
-      }
-      source.disconnect();
-      analyserNode.disconnect();
-      if (ctx.state !== "closed") {
-        ctx.close();
-      }
-    };
-  }, []);
-
-  const resumeAudioContext = useCallback(async () => {
-    const ctx = webAudioContextRef.current;
-    if (ctx && ctx.state === "suspended") {
-      await ctx.resume();
+    if (audioCtxRef.current.state === "suspended") {
+      audioCtxRef.current.resume();
     }
   }, []);
 
-  const playTrack = useCallback(
-    (track: AudioTrack) => {
-      const audio = audioRef.current;
-      if (!audio) return;
+  const connectAudioElement = useCallback((audioEl: HTMLAudioElement) => {
+    initAudio();
+    const ctx = audioCtxRef.current;
+    if (!ctx || !audioEl) return;
 
-      if (currentTrack?.src !== track.src) {
-        audio.src = encodeURI(track.src);
-        audio.load();
-        setCurrentTrack(track);
-      } else if (currentTrack?.id === track.id) {
-        setCurrentTrack(track);
+    // Fixed at 1.0 so Web Audio GainNode has full authority over loudness
+    audioEl.volume = 1.0;
+
+    if (!sourceNodesRef.current.has(audioEl)) {
+      try {
+        const source = ctx.createMediaElementSource(audioEl);
+        const gainNode = ctx.createGain();
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.85;
+
+        // Chain: Source -> Analyser -> GainNode -> Destination
+        source.connect(analyser);
+        analyser.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        sourceNodesRef.current.set(audioEl, source);
+        gainNodesRef.current.set(audioEl, gainNode);
+        analysersRef.current.set(audioEl, analyser);
+      } catch (e) {
+        console.warn("Audio element already connected or source creation failed:", e);
       }
-
-      audio.play().catch(() => {
-        // Autoplay blocked; resume on user interaction handled separately
-      });
-      setIsPlaying(true);
-      resumeAudioContext();
-    },
-    [currentTrack?.id, currentTrack?.src, resumeAudioContext]
-  );
-
-  const pauseTrack = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
     }
-    setIsPlaying(false);
-  }, []);
+  }, [initAudio]);
 
-  const togglePlay = useCallback(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
+  const applyVolumeToGainNode = useCallback((gainNode: GainNode, rawVal: number | string, ctx: AudioContext) => {
+    const v = Math.max(0, Math.min(1, parseFloat(String(rawVal)) || 0));
+    gainNode.gain.cancelScheduledValues(0);
+    if (v <= 0.001) {
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.value = 0;
     } else {
-      audio.play().catch(() => {});
-      setIsPlaying(true);
-      resumeAudioContext();
-    }
-  }, [isPlaying, resumeAudioContext]);
-
-  const seek = useCallback((timeInSeconds: number) => {
-    const audio = audioRef.current;
-    if (audio && !isNaN(timeInSeconds) && isFinite(timeInSeconds)) {
-      audio.currentTime = Math.max(0, timeInSeconds);
-      setCurrentTime(timeInSeconds);
+      gainNode.gain.setValueAtTime(v, ctx.currentTime);
     }
   }, []);
 
-  const setVolume = useCallback((level: number) => {
-    const newVolume = Math.max(0, Math.min(1, level));
-    setVolumeState(newVolume);
+  const setCardVolume = useCallback((audioEl: HTMLAudioElement | null, val: number) => {
+    if (!audioEl) return;
+    const gainNode = gainNodesRef.current.get(audioEl);
+    if (gainNode && audioCtxRef.current) {
+      applyVolumeToGainNode(gainNode, val, audioCtxRef.current);
+    }
+  }, [applyVolumeToGainNode]);
+
+  const setMasterVolume = useCallback((val: number) => {
+    // Delegate to setCardVolume if active main audio element exists
     if (audioRef.current) {
-      audioRef.current.volume = newVolume;
+      setCardVolume(audioRef.current, val);
     }
+  }, [setCardVolume]);
+
+  const getFrequencyData = useCallback((audioEl: HTMLAudioElement): Uint8Array | null => {
+    const analyser = analysersRef.current.get(audioEl);
+    if (!analyser) return null;
+    const data = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(data);
+    return data;
   }, []);
 
-  // Sync volume on mount
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = volume;
+  const registerAudioElement = useCallback((audioEl: HTMLAudioElement) => {
+    connectAudioElement(audioEl);
+    return () => {
+      // Cleanup if needed when card unmounts
+    };
+  }, [connectAudioElement]);
+
+  // Playback functions
+  const playTrack = async (track: TrackInfo) => {
+    if (!audioRef.current) return;
+    initAudio();
+    if (audioCtxRef.current?.state === "suspended") {
+      await audioCtxRef.current.resume();
     }
-  }, [volume]);
+    if (activeTrack?.id !== track.id) {
+      setActiveTrack(track);
+      audioRef.current.src = track.audioUrl;
+      audioRef.current.currentTime = 0;
+    }
+    try {
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        await playPromise;
+      }
+      setIsPlaying(true);
+      setIsVisualizerActive(true);
+      // Ensure bottom-player audio is connected to analyser
+      if (audioRef.current) {
+        audioRef.current.volume = 1.0;
+        connectAudioElement(audioRef.current);
+        // Apply the current volume to the gain node
+        setCardVolume(audioRef.current, volume);
+      }
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        console.error("Playback error:", err);
+      }
+    }
+  };
+
+  const pauseTrack = () => {
+    if (!audioRef.current) return;
+    try {
+      audioRef.current.pause();
+    } catch (e) { /* ignore */ }
+    setIsPlaying(false);
+    setIsVisualizerActive(false);
+  };
+
+  const stopTrack = () => {
+    if (!audioRef.current) return;
+    try {
+      audioRef.current.pause();
+    } catch (e) { /* ignore */ }
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
+    setIsVisualizerActive(false);
+  };
+
+  const togglePlayStop = (track: TrackInfo) => {
+    if (activeTrack?.id === track.id && isPlaying) {
+      pauseTrack();
+    } else {
+      playTrack(track);
+    }
+  };
+
+  const setVolume = (val: number) => {
+    setVolumeState(val);
+    if (audioRef.current) audioRef.current.volume = 1.0;
+    const activeAudioEl = audioRef.current;
+    if (activeAudioEl && gainNodesRef.current.get(activeAudioEl) && audioCtxRef.current) {
+      applyVolumeToGainNode(gainNodesRef.current.get(activeAudioEl)!, val, audioCtxRef.current);
+    }
+  };
+
+  const seek = (time: number) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  // Global media coordination: pause all other audio elements and YouTube iframes
+  const pauseAllOtherMedia = useCallback((activeAudioEl?: HTMLAudioElement | null) => {
+    // Pause all registered HTMLAudioElements across ToneCards and FeaturedPlayer (except activeAudioEl)
+    sourceNodesRef.current.forEach((source, audioEl) => {
+      if (audioEl !== activeAudioEl && !audioEl.paused) {
+        try {
+          audioEl.pause();
+          audioEl.currentTime = 0;
+        } catch (e) {
+          console.warn("Error pausing audio element:", e);
+        }
+      }
+    });
+
+    // Pause all YouTube iframe embeds on the page
+    if (typeof document !== "undefined") {
+      document.querySelectorAll("iframe").forEach((iframe) => {
+        try {
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({ event: "command", func: "pauseVideo", args: "" }),
+            "*"
+          );
+        } catch (e) {
+          // Ignore cross-origin errors
+        }
+      });
+    }
+
+    // Reset preset/demo card active state
+    setActiveTrack(null);
+    previewController.notify(null, false);
+
+    // Reset active playing states in context if the currently active track is not the activeAudioEl
+    if (audioRef.current !== activeAudioEl && isPlaying) {
+      setIsPlaying(false);
+      setIsVisualizerActive(false);
+    }
+  }, [isPlaying, setIsPlaying, setIsVisualizerActive]);
 
   return (
-    <AudioContext.Provider
+    <AudioContextInstance.Provider
       value={{
-        currentTrack,
+        audioCtx: audioCtxRef.current,
         isPlaying,
-        currentTime,
-        duration,
-        volume,
-        analyser,
+        setIsPlaying,
+        isVisualizerActive,
+        setIsVisualizerActive,
+        setVisualizerActive: setIsVisualizerActive,
+        connectAudioElement,
+        registerAudioElement,
+        setMasterVolume,
+        setCardVolume,
+        getFrequencyData,
+        // Playback controls
+        activeTrack,
         playTrack,
         pauseTrack,
-        togglePlay,
-        seek,
+        stopTrack,
+        togglePlayStop,
+        volume,
         setVolume,
+        currentTime,
+        duration,
+        seek,
+        // Global media coordination
+        pauseAllOtherMedia,
       }}
     >
       {children}
-    </AudioContext.Provider>
+    </AudioContextInstance.Provider>
   );
-}
+};
 
-export function useAudio(): AudioContextValue {
-  const context = useContext(AudioContext);
-  if (!context) {
-    throw new Error("useAudio must be used within an AudioProvider");
-  }
+export const useAudio = () => {
+  const context = useContext(AudioContextInstance);
+  if (!context) throw new Error("useAudio must be used within AudioProvider");
   return context;
-}
+};
