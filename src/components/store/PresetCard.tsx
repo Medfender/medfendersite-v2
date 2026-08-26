@@ -38,9 +38,7 @@ export default function PresetCard({ preset }: PresetCardProps) {
     }
   };
 
-  const checkoutUrl = preset.lemonSqueezyVariantId
-    ? `https://medfender.lemonsqueezy.com/checkout/buy/${preset.lemonSqueezyVariantId}`
-    : "https://medfender.lemonsqueezy.com/checkout/buy/";
+  const checkoutUrl = "https://medfender.lemonsqueezy.com/checkout/buy/9c678be0-e916-46fb-8340-112098cc6ed4?embed=1";
 
   return (
     <article className="group bg-neutral-900/40 border border-white/10 backdrop-blur-md rounded-2xl p-6 transition hover:border-cyan-500/50 hover:shadow-cyan-500/10 hover:shadow-xl flex flex-col justify-between">
