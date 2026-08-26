@@ -1,4 +1,5 @@
 import FeaturedPlayer from "@/components/audio/FeaturedPlayer";
+import HeroVisualizer from "@/components/hero/HeroVisualizer";
 import PresetsSection from "@/components/store/PresetsSection";
 import MediaSection from "@/components/media/MediaSection";
 import ContactSection from "@/components/contact/ContactSection";
@@ -24,6 +25,7 @@ export default function Home() {
             Real-time web audio visualization powered by Web Audio API. Select a track, press play, and watch the waveform respond.
           </p>
         </div>
+        <HeroVisualizer />
         <FeaturedPlayer />
       </section>
 
