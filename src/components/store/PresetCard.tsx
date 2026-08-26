@@ -38,7 +38,7 @@ export default function PresetCard({ preset }: PresetCardProps) {
       playTrack({
         id: `${preset.id}-${id}`,
         title: `${preset.title} — ${id} demo`,
-        src,
+        src: encodeURI(src),
         artist: preset.category,
       });
       setActiveDemo(id);
@@ -173,6 +173,34 @@ export default function PresetCard({ preset }: PresetCardProps) {
           </div>
         </div>
       )}
-    </article>
+  
+      {/* Inline Mini-Player */}
+      <div className="mt-4 bg-neutral-950/60 border border-cyan-500/10 rounded-xl p-3 shadow-inner">
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex gap-2">
+            {(preset.demoClips || [{ id: "main", label: "Main", src: preset.demoAudio }]).map((clip: { id: string; label: string; src: string }) => (
+              <button
+                key={clip.id}
+                onClick={() => handleDemo(clip.id, clip.src)}
+                className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border transition ${
+                  activeDemo === clip.id ? "bg-cyan-500 text-black border-cyan-400" : "text-neutral-300 border-white/10 hover:border-cyan-400/50"
+                }`}
+              >{clip.label}</button>
+            ))}
+          </div>
+          <button onClick={() => handleDemo("main", preset.demoAudio)} className="ml-auto w-8 h-8 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300 flex items-center justify-center text-xs hover:scale-105 transition">
+            {isPlaying && currentTrack?.src === encodeURI(preset.demoAudio) ? "⏸" : "▶"}
+          </button>
+        </div>
+        <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden mb-2">
+          <div className="h-full bg-gradient-to-r from-cyan-500 to-cyan-300 rounded-full" style={{ width: "30%" }} />
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-neutral-500 font-mono">
+          <span>0:00</span>
+          <span>Preview</span>
+        </div>
+      </div>
+
+  </article>
   );
 }
