@@ -52,7 +52,31 @@
       "Bash(curl -s http://localhost:3000/api/featured-tracks)",
       "Bash(curl -s -o /tmp/player.html http://localhost:3000/)",
       "Bash(curl -s -w \"\\\\nHTTP %{http_code}\\\\n\" http://localhost:3000/)",
-      "Bash(curl -s http://localhost:3001/api/featured-tracks)"
+      "Bash(curl -s http://localhost:3001/api/featured-tracks)",
+      "Bash(curl -s -o /dev/null -w \"Port 3000 → %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(timeout 15 bash -c 'pnpm dev > /tmp/dev.log 2>&1 & sleep 8 && curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000 || echo \"not ready\"; cat /tmp/dev.log | tail -20')",
+      "Bash(curl -s -o /tmp/page.html -w \"HTTP:%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(node *)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/page.html -w \"HTTP:%{http_code}\\\\n\")",
+      "Bash(timeout 10 bash -c 'pnpm dev 2>&1 | head -20')",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/page_fresh.html -w \"HTTP:%{http_code}\\\\n\")",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/page_final.html -w \"HTTP:%{http_code}\\\\n\")",
+      "Bash(Tail -n 8 .claude/operations/2026-08-27.md)",
+      "Bash(awk 'NR==543' /home/medfender/projects/medfendersite-v2/src/components/audio/VinylFeaturedPlayer.tsx)",
+      "Bash(awk *)",
+      "Bash(grep -n \"transform: \\\\`rotate\" src/components/audio/VinylFeaturedPlayer.tsx)",
+      "Bash(sed -i '3d; 16d' src/app/page.tsx)",
+      "Bash(sed -i '/Convenience aliases for VinylFeaturedPlayer/d' src/context/AudioContext.tsx)",
+      "Bash(npx next *)",
+      "Bash(ln -sf \"Sidi Bouganga feat Younes Hadir.mp3\" \"sidi-bouganga.mp3\")",
+      "Bash(curl -s http://localhost:3001/api/audio/featured)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/api/audio/featured)",
+      "Bash(timeout 8s bash -c 'npm run dev 2>/dev/null & sleep 5; curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/')",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3001/api/audio/featured)",
+      "Bash(curl -s http://localhost:3000/api/audio/featured)",
+      "Bash(curl -s -o /dev/null -w \"Dev server: HTTP %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3000)",
+      "Bash(sed *)"
     ]
   }
 }

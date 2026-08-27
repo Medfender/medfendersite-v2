@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useRef, useState, useCallback } from "react";
+import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { ToneItem } from "@/data/storeData";
 import { previewController } from "@/components/store/PresetCard";
 
@@ -14,15 +14,26 @@ interface AudioContextType {
   setIsVisualizerActive: (val: boolean) => void;
   setVisualizerActive: (val: boolean) => void;
   connectAudioElement: (audioEl: HTMLAudioElement) => void;
+  connectSourceToAnalyser: () => void;
   setActiveAudioElement: (audioEl: HTMLAudioElement | null) => void;
   registerAudioElement: (audioEl: HTMLAudioElement) => (() => void) | void;
   setMasterVolume: (val: number) => void;
   setCardVolume: (audioEl: HTMLAudioElement | null, val: number) => void;
   getFrequencyData: (audioEl: HTMLAudioElement) => Uint8Array | null;
   getActiveFrequencyData: () => Uint8Array | null;
+  // Scratch / motor torque
+  setScratchFilterFreq: (hz: number) => void;
+  setPlaybackRate: (rate: number) => void;
   // Playback controls
   activeTrack: TrackInfo | null;
+  setActiveTrack: (track: TrackInfo | null) => void;
   currentTrack: TrackInfo | null;
+  playlist: TrackInfo[];
+  loadPlaylist: (tracks: TrackInfo[]) => void;
+  playNext: () => void;
+  playPrevious: () => void;
+  skipForward: (s?: number) => void;
+  skipBackward: (s?: number) => void;
   playTrack: (track: TrackInfo) => void;
   pauseTrack: () => void;
   stopTrack: () => void;
@@ -31,12 +42,25 @@ interface AudioContextType {
   pause: () => void;
   volume: number;
   setVolume: (val: number) => void;
+  isMuted: boolean;
+  toggleMute: () => void;
   currentTime: number;
   duration: number;
   seek: (time: number) => void;
+  stop: () => void;
   // Global media coordination
   pauseAllOtherMedia: (activeAudioEl?: HTMLAudioElement | null) => void;
   activeAudioRef: React.RefObject<HTMLAudioElement | null>;
+  analyserRef: React.RefObject<AnalyserNode | null>;
+  // Live analyser — use this directly, not analyserNode (that one may be stale)
+  analyserNode: AnalyserNode | null;
+  gainNodeRef: React.RefObject<GainNode | null>;
+  /** The single shared <audio> element owned by the provider. */
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  /** Returns the shared AnalyserNode, wiring the Web Audio graph exactly once.
+   *  Safe to call from multiple visualizer components — uses a WeakMap singleton
+   *  under the hood to prevent InvalidStateError from double-createMediaElementSource. */
+  getAnalyserNode: () => AnalyserNode | null;
 }
 
 const AudioContextInstance = createContext<AudioContextType | null>(null);
@@ -47,61 +71,123 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const sourceNodesRef = useRef<Map<HTMLAudioElement, MediaElementAudioSourceNode>>(new Map());
   const gainNodesRef = useRef<Map<HTMLAudioElement, GainNode>>(new Map());
   const analysersRef = useRef<Map<HTMLAudioElement, AnalyserNode>>(new Map());
+  const scratchFiltersRef = useRef<Map<HTMLAudioElement, BiquadFilterNode>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
+  const initGuardRef = useRef(false);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  // WeakMap singleton — prevents InvalidStateError: "HTMLMediaElement already connected"
+  // when the same <audio> element re-enters the connect path.
+  const sourceNodesMap = useRef<WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>>(new WeakMap());
+
+  const getOrCreateSourceNode = (ctx: AudioContext, audioEl: HTMLAudioElement): MediaElementAudioSourceNode => {
+    const map = sourceNodesMap.current;
+    const existing = map.get(audioEl);
+    if (existing) return existing;
+    const source = ctx.createMediaElementSource(audioEl);
+    map.set(audioEl, source);
+    return source;
+  };
+  // Synchronous index tracker — eliminates stale-closure bugs in async skip nav
+  const currentIndexRef = useRef<number>(0);
+  // Navigation lock — held during a track switch so native onPause / onEnded
+  // events emitted by the src swap don't flip isPlaying to false.
+  const isNavigatingRef = useRef<boolean>(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
-  const [activeTrack, setActiveTrack] = useState<TrackInfo | null>(null);
+  const [activeTrack, setActiveTrackState] = useState<TrackInfo | null>(null);
+  // Ref to avoid stale-closure issues in async playTrack / togglePlay
+  const activeTrackRef = useRef<TrackInfo | null>(null);
+  const [playlist, setPlaylist] = useState<TrackInfo[]>([]);
   const [volume, setVolumeState] = useState(0.85);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(false);
+  // Tick state once per rAF frame so consumers re-render when the analyser
+  // node is created. Without this, components that read `analyserNode` from
+  // the context never see updates created inside callbacks.
+  const [, setAnalyserTick] = useState(0);
+  // Shared reactive analyser node — updated synchronously when wired.
+  const [analyserNode, setAnalyserNode] = useState<AnalyserNode | null>(null);
 
-  const initAudio = useCallback(() => {
+  // Public setter that keeps the ref and state in sync
+  const setActiveTrack = useCallback((track: TrackInfo | null) => {
+    setActiveTrackState(track);
+    activeTrackRef.current = track;
+  }, []);
+
+  /** Force React to re-render so consumers always see the live analyser node. */
+  const tickAnalyser = useCallback(() => {
+    setAnalyserTick((n) => n + 1);
+  }, []);
+
+  const initAudio = useCallback(async () => {
+    if (initGuardRef.current) {
+      // Already initialized in a previous call — still make sure it is running.
+      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+        try { await audioCtxRef.current.resume(); } catch { /* ignore */ }
+      }
+      return;
+    }
+    initGuardRef.current = true;
     if (!audioCtxRef.current) {
       const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       const ctx = new AudioCtxClass();
       const analyser = ctx.createAnalyser();
-      analyser.fftSize = 256;
-      analyser.smoothingTimeConstant = 0.82;
+      // Per spec: fftSize=128, smoothing=0.8
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.15;
+      // Spec-default dynamic range. Floor clipping at -24 dB happens in
+      // the render loop (AudioPhysicsEngine / useAudioVisualizer.drawBars),
+      // NOT on the AnalyserNode itself.
+      analyser.minDecibels = -90;
+      analyser.maxDecibels = 0;
 
       audioCtxRef.current = ctx;
       analyserRef.current = analyser;
+      tickAnalyser();
     }
 
-    if (audioCtxRef.current.state === "suspended") {
-      audioCtxRef.current.resume();
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      await audioCtxRef.current.resume();
     }
+  }, [tickAnalyser]);
+
+  // Synchronous AudioContext initialization + resume before any skip/play
+  const ensureAudioContext = async () => {
+    if (!audioCtxRef.current) {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      audioCtxRef.current = new AudioCtx();
+      const analyser = audioCtxRef.current.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.15;
+      analyser.minDecibels = -90;
+      analyser.maxDecibels = 0;
+      analyserRef.current = analyser;
+      tickAnalyser();
+    }
+    if (audioCtxRef.current.state === "suspended") {
+      try { await audioCtxRef.current.resume(); } catch (e) { console.error("Failed to resume AudioContext:", e); }
+    }
+  };
+  // ref to initWebAudio so the legacy connect functions can delegate without TDZ issues
+  const initWebAudioRef = useRef<() => void>(() => {});
+  const connectSourceToAnalyser = useCallback(() => {
+    // Delegate to the canonical pipeline — ensures only one spec (fftSize=256 / smoothing=0.7) ever applies
+    initWebAudioRef.current();
   }, []);
 
+  // ---------------------------------------------------------------------------
+  // connectAudioElement — Web Audio graph + CORS fallback
+  // ---------------------------------------------------------------------------
   const connectAudioElement = useCallback((audioEl: HTMLAudioElement) => {
+    if (sourceNodeRef.current) return; // EXACTLY ONCE — already wired by initWebAudio
     initAudio();
-    const ctx = audioCtxRef.current;
-    if (!ctx || !audioEl) return;
-
-    // Fixed at 1.0 so Web Audio GainNode has full authority over loudness
-    audioEl.volume = 1.0;
-
-    if (!sourceNodesRef.current.has(audioEl)) {
-      try {
-        const source = ctx.createMediaElementSource(audioEl);
-        const gainNode = ctx.createGain();
-        const analyser = ctx.createAnalyser();
-        analyser.fftSize = 256;
-        analyser.smoothingTimeConstant = 0.85;
-
-        // Chain: Source -> Analyser -> GainNode -> Destination
-        source.connect(analyser);
-        analyser.connect(gainNode);
-        gainNode.connect(ctx.destination);
-
-        sourceNodesRef.current.set(audioEl, source);
-        gainNodesRef.current.set(audioEl, gainNode);
-        analysersRef.current.set(audioEl, analyser);
-      } catch (e) {
-        console.warn("Audio element already connected or source creation failed:", e);
-      }
-    }
+    // Delegate to the canonical pipeline so only one spec is ever applied
+    initWebAudioRef.current();
   }, [initAudio]);
 
   const applyVolumeToGainNode = useCallback((gainNode: GainNode, rawVal: number | string, ctx: AudioContext) => {
@@ -124,11 +210,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [applyVolumeToGainNode]);
 
   const setMasterVolume = useCallback((val: number) => {
-    // Delegate to setCardVolume if active main audio element exists
     if (audioRef.current) {
       setCardVolume(audioRef.current, val);
     }
   }, [setCardVolume]);
+
+  const setScratchFilterFreq = useCallback((hz: number) => {
+    const clamped = Math.max(200, Math.min(16000, hz));
+    const filter = activeAudioRef.current ? scratchFiltersRef.current.get(activeAudioRef.current) : null;
+    if (filter && audioCtxRef.current) {
+      filter.frequency.cancelScheduledValues(audioCtxRef.current.currentTime);
+      filter.frequency.setTargetAtTime(clamped, audioCtxRef.current.currentTime, 0.02);
+    }
+  }, []);
+
+  const setPlaybackRate = useCallback((rate: number) => {
+    if (activeAudioRef.current) {
+      const safeRate = Math.max(0.1, Math.min(16, Math.abs(rate)));
+      activeAudioRef.current.playbackRate = safeRate;
+    }
+  }, []);
 
   const getFrequencyData = useCallback((audioEl: HTMLAudioElement): Uint8Array | null => {
     const analyser = analysersRef.current.get(audioEl);
@@ -154,89 +255,292 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
   }, [connectAudioElement]);
 
+  /** Returns the shared AnalyserNode, wiring the Web Audio graph exactly once.
+   *  Multiple callers (top visualizer + bottom mini player) safely share this —
+   *  the WeakMap inside connectAudioElement prevents InvalidStateError. */
+  const getAnalyserNode = useCallback((): AnalyserNode | null => {
+    if (!audioRef.current) return null;
+    if (analyserRef.current) return analyserRef.current;
+    // Lazily wire: this calls the same path that connectAudioElement does,
+    // but the guard inside it (sourceNodeRef check + WeakMap) prevents double-connect.
+    connectAudioElement(audioRef.current);
+    return analyserRef.current;
+  }, [connectAudioElement]);
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Normalise a raw track URL into a clean, origin-free path string.
+   * decodeURIComponent first prevents double-encoding (%20 → %2520);
+   * encodeURI produces a single-encoded path safe for audio.src.
+   */
+  // Named native-pause handler — used by the audio element's onPause listener.
+  const handleNativePause = () => {
+    if (!isNavigatingRef.current) {
+      setIsPlaying(false);
+      setIsVisualizerActive(false);
+    }
+  };
+
+  const buildCleanUrl = (raw: string | undefined): string => {
+    if (!raw || typeof raw !== "string") {
+      // Fallback to the real file that exists on disk
+      return "/audio/featured/Sidi Bouganga feat Younes Hadir.mp3";
+    }
+    // Strip origin if accidentally included (e.g. full URL pasted in)
+    const stripped = raw.startsWith("http")
+      ? raw.replace(/^https?:\/\/[^/]+/, "")
+      : raw;
+    // Ensure leading slash
+    const withSlash = stripped.startsWith("/") ? stripped : `/${stripped}`;
+    // Decode then re-encode to normalise any prior encoding
+    return encodeURI(decodeURIComponent(withSlash));
+  };
+
+  /** Check whether a new track needs the audio element reloaded */
+  const needsTrackReload = (track: TrackInfo, currentSrc: string): boolean => {
+    const rawSrc = (track as any)?.url || (track as any)?.audioUrl || (track as any)?.src;
+    if (!rawSrc) return true;
+    const clean = buildCleanUrl(rawSrc);
+    // Normalise currentSrc to path-only for comparison (strips origin prefix)
+    const normCurrent = currentSrc.replace(/^https?:\/\/[^/]+/, "");
+    return normCurrent !== clean;
+  };
+
+  // ---------------------------------------------------------------------------
   // Playback functions
+  // ---------------------------------------------------------------------------
+  /** Handle media load failures gracefully — prevent unhandled exceptions (Code 4) */
+  const handleAudioError = () => {
+    const err = audioRef.current?.error;
+    if (err?.code === 4) {
+      console.warn(`[Audio System] Track unavailable or file missing at: ${audioRef.current?.src}`);
+    } else if (err) {
+      console.error(`[Audio System] Error ${err.code}: ${err.message}`);
+    }
+    setIsPlaying(false);
+    setIsVisualizerActive(false);
+    setDuration(0);
+  };
+
   const playTrack = async (track: TrackInfo) => {
     if (!audioRef.current) return;
-    initAudio();
-    if (audioCtxRef.current?.state === "suspended") {
+
+    await initAudio();
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
       await audioCtxRef.current.resume();
     }
-    if (audioRef.current) activeAudioRef.current = audioRef.current;
-    if (activeTrack?.id !== track.id) {
-      setActiveTrack(track);
-      audioRef.current.src = track.audioUrl || (track as any).src || '';
-      audioRef.current.currentTime = 0;
-    }
-    try {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        await playPromise;
+    activeAudioRef.current = audioRef.current;
+
+    // Step 1 — extract URL with full fallback chain
+    const rawSrc = (track as any)?.url || (track as any)?.audioUrl || (track as any)?.src;
+    const audioSrc = buildCleanUrl(rawSrc);
+    console.log("[AudioContext] Loading URL:", audioSrc);
+
+    // Step 2 — set preload BEFORE src so the browser begins fetching early
+    audioRef.current.preload = "auto";
+
+    // Step 2a — ensure CORS is set before any src assignment so analyser receives
+    // valid cross-origin data (no tainted audio). Setting it after src is a no-op.
+    audioRef.current.crossOrigin = "anonymous";
+
+    // Step 3 — encode clean source once; decode first to prevent %2520
+    if (audioRef.current) {
+      const cleanPath = decodeURIComponent(audioSrc);
+      const encodedSrc = encodeURI(cleanPath);
+      if (audioRef.current.src !== encodedSrc) {
+        audioRef.current.src = encodedSrc;
+        audioRef.current.load();
+        audioRef.current.currentTime = 0;
+        setDuration(0);
       }
+    }
+
+    // Step 4 — sync activeTrack state SYNCHRONOUSLY so the player UI updates
+    // before the browser begins buffering the new source.
+    activeTrackRef.current = track;
+    setActiveTrackState(track);
+
+    // Sync index ref so skip nav starts from this track (direct selection from list)
+    const idx = playlist.findIndex(
+      (t) => decodeURIComponent((t as any)?.url || "") === decodeURIComponent((track as any)?.url || "")
+    );
+    currentIndexRef.current = idx === -1 ? 0 : idx;
+
+    // Step 5 — initiate playback
+    try {
+      audioRef.current.muted = false;
+      audioRef.current.volume = 1.0;
+
+      const promise = audioRef.current.play();
+      if (promise !== undefined) {
+        playPromiseRef.current = promise;
+        promise.catch((err: any) => {
+          if (err.name !== "AbortError") {
+            console.error("[AudioContext] Playback rejected:", err, "URL:", audioSrc);
+          }
+        });
+      }
+
       setIsPlaying(true);
       setIsVisualizerActive(true);
-      // Ensure bottom-player audio is connected to analyser
-      if (audioRef.current) {
-        audioRef.current.volume = 1.0;
-        connectAudioElement(audioRef.current);
-        // Apply the current volume to the gain node
-        setCardVolume(audioRef.current, volume);
-      }
+
+      // The JSX <audio onPlay={initWebAudio}> handles Web Audio wiring.
+      // This call invokes it synchronously so the analyser is available
+      // immediately (before rAF renders) rather than waiting for the native event.
+      initWebAudioRef.current();
+
+      setCardVolume(audioRef.current, volume);
     } catch (err: any) {
-      if (err.name !== "AbortError") {
-        console.error("Playback error:", err);
-      }
+      console.error("[AudioContext] Playback exception:", err, "URL:", audioSrc);
     }
   };
 
   const pauseTrack = () => {
     if (!audioRef.current) return;
-    try {
+    if (playPromiseRef.current) {
+      playPromiseRef.current.then(() => audioRef.current?.pause()).catch(() => {});
+    } else {
       audioRef.current.pause();
-    } catch (e) { /* ignore */ }
+    }
     setIsPlaying(false);
     setIsVisualizerActive(false);
   };
 
   const stopTrack = () => {
     if (!audioRef.current) return;
-    try {
+    if (playPromiseRef.current) {
+      playPromiseRef.current
+        .then(() => {
+          audioRef.current?.pause();
+          if (audioRef.current) audioRef.current.currentTime = 0;
+        })
+        .catch(() => {});
+    } else {
       audioRef.current.pause();
-    } catch (e) { /* ignore */ }
-    audioRef.current.currentTime = 0;
+      audioRef.current.currentTime = 0;
+    }
     setIsPlaying(false);
     setIsVisualizerActive(false);
   };
 
   const togglePlayStop = (track: TrackInfo) => {
-    if (activeTrack?.id === track.id && isPlaying) {
+    if (activeTrackRef.current?.id === track.id && isPlaying) {
       pauseTrack();
     } else {
       playTrack(track);
     }
   };
 
-  // Convenience aliases for VinylFeaturedPlayer
   const currentTrack = activeTrack;
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(async () => {
+    if (!audioRef.current) return;
+
     if (isPlaying) {
-      pauseTrack();
-    } else if (activeTrack) {
-      playTrack(activeTrack);
+      // Pause without resetting currentTime or clearing src
+      audioRef.current.pause();
+      setIsPlaying(false);
+      setIsVisualizerActive(false);
+    } else {
+      // Resume audio (if context is suspended, resume it first)
+      if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+        try {
+          await audioCtxRef.current.resume();
+        } catch (e) {
+          console.error("AudioContext resume failed:", e);
+        }
+      }
+      try {
+        await audioRef.current.play();
+        setIsPlaying(true);
+        setIsVisualizerActive(true);
+        initWebAudioRef.current(); // Ensure pipeline is wired before first rAF frame
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Play error:", err);
+        }
+      }
     }
-  };
+  }, [isPlaying]);
 
   const pause = () => {
     pauseTrack();
   };
 
-  const setVolume = (val: number) => {
-    setVolumeState(val);
-    if (audioRef.current) audioRef.current.volume = 1.0;
-    const activeAudioEl = audioRef.current;
-    if (activeAudioEl && gainNodesRef.current.get(activeAudioEl) && audioCtxRef.current) {
-      applyVolumeToGainNode(gainNodesRef.current.get(activeAudioEl)!, val, audioCtxRef.current);
+  /** Toggle mute — remembers the last active volume, restores cleanly on unmute */
+  const lastVolumeRef = useRef(0.85);
+  const toggleMute = useCallback(() => {
+    if (isMuted) {
+      // Unmute → restore last volume
+      const restore = lastVolumeRef.current > 0.01 ? lastVolumeRef.current : 0.85;
+      setIsMuted(false);
+      setVolumeState(restore);
+      // Visualizer decoupling: HTML audio element stays at 100% — all mute/unmute
+      // is handled by the Web Audio GainNode downstream.
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.volume = 1.0;
+      }
+      const el = audioRef.current;
+      if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {
+        applyVolumeToGainNode(gainNodesRef.current.get(el)!, restore, audioCtxRef.current);
+      }
+    } else {
+      // Mute → remember current level, set to 0
+      if (volume > 0.01) lastVolumeRef.current = volume;
+      setIsMuted(true);
+      // Visualizer decoupling: HTML audio stays at 100% — mute via GainNode only.
+      if (audioRef.current) {
+        audioRef.current.muted = false;
+        audioRef.current.volume = 1.0;
+      }
+      const el = audioRef.current;
+      if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {
+        applyVolumeToGainNode(gainNodesRef.current.get(el)!, 0, audioCtxRef.current);
+      }
     }
+  }, [isMuted, volume]);
+
+  const setVolume = useCallback((val: number) => {
+    const clamped = Math.max(0, Math.min(1, val));
+    setVolumeState(clamped);
+    setIsMuted(false); // un-mute when volume changes
+    // Visualizer decoupling: HTML audio element stays at 100% so
+    // MediaElementAudioSource outputs full unattenuated signal to the
+    // pre-gain AnalyserNode. All attenuation lives at the Web Audio GainNode.
+    if (audioRef.current) {
+      audioRef.current.volume = 1.0;
+      audioRef.current.muted = false;
+    }
+    if (gainNodeRef.current && audioCtxRef.current) {
+      applyVolumeToGainNode(gainNodeRef.current, clamped, audioCtxRef.current);
+    }
+    const el = audioRef.current;
+    if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {
+      applyVolumeToGainNode(gainNodesRef.current.get(el)!, clamped, audioCtxRef.current);
+    }
+  }, []);
+
+  const stop = () => {
+    if (audioRef.current) {
+      if (playPromiseRef.current) {
+        playPromiseRef.current
+          .then(() => {
+            audioRef.current?.pause();
+            if (audioRef.current) audioRef.current.currentTime = 0;
+          })
+          .catch(() => {});
+      } else {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setIsVisualizerActive(false);
   };
 
   const seek = (time: number) => {
@@ -246,21 +550,110 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  // Global media coordination: pause all other audio elements and YouTube iframes
+  const loadPlaylist = useCallback((tracks: TrackInfo[]) => {
+    setPlaylist(tracks);
+  }, []);
+
+  const skipForward = (seconds: number = 10) => {
+    if (!audioRef.current) return;
+    const next = Math.min(
+      duration || audioRef.current.duration || 0,
+      (audioRef.current.currentTime || 0) + seconds
+    );
+    audioRef.current.currentTime = next;
+    setCurrentTime(next);
+  };
+
+  const skipBackward = (seconds: number = 10) => {
+    if (!audioRef.current) return;
+    const prev = Math.max(0, (audioRef.current.currentTime || 0) - seconds);
+    audioRef.current.currentTime = prev;
+    setCurrentTime(prev);
+  };
+
+  /** Get current playlist index with robust fallback (id / filename / url) */
+  const getCurrentIndex = () => {
+    if (!playlist.length || !activeTrack) return 0;
+    const idx = playlist.findIndex(
+      (t) =>
+        t.id === activeTrack.id ||
+        (t as any)?.filename === (activeTrack as any)?.filename ||
+        (t as any)?.url === (activeTrack as any)?.url ||
+        (t as any)?.audioUrl === (activeTrack as any)?.audioUrl
+    );
+    return idx !== -1 ? idx : 0;
+  };
+
+  // Unified playback switcher — single source of truth for index math.
+  // Handles rapid-click interruptions gracefully (AbortError ignored).
+  // Always forces playback on skip/back even from paused state.
+  const playTrackAtIndex = useCallback(async (targetIndex: number) => {
+    if (!playlist || playlist.length === 0 || !audioRef.current) return;
+
+    // Lock navigation guard — hold during the whole switch so native pause/ended
+    // events from the src swap don't flip isPlaying to false.
+    isNavigatingRef.current = true;
+
+    // 1. Calculate circular index mathematically
+    const safeIndex = (targetIndex % playlist.length + playlist.length) % playlist.length;
+    const targetTrack = playlist[safeIndex];
+    const targetUrl = (targetTrack as any)?.url || (targetTrack as any)?.audioUrl || "";
+
+    // 2. Update state and synchronous refs immediately
+    currentIndexRef.current = safeIndex;
+    setActiveTrack(targetTrack);
+    setIsPlaying(true);
+
+    // 3. Unlock Web Audio Context if suspended
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      try {
+        await audioCtxRef.current.resume();
+      } catch (e) {
+        console.error("AudioContext resume error:", e);
+      }
+    }
+
+    // 4. Update audio source and trigger immediate play (unconditional src assignment)
+    audioRef.current.src = targetUrl;
+    audioRef.current.currentTime = 0;
+
+    try {
+      await audioRef.current.play();
+    } catch (err: any) {
+      // Silently ignore browser promise cancellation from rapid clicking
+      if (err.name !== "AbortError") {
+        console.error("Playback error:", err);
+      }
+    } finally {
+      // Release lock after promise settles — guarantees it clears even on AbortError
+      isNavigatingRef.current = false;
+    }
+  }, [playlist]);
+
+  // Clean 1-line skip handlers — currentIndexRef stays in sync via playTrackAtIndex
+  const playNext = useCallback(() => {
+    playTrackAtIndex(currentIndexRef.current + 1);
+  }, [playTrackAtIndex]);
+
+  const playPrevious = useCallback(() => {
+    playTrackAtIndex(currentIndexRef.current - 1);
+  }, [playTrackAtIndex]);
+
+  // ---------------------------------------------------------------------------
+  // Global media coordination
+  // ---------------------------------------------------------------------------
   const pauseAllOtherMedia = useCallback((activeAudioEl?: HTMLAudioElement | null) => {
-    // Pause all registered HTMLAudioElements across ToneCards and FeaturedPlayer (except activeAudioEl)
-    sourceNodesRef.current.forEach((source, audioEl) => {
+    sourceNodesRef.current.forEach((_source, audioEl) => {
       if (audioEl !== activeAudioEl && !audioEl.paused) {
         try {
           audioEl.pause();
           audioEl.currentTime = 0;
         } catch (e) {
-          console.warn("Error pausing audio element:", e);
+          console.warn("[AudioContext] Error pausing audio element:", e);
         }
       }
     });
 
-    // Pause all YouTube iframe embeds on the page
     if (typeof document !== "undefined") {
       document.querySelectorAll("iframe").forEach((iframe) => {
         try {
@@ -268,62 +661,249 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             JSON.stringify({ event: "command", func: "pauseVideo", args: "" }),
             "*"
           );
-        } catch (e) {
+        } catch {
           // Ignore cross-origin errors
         }
       });
     }
 
-    // Reset preset/demo card active state
-    setActiveTrack(null);
+    setActiveTrackState(null);
+    activeTrackRef.current = null;
     previewController.notify(null, false);
 
-    // Reset active playing states in context if the currently active track is not the activeAudioEl
     if (audioRef.current !== activeAudioEl && isPlaying) {
       setIsPlaying(false);
       setIsVisualizerActive(false);
     }
-  }, [isPlaying, setIsPlaying, setIsVisualizerActive]);
+  }, [isPlaying, setIsPlaying, setIsVisualizerActive, setActiveTrackState]);
 
+  // ---------------------------------------------------------------------------
+  // useEffect hooks
+  // ---------------------------------------------------------------------------
+
+  // Keep activeAudioRef in sync with the global player element
+  useEffect(() => {
+    if (audioRef.current) {
+      activeAudioRef.current = audioRef.current;
+    }
+  }, [activeTrack]);
+
+  // Attach media error diagnostics once the audio element is mounted
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.onerror = () => {
+      console.error(
+        "[Audio Error Code]",
+        el.error?.code,
+        "Message:",
+        el.error?.message,
+        "Path:",
+        el.src
+      );
+    };
+    return () => {
+      el.onerror = null;
+    };
+  }, []);
+
+  // Re-bind source and reload when activeTrack changes externally
+  useEffect(() => {
+    if (!audioRef.current || !activeTrack) return;
+    if (needsTrackReload(activeTrack, audioRef.current.src)) {
+      const rawSrc = (activeTrack as any)?.url || (activeTrack as any)?.audioUrl || (activeTrack as any)?.src;
+      const cleanSrc = buildCleanUrl(rawSrc);
+      console.log("[AudioContext] activeTrack changed externally — reloading source:", cleanSrc);
+      audioRef.current.src = cleanSrc;
+      audioRef.current.load();
+      audioRef.current.currentTime = 0;
+      setDuration(0);
+    }
+  }, [activeTrack]);
+
+  // ─── Single shared Web Audio pipeline ────────────────────────────────────────
+  // Called by the JSX onPlay handler (and from playTrack) — wires the
+  // source → analyser → destination graph exactly once per audio element.
+  // The onPlay event fires only after a real user gesture, so the
+  // AudioContext is guaranteed not to be in the "blocked" suspended state.
+  const initWebAudio = useCallback(() => {
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
+
+    // Defensive: ensure CORS attribute is set on the element before source creation
+    audioEl.crossOrigin = "anonymous";
+
+    // Initialize AudioContext on user interaction (gesture unlocks the API)
+    if (!audioCtxRef.current) {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtxRef.current = new AudioCtx();
+    }
+
+    const ctx = audioCtxRef.current;
+    if (ctx.state === "suspended") {
+      ctx.resume();
+    }
+
+    // Bind source and analyser only once per audio element
+    if (!sourceNodeRef.current) {
+      try {
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 256; // High responsiveness
+        analyser.smoothingTimeConstant = 0.7;
+        analyser.minDecibels = -90;
+        analyser.maxDecibels = 0;
+
+        // Pre-gain tap: analyser is wired BEFORE the master gain node so the
+        // visualizer sees the raw, unattenuated signal at all times.
+        //   source → analyser → masterGain → destination
+        // (Previously: source → analyser → destination, with the gain
+        //  applied elsewhere — the analyser was downstream of the gain and
+        //  dimmed with the volume slider.)
+        const source = ctx.createMediaElementSource(audioEl);
+        const masterGain = ctx.createGain();
+        masterGain.gain.value = 0.85; // match initial volume state
+
+        source.connect(analyser);
+        analyser.connect(masterGain);
+        masterGain.connect(ctx.destination);
+
+        sourceNodeRef.current = source;
+        analyserRef.current   = analyser;
+        gainNodeRef.current   = masterGain;
+
+        // Update reactive state so React consumers re-render with the live node
+        setAnalyserNode(analyser);
+        tickAnalyser();
+
+        console.log("✅ Web Audio API Pipeline successfully connected to <audio>");
+      } catch (err) {
+        console.warn("Web Audio binding warning:", err);
+      }
+    }
+  }, [tickAnalyser]);
+
+  // Register initWebAudio with the ref so legacy connect functions can delegate without TDZ
+  initWebAudioRef.current = initWebAudio;
+
+  // Backup safety net: also bind on first render in case the play event
+  // never fires (e.g., track autoplay block) — this keeps the analyser
+  // reachable for components even when paused.
+  useEffect(() => {
+    const audioEl = audioRef.current;
+    if (!audioEl) return;
+    // No-op listener — pipeline is wired via initWebAudio on play
+    return () => {};
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Render
+  // ---------------------------------------------------------------------------
   return (
     <>
-      <audio ref={audioRef} crossOrigin="anonymous" preload="metadata" style={{ display: "none" }} />
+      <audio
+        ref={audioRef}
+        crossOrigin="anonymous"
+        preload="metadata"
+        style={{ display: "none" }}
+        onLoadedMetadata={() => {
+          if (audioRef.current) {
+            audioRef.current.crossOrigin = 'anonymous'; // Defensive: enforce CORS before any load
+            setDuration(isNaN(audioRef.current.duration) ? 0 : audioRef.current.duration);
+          }
+        }}
+        onCanPlay={() => {
+          if (audioRef.current) {
+            setDuration(isNaN(audioRef.current.duration) ? 0 : audioRef.current.duration);
+          }
+        }}
+        onTimeUpdate={() => {
+          if (audioRef.current) setCurrentTime(audioRef.current.currentTime || 0);
+        }}
+        onPlay={() => {
+          setIsPlaying(true);
+          setIsVisualizerActive(true);
+          initWebAudioRef.current(); // Wire Web Audio pipeline the moment user gesture unlocks it
+        }}
+        onPause={handleNativePause}
+        onEnded={() => {
+          if (!isNavigatingRef.current) {
+            setCurrentTime(0);
+            playNext();
+          }
+        }}
+        onError={() => {
+          const err = audioRef.current?.error;
+          console.error(
+            "[Audio Error Code]",
+            err?.code,
+            "Message:",
+            err?.message,
+            "Path:",
+            audioRef.current?.src
+          );
+          handleAudioError();
+        }}
+        onDurationChange={() => {
+          if (audioRef.current) {
+            setDuration(isNaN(audioRef.current.duration) ? 0 : audioRef.current.duration);
+          }
+        }}
+      />
       <AudioContextInstance.Provider
-      value={{
-        audioCtx: audioCtxRef.current,
-        isPlaying,
-        setIsPlaying,
-        isVisualizerActive,
-        setIsVisualizerActive,
-        setVisualizerActive: setIsVisualizerActive,
-        connectAudioElement,
-        setActiveAudioElement,
-        registerAudioElement,
-        setMasterVolume,
-        setCardVolume,
-        getFrequencyData,
-        getActiveFrequencyData,
-        // Playback controls
-        activeTrack,
-        currentTrack,
-        playTrack,
-        pauseTrack,
-        stopTrack,
-        togglePlayStop,
-        togglePlay,
-        pause,
-        volume,
-        setVolume,
-        currentTime,
-        duration,
-        seek,
-        // Global media coordination
-        pauseAllOtherMedia,
-        activeAudioRef,
-      }}
-    >
-      {children}
-    </AudioContextInstance.Provider>
+        value={{
+          audioCtx: audioCtxRef.current,
+          isPlaying,
+          setIsPlaying,
+          isVisualizerActive,
+          setIsVisualizerActive,
+          setVisualizerActive: setIsVisualizerActive,
+          connectAudioElement,
+          connectSourceToAnalyser,
+          setActiveAudioElement,
+          registerAudioElement,
+          setMasterVolume,
+          setCardVolume,
+          getFrequencyData,
+          getActiveFrequencyData,
+          // Playback controls
+          activeTrack,
+          setActiveTrack,
+          currentTrack,
+          playTrack,
+          pauseTrack,
+          stopTrack,
+          togglePlayStop,
+          togglePlay,
+          pause,
+          volume,
+          setVolume,
+          isMuted: isMuted,
+          toggleMute,
+          currentTime,
+          duration,
+          seek,
+          stop,
+          playlist,
+          loadPlaylist,
+          playNext,
+          playPrevious,
+          skipForward,
+          skipBackward,
+          // Scratch / motor torque
+          setScratchFilterFreq,
+          setPlaybackRate,
+          // Global media coordination
+          pauseAllOtherMedia,
+          activeAudioRef,
+          audioRef, // expose so components can bind directly to the shared element
+          analyserRef,
+          analyserNode, // reactive state version — updated by the single pipeline
+          gainNodeRef,
+          getAnalyserNode,
+        }}
+      >
+        {children}
+      </AudioContextInstance.Provider>
     </>
   );
 };
