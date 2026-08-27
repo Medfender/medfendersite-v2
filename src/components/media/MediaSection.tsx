@@ -1,7 +1,60 @@
 "use client";
 
 import React, { useState } from "react";
+import { Play } from "lucide-react";
 import mediaData from "@/content/media.json";
+
+interface VideoCardProps {
+  videoId: string;
+  title: string;
+  youtubeId: string;
+}
+
+function VideoCard({ videoId, title, youtubeId }: VideoCardProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const thumb = `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-neutral-950/40 relative">
+        {isPlaying ? (
+          <iframe
+            className="w-full h-full"
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
+            title={title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsPlaying(true)}
+            aria-label={`Play ${title}`}
+            className="group relative block w-full h-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+          >
+            <img
+              src={thumb}
+              alt={title}
+              loading="lazy"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-cyan-500/90 group-hover:bg-cyan-400 flex items-center justify-center shadow-[0_0_30px_rgba(0,216,246,0.6)] transition-all duration-300 group-hover:scale-110">
+                <Play className="w-7 h-7 md:w-9 md:h-9 text-black fill-black ml-1" strokeWidth={0} />
+              </span>
+            </div>
+            <div className="absolute bottom-3 left-3 right-3 text-left">
+              <h3 className="text-white font-bold text-sm md:text-base drop-shadow-lg">
+                {title}
+              </h3>
+            </div>
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function MediaSection() {
   const [activeTab, setActiveTab] = useState<"videos" | "gallery">("videos");
@@ -43,20 +96,7 @@ export default function MediaSection() {
       {activeTab === "videos" && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {mediaData.youtube.map((video) => (
-            <div key={video.id} className="flex flex-col gap-3">
-              <div className="aspect-video w-full rounded-2xl overflow-hidden border border-white/10 shadow-lg bg-neutral-950/40">
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${video.youtubeId}`}
-                  title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-              <h3 className="text-white font-bold text-sm md:text-base px-1">
-                {video.title}
-              </h3>
-            </div>
+            <VideoCard key={video.id} videoId={video.id} title={video.title} youtubeId={video.youtubeId} />
           ))}
         </div>
       )}

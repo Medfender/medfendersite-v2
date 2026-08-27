@@ -3,10 +3,45 @@
 import React, { useRef, useEffect, useState } from "react";
 import FeaturedPlayer from "@/components/audio/FeaturedPlayer";
 import HeroVisualizer from "@/components/hero/HeroVisualizer";
+import { useAudio } from "@/context/AudioContext";
+import { ToneItem } from "@/data/storeData";
 
 export default function FeaturedAudioSection() {
   const audioSectionRef = useRef<HTMLElement>(null);
   const [isAudioSectionInView, setIsAudioSectionInView] = useState(true);
+  const { loadPlaylist, setActiveTrack } = useAudio();
+
+  useEffect(() => {
+    // Dynamic initialization: wait for API payload before setting any track
+    let cancelled = false;
+    fetch("/api/audio/featured")
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        const tracks = (data?.tracks || []) as any[];
+        if (!tracks.length) return;
+        // Sync currentIndexRef to 0 so skip/back works immediately on first load
+        // (handled in AudioContext when playTrack is called below)
+        const initial = tracks[0];
+        const payload: ToneItem = {
+          id: initial.id || "featured-1",
+          name: initial.title || initial.name || "Featured",
+          gearTag: initial.artist || "Medfender",
+          audioUrl: initial.url || initial.audioUrl || "/audio/featured-artists/Sidi%20Bouganga%20feat%20Younes%20Hadir.mp3",
+        };
+        loadPlaylist(tracks.map((t: any) => ({
+          id: t.id || `track-${Math.random()}`,
+          name: t.title || t.name || "Untitled",
+          gearTag: t.artist || "Medfender",
+          audioUrl: t.url || t.audioUrl || "",
+        })));
+        setActiveTrack(payload);
+      })
+      .catch((e) => {
+        console.warn("[FeaturedAudioSection] API fetch failed:", e);
+      });
+    return () => { cancelled = true; };
+  }, [loadPlaylist, setActiveTrack]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

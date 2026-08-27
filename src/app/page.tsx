@@ -1,6 +1,5 @@
 import FeaturedAudioSection from "@/components/sections/FeaturedAudioSection";
 import PresetsSection from "@/components/store/PresetsSection";
-import VinylFeaturedPlayer from "@/components/audio/VinylFeaturedPlayer";
 import MediaSection from "@/components/media/MediaSection";
 import ContactSection from "@/components/contact/ContactSection";
 
@@ -13,7 +12,6 @@ export default function Home() {
         <PresetsSection />
       </section>
 
-      <VinylFeaturedPlayer />
 
       <section id="media">
         <MediaSection />

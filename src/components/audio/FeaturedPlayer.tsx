@@ -1,238 +1,204 @@
 "use client";
 
-import React from "react";
-import { featuredTrack } from "@/data/storeData";
+import React, { useState, useEffect, useRef } from "react";
+import { Play, Pause, SkipBack, SkipForward, Square, Volume2, VolumeX } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
-import SpectrumVisualizer from "./SpectrumVisualizer";
+import MiniVisualizer from "./MiniVisualizer";
+import type { VisualizerMode } from "@/lib/visualizer/useAudioVisualizer";
 
 interface FeaturedPlayerProps {
   isSectionInView: boolean;
 }
 
+const MINI_MODES: VisualizerMode[] = ["bars", "curve", "waveform"];
+const MODE_LABELS: Record<VisualizerMode, string> = {
+  bars: "Spec",
+  curve: "Curve",
+  waveform: "Osc",
+};
+
 export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps) {
   const {
-    activeTrack,
-    isPlaying,
-    volume,
-    setIsPlaying,
-    setVisualizerActive,
-    connectAudioElement,
-    setCardVolume,
-    pauseAllOtherMedia,
-    audioCtx,
-    seek,
-    setVolume,
-    setActiveAudioElement,
-    activeAudioRef,
+    activeTrack, currentTrack, isPlaying, volume, setVolume,
+    isMuted, toggleMute, togglePlay, seek, currentTime, duration,
+    analyserNode, playNext, playPrevious, stop, playlist,
   } = useAudio();
 
-  const trackInfo = {
-    id: featuredTrack.title,
-    title: featuredTrack.title,
-    gearTag: featuredTrack.gearTag,
-    audioUrl: featuredTrack.audioUrl,
+  // ── Track metadata ────────────────────────────────────────────────────────
+  const trackName =
+    ((activeTrack as any)?.title   || (activeTrack as any)?.name    || currentTrack?.name       || (currentTrack as any)?.title   || "Unknown Track");
+  const trackArtist =
+    ((activeTrack as any)?.artist  || (activeTrack as any)?.gearTag || (currentTrack as any)?.gearTag || (currentTrack as any)?.artist || "MedFender");
+
+  const [coverError, setCoverError] = useState(false);
+  useEffect(() => { setCoverError(false); }, []);
+
+  // ── Mini visualizer mode (3-way cycle) ──────────────────────────────────
+  const [miniMode, setMiniMode] = useState<VisualizerMode>("bars");
+  const cycleMiniMode = () => {
+    setMiniMode((prev) => {
+      const idx = MINI_MODES.indexOf(prev);
+      return MINI_MODES[(idx + 1) % MINI_MODES.length];
+    });
   };
 
-  const audioRef = React.useRef<HTMLAudioElement | null>(null);
-  const [currentTime, setCurrentTime] = React.useState(0);
-  const [duration, setDuration] = React.useState(0);
-  const [prevVolume, setPrevVolume] = React.useState<number>(1);
-
-  const formatTime = (sec: number) => {
-    if (isNaN(sec) || !isFinite(sec)) return "0:00";
-    const mins = Math.floor(sec / 60);
-    const secs = Math.floor(sec % 60);
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const fmt = (sec: number) => {
+    if (isNaN(sec) || !isFinite(sec) || !sec) return "0:00";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
-  const handleTogglePlay = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-      setIsThisPlaying(false);
-      setVisualizerActive(false);
-    } else {
-      if (pauseAllOtherMedia) pauseAllOtherMedia(audio);
-      connectAudioElement(audio);
-      setCardVolume(audio, volume);
-      try {
-        await audio.play();
-        setIsPlaying(true);
-        setIsThisPlaying(true);
-        setVisualizerActive(true);
-        if (audio && setActiveAudioElement) setActiveAudioElement(audio);
-      } catch (err) {
-        console.error("Playback failed:", err);
-      }
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawVal = parseFloat(e.target.value);
-    const newVol = Math.max(0, Math.min(1, isNaN(rawVal) ? 0 : rawVal));
-    setVolume(newVol); // Local UI slider state
-
-    if (audioRef.current) {
-      setCardVolume(audioRef.current, newVol); // Update Web Audio GainNode in real-time
-    }
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
-    }
-  };
-
-  const handleToggleMute = () => {
-    const audio = audioRef.current;
-    if (volume > 0) {
-      setPrevVolume(volume);
-      setVolume(0);
-      if (audio) setCardVolume(audio, 0);
-    } else {
-      const restored = prevVolume > 0 ? prevVolume : 1;
-      setVolume(restored);
-      if (audio) setCardVolume(audio, restored);
-    }
-  };
-
-  const handleStop = () => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
-
-    // Only update global playing/visualizer state IF the Featured Player was the active sound source
-    if (activeAudioRef.current === audio) {
-      setIsPlaying(false);
-      setVisualizerActive(false);
-      activeAudioRef.current = null;
-    }
-
-    setCurrentTime(0);
-    setIsThisPlaying(false);
-  };
-
-  const [isThisPlaying, setIsThisPlaying] = React.useState(false);
-
-  const isPlayingDerived = activeTrack?.id === trackInfo.id && isPlaying;
-
-  return (
-    <>
-      <audio
-        ref={audioRef}
-        src={featuredTrack.audioUrl}
-        preload="auto"
-        onEnded={() => {
-          setIsPlaying(false);
-          setVisualizerActive(false);
-          setCurrentTime(0);
-          setIsThisPlaying(false);
-        }}
-        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-        onPlay={() => { setIsPlaying(true); setVisualizerActive(true); setIsThisPlaying(true); }}
-        onPause={() => { setIsPlaying(false); setVisualizerActive(false); setIsThisPlaying(false); }}
-        style={{ display: "none" }}
-      />
-      <div className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
-        isSectionInView
-          ? 'opacity-100 translate-y-0 pointer-events-auto'
-          : 'opacity-0 translate-y-8 pointer-events-none'
-      }`}>
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 sm:px-4 md:px-8 w-full">
-          {/* Left Section: Play Button + Track Info */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={handleTogglePlay}
-              className="relative group w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all duration-200 shrink-0 aspect-square"
-              aria-label={isThisPlaying ? "Pause" : "Play"}
-            >
-              {isThisPlaying ? (
-                <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-label="Pause">
-                  <rect x="6" y="4" width="4" height="16" />
-                  <rect x="14" y="4" width="4" height="16" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-label="Play">
-                  <polygon points="5,3 19,12 5,21" />
-                </svg>
-              )}
-              {isThisPlaying && (
-                <span className="absolute inset-0 rounded-full border border-cyan-400 animate-ping opacity-30" />
-              )}
-            </button>
-
-            <div className="flex flex-col truncate min-w-0">
-              <div className="flex items-center gap-2">
-                <h4 className="font-bold text-sm md:text-base text-white truncate tracking-wide">{featuredTrack.title}</h4>
-                <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50 shrink-0">Featured</span>
-              </div>
-              <p className="text-xs text-neutral-400 truncate mt-0.5 font-mono">{featuredTrack.gearTag}</p>
-            </div>
-          </div>
-
-          {/* Middle Section: Timeline & Seek Bar */}
-          <div className="flex-1 flex items-center gap-2 min-w-0 w-full sm:px-2">
-            <span className="text-xs font-mono text-neutral-400 shrink-0">{formatTime(currentTime)}</span>
-            <input
-              type="range"
-              min={0}
-              max={duration || 100}
-              value={currentTime}
-              onChange={handleSeek}
-              className="flex-1 min-w-[100px] h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition"
-            />
-            <span className="text-xs font-mono text-neutral-400 shrink-0">{formatTime(duration)}</span>
-          </div>
-
-          {/* Right Section: Stop Button + Volume + Spectrum */}
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={handleStop}
-              className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-800/80 text-neutral-400 flex items-center justify-center hover:text-white hover:bg-neutral-700 border border-neutral-700/60 transition shrink-0 aspect-square"
-              aria-label="STOP"
-            >
-              <svg className="w-4 h-4 md:w-5 md:h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                <rect x="6" y="6" width="12" height="12" rx="2" />
-              </svg>
-            </button>
-
-            <div className="hidden sm:flex items-center gap-2 shrink-0">
-              <button
-                onClick={handleToggleMute}
-                className="text-xs font-mono text-neutral-400 hover:text-white transition-colors shrink-0 whitespace-nowrap"
-              >
-                {volume === 0 ? "MUTED" : "VOL"}
-              </button>
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={handleVolumeChange}
-                className="w-16 md:w-20 h-1.5 bg-neutral-800 rounded-lg appearance-none cursor-pointer accent-cyan-400 hover:accent-cyan-300 transition shrink-0"
-              />
-            </div>
-
-            <div className="hidden md:block shrink-0">
-              <SpectrumVisualizer
-                audioRef={audioRef}
-                isActive={isThisPlaying}
-                width={150}
-                height={60}
-              />
-            </div>
-          </div>
+  // ── Empty state ─────────────────────────────────────────────────────────
+  if (!currentTrack && !isPlaying && duration === 0) {
+    const emptyMsg = "No audio — add files to /public/audio/featured";
+    return (
+      <div
+        className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+          isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 p-2 sm:px-4 md:px-6 w-full h-[60px]">
+          <span className="text-xs text-neutral-500 font-mono">{emptyMsg}</span>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="text-xs text-cyan-400 hover:text-white transition shrink-0"
+          >
+            ↑ Top
+          </button>
         </div>
       </div>
-    </>
+    );
+  }
+
+  return (
+    <div
+      className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+        isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 p-2 sm:px-4 md:px-6 w-full min-h-[60px]">
+
+        {/* ── Left: transport + track info ──────────────────────────────────── */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Transport buttons */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={playPrevious}
+              aria-label="Previous track"
+              className="w-8 h-8 rounded-full bg-neutral-800/80 text-cyan-400 flex items-center justify-center hover:text-white hover:bg-neutral-700/80 transition shrink-0"
+            >
+              <SkipBack size={14} />
+            </button>
+
+            <button
+              onClick={togglePlay}
+              className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold shadow-[0_0_14px_rgba(0,216,246,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying
+                ? <Pause size={18} />
+                : <Play  size={18} className="ml-0.5" />}
+            </button>
+
+            <button
+              onClick={playNext}
+              aria-label="Next track"
+              className="w-8 h-8 rounded-full bg-neutral-800/80 text-cyan-400 flex items-center justify-center hover:text-white hover:bg-neutral-700/80 transition shrink-0"
+            >
+              <SkipForward size={14} />
+            </button>
+          </div>
+
+          {/* Track info */}
+          <div className="flex flex-col min-w-0 hidden sm:flex">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h4 className="text-sm font-bold text-white truncate">{trackName}</h4>
+              <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50 shrink-0">
+                FEAT
+              </span>
+            </div>
+            <p className="text-[10px] text-neutral-500 truncate font-mono">{trackArtist}</p>
+          </div>
+        </div>
+
+        {/* ── Center: timeline ─────────────────────────────────────────────── */}
+        <div className="flex items-center gap-1.5 flex-1 min-w-0 mx-2">
+          <span className="text-[10px] font-mono text-neutral-500 shrink-0 tabular-nums">
+            {fmt(currentTime)}
+          </span>
+          <input
+            type="range"
+            min={0}
+            max={duration || 100}
+            value={currentTime || 0}
+            onChange={(e) => seek(Number(e.target.value))}
+            className="w-full accent-cyan-400 cursor-pointer h-1 bg-neutral-700 rounded-lg appearance-none"
+            aria-label="Seek"
+          />
+          <span className="text-[10px] font-mono text-neutral-500 shrink-0 tabular-nums">
+            {fmt(duration)}
+          </span>
+        </div>
+
+        {/* ── Right: volume + mini visualizer + stop ───────────────────────── */}
+        <div className="flex items-center gap-2 shrink-0">
+
+          {/* Volume */}
+          <div className="hidden sm:flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={toggleMute}
+              aria-label={isMuted ? "Unmute" : "Mute"}
+              className="w-7 h-7 rounded-full text-neutral-400 flex items-center justify-center hover:text-cyan-400 transition shrink-0"
+            >
+              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
+            <input
+              type="range" min="0" max="1" step="0.01"
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+              className="w-14 md:w-16 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0"
+              aria-label="Volume"
+            />
+          </div>
+
+          {/* Free-contained mini visualizer — no card, no border, no shadow.
+              Fixed 150×50 footprint; click cycles bars → curve → waveform. */}
+          <div
+            onClick={cycleMiniMode}
+            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 rounded overflow-hidden transition-all duration-200 hover:brightness-110 group"
+            title={`${MODE_LABELS[miniMode]} — click to switch`}
+            style={{
+              width: 150,
+              height: 50,
+              minWidth: 150,
+              minHeight: 50,
+              maxWidth: 150,
+              maxHeight: 50,
+              flexShrink: 0,
+            }}
+          >
+            <MiniVisualizer
+              analyserNode={analyserNode}
+              isPlaying={isPlaying}
+              mode={miniMode}
+              width={150}
+              height={50}
+            />
+          </div>
+
+          {/* Stop */}
+          <button
+            onClick={stop}
+            title="Stop"
+            aria-label="Stop"
+            className="w-7 h-7 rounded-full text-neutral-500 hover:text-cyan-400 hover:bg-white/5 transition-colors shrink-0 flex items-center justify-center"
+          >
+            <Square fill="currentColor" size={13} />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

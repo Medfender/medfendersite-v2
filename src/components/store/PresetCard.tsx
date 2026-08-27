@@ -15,7 +15,7 @@ export const previewController = {
 
 export default function PresetCard({ preset }: { preset: PackData }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hover:border-cyan-500/50 transition">
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hover:border-cyan-500/50 transition flex flex-col">
       <div className="flex justify-between items-start mb-4">
         <div>
           <span className="inline-block px-2.5 py-1 text-xs font-semibold bg-cyan-500/10 text-cyan-400 rounded-md mb-2">
@@ -23,15 +23,28 @@ export default function PresetCard({ preset }: { preset: PackData }) {
           </span>
           <h3 className="text-xl font-bold text-white">{preset.title}</h3>
         </div>
+        <span className="text-2xl font-extrabold text-white tracking-tight shrink-0 ml-3">
+          ${preset.price.toFixed(2)}
+        </span>
       </div>
       <p className="text-slate-400 text-sm mb-6">{preset.description}</p>
 
-      <div className="space-y-4">
+      <div className="space-y-4 mb-6">
         <h4 className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Included Tones</h4>
         {preset.tones.map((tone) => (
           <ToneRow key={tone.id} tone={tone} />
         ))}
       </div>
+
+      <a
+        href={preset.checkoutUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-auto inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-600 text-slate-950 font-extrabold text-sm px-5 py-3 shadow-[0_0_20px_rgba(0,216,246,0.35)] hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_28px_rgba(0,216,246,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 transition-transform"
+        aria-label={`Grab your ${preset.title} for $${preset.price.toFixed(2)}`}
+      >
+        Grab Your Pack
+      </a>
     </div>
   );
 }
