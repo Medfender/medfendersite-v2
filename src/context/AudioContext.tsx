@@ -475,38 +475,39 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     pauseTrack();
   };
 
-  /** Toggle mute — remembers the last active volume, restores cleanly on unmute */
+  /** Toggle mute — remembers the last active volume, restores cleanly on unmute.
+   *  Mute is implemented ENTIRELY at the Web Audio masterGain layer. The HTML
+   *  <audio> element stays at volume=1.0 and muted=false so the underlying
+   *  MediaElementAudioSourceNode continues feeding the AnalyserNode with raw
+   *  signal — the spectrum analyzer / visualizer keep animating while muted. */
   const lastVolumeRef = useRef(0.85);
   const toggleMute = useCallback(() => {
-    if (isMuted) {
-      // Unmute → restore last volume
-      const restore = lastVolumeRef.current > 0.01 ? lastVolumeRef.current : 0.85;
-      setIsMuted(false);
-      setVolumeState(restore);
-      // Visualizer decoupling: HTML audio element stays at 100% — all mute/unmute
-      // is handled by the Web Audio GainNode downstream.
-      if (audioRef.current) {
-        audioRef.current.muted = false;
-        audioRef.current.volume = 1.0;
-      }
-      const el = audioRef.current;
-      if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {
-        applyVolumeToGainNode(gainNodesRef.current.get(el)!, restore, audioCtxRef.current);
+    if (audioCtxRef.current) {
+      const gain = gainNodeRef.current;
+      if (gain) {
+        if (isMuted) {
+          // Unmute → restore last volume
+          const restore = lastVolumeRef.current > 0.01 ? lastVolumeRef.current : 0.85;
+          applyVolumeToGainNode(gain, restore, audioCtxRef.current);
+          setIsMuted(false);
+          setVolumeState(restore);
+        } else {
+          // Mute → remember current level, ramp gain to 0
+          if (volume > 0.01) lastVolumeRef.current = volume;
+          applyVolumeToGainNode(gain, 0, audioCtxRef.current);
+          setIsMuted(true);
+          setVolumeState(0);
+        }
+      } else {
+        // Fallback (pre-pipeline): flip isMuted only
+        setIsMuted((m) => !m);
       }
     } else {
-      // Mute → remember current level, set to 0
-      if (volume > 0.01) lastVolumeRef.current = volume;
-      setIsMuted(true);
-      if (audioRef.current) {
-        audioRef.current.muted = true;
-        audioRef.current.volume = 0;
-      }
-      const el = audioRef.current;
-      if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {
-        applyVolumeToGainNode(gainNodesRef.current.get(el)!, 0, audioCtxRef.current);
-      }
+      setIsMuted((m) => !m);
     }
-  }, [isMuted, volume]);
+    // IMPORTANT: never touch audioRef.current.muted or call audioRef.current.pause().
+    // Both would freeze the MediaElementAudioSourceNode and stop the analyser.
+  }, [isMuted, volume, applyVolumeToGainNode]);
 
   const setVolume = useCallback((val: number) => {
     const clamped = Math.max(0, Math.min(1, val));
@@ -757,18 +758,24 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         analyser.minDecibels = -90;
         analyser.maxDecibels = 0;
 
-        // Pre-gain tap: analyser is wired BEFORE the master gain node so the
-        // visualizer sees the raw, unattenuated signal at all times.
-        //   source → analyser → masterGain → destination
-        // (Previously: source → analyser → destination, with the gain
-        //  applied elsewhere — the analyser was downstream of the gain and
-        //  dimmed with the volume slider.)
+        // Decoupled parallel routing: the analyser taps the source DIRECTLY
+        // (pre-volume, pre-mute), while the audible output flows through
+        // the masterGain independently. This means the spectrum analyzer
+        // always sees the raw 100% signal — volume slider, mute state, and
+        // any future gain changes do NOT dim the visualizer.
+        //
+        //   source ──► analyser      (raw, unscaled, ignores masterGain)
+        //           └► masterGain ──► destination   (audible output)
         const source = ctx.createMediaElementSource(audioEl);
         const masterGain = ctx.createGain();
         masterGain.gain.value = 0.85; // match initial volume state
 
         source.connect(analyser);
-        analyser.connect(masterGain);
+        // NOTE: analyser.connect(...) is intentionally NOT chained to masterGain.
+        // The analyser is a sink of its own; connecting it downstream would
+        // re-introduce the post-gain attenuation it was just decoupled from.
+
+        source.connect(masterGain);
         masterGain.connect(ctx.destination);
 
         sourceNodeRef.current = source;
