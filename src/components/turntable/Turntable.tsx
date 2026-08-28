@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 /**
  * Turntable — luxury DJ deck chassis (Technics SL-1200 inspired).
@@ -25,13 +25,25 @@ import React, { useState, useMemo } from "react";
 const cos = (deg: number) => Math.cos((deg * Math.PI) / 180);
 const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
 
-export default function Turntable({ isPlaying, className }: { isPlaying?: boolean; className?: string }) {
+export default function Turntable({ isPlaying, className, progress }: { isPlaying?: boolean; className?: string; progress?: number }) {
   const [internalPlaying, setInternalPlaying] = useState(false);
   const active = isPlaying ?? internalPlaying;
   const toggleInternal = () => setInternalPlaying((s) => !s);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0); // -8 to +8 (%)
+  const [isTracking, setIsTracking] = useState(false);
+
+  // Tracking mode kicks in 600ms after the drop completes — keeps first frame smooth
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (active) {
+      timer = setTimeout(() => setIsTracking(true), 600);
+    } else {
+      setIsTracking(false);
+    }
+    return () => clearTimeout(timer);
+  }, [active]);
 
   // Platter coordinates
   const PCX = 215;
@@ -52,11 +64,13 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
   const REST_X = TPX;
   const REST_Y = TPY + 220;
   const PARK_ANGLE = 0;
-  const PLAY_ANGLE = 33;
-  const INNER_ANGLE = 48;
-  const progress = active ? 1.0 : 0.0; // track progress: 1.0 = playing / fully tracked
-  const activeAngle = PLAY_ANGLE + (progress * (INNER_ANGLE - PLAY_ANGLE));
-  const armAngle = active ? activeAngle : PARK_ANGLE;
+  const PLAY_ANGLE = 55;
+  const INNER_ANGLE = 75;
+  const currentProgress = progress ?? 0;
+  const activeAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
+  const armAngle = active
+    ? (isTracking ? activeAngle : PLAY_ANGLE)
+    : PARK_ANGLE;
 
   // Stylus tip in chassis coords — wand natively points straight down (+Y)
   // At angle θ (CCW negative in screen y-down), tip = (TPX + sin(θ)·L, TPY + cos(θ)·L)
@@ -402,10 +416,10 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
               {Array.from({ length: 24 }, (_, i) => {
                 const a = (i * 360) / 24;
                 const rad = (a * Math.PI) / 180;
-                const x1 = TPX + Math.cos(rad) * 27;
-                const y1 = TPY + Math.sin(rad) * 27;
-                const x2 = TPX + Math.cos(rad) * 33;
-                const y2 = TPY + Math.sin(rad) * 33;
+                const x1 = +(TPX + Math.cos(rad) * 27).toFixed(3);
+                const y1 = +(TPY + Math.sin(rad) * 27).toFixed(3);
+                const x2 = +(TPX + Math.cos(rad) * 33).toFixed(3);
+                const y2 = +(TPY + Math.sin(rad) * 33).toFixed(3);
                 return (
                   <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
                     stroke="#1e222a" strokeWidth="0.5" opacity="0.7" />
@@ -477,7 +491,9 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
                 style={{
                   transform: `rotate(${armAngle}deg)`,
                   transformOrigin: "0px 0px",
-                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                  transition: (!active || !isTracking)
+                    ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
+                    : 'transform 0.1s linear',
                 }}
               >
               {/* ── Counterweight — straight UP from pivot (native) ── */}
@@ -672,18 +688,6 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
               </g>
             </g>
 
-            {/* Stylus contact indicator (glows at tip when playing) */}
-            <circle
-              cx={tipX}
-              cy={tipY}
-              r={active ? 4 : 0}
-              fill="#cc1a4a"
-              opacity={active ? 0.7 : 0}
-              style={{
-                filter: "url(#shadow-sm)",
-                transition: "opacity 0.7s ease, r 0.4s ease",
-              }}
-            />
 
             {/* ════════════════════════════════════════════════════
                 PITCH FADER — far right edge, vertical track
