@@ -144,18 +144,20 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       // Log-normalised bin spread: 20Hz → index near 0, 20kHz → index near raw.length-1.
       // Without this, linear `raw[i*step]` clusters most energy in the left/middle
       // (low/mid bands) and leaves the high-frequency right side blank/dead.
+      // Strict musical range: 20Hz → 10kHz (covers bass, mids, presence; ignores
+      // the very top octave where analysers are typically noise-floor dominated).
       const logMin = Math.log10(20);
-      const logMax = Math.log10(20000);
+      const logMax = Math.log10(10000);
       const freqBinCount = raw.length;
 
       let anyOverflow = false;
       for (let i = 0; i < barCount; i++) {
-        // Map bar position 0..barCount-1 to log frequency 20Hz..20kHz
-        const t = i / (barCount - 1); // 0 → 20Hz, 1 → 20kHz
+        // Map bar position 0..barCount-1 to log frequency 20Hz..10kHz
+        const t = i / (barCount - 1); // 0 → 20Hz, 1 → 10kHz
         const logFreq = logMin + t * (logMax - logMin);
         const freq = Math.pow(10, logFreq);
         // Convert frequency back to bin index (relative to fft bin count)
-        const binIdx = Math.round((freq / 20000) * (freqBinCount - 1));
+        const binIdx = Math.round((freq / 10000) * (freqBinCount - 1));
         const safeIdx = Math.max(0, Math.min(freqBinCount - 1, binIdx));
         const v = raw[safeIdx] / 255;
         const next = Math.min(v, 1.0);
