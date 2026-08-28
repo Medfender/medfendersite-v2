@@ -141,25 +141,31 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       const peaks    = peaksRef.current;
       const peakHold = peakHoldRef.current;
 
-      // Log-normalised bin spread: 20Hz → index near 0, 20kHz → index near raw.length-1.
-      // Without this, linear `raw[i*step]` clusters most energy in the left/middle
-      // (low/mid bands) and leaves the high-frequency right side blank/dead.
-      // Strict musical range: 20Hz → 10kHz (covers bass, mids, presence; ignores
-      // the very top octave where analysers are typically noise-floor dominated).
-      const logMin = Math.log10(20);
-      const logMax = Math.log10(10000);
+      // Log-spaced frequency mapping: bar 0 → 20Hz, bar 15 → 10kHz.
+      // Logarithmic frequency-to-bin mapping: 20Hz → 10kHz.
+      //   freq(i) = minFreq * (maxFreq / minFreq)^(i / (barCount - 1))
+      //   binIndex = round((freq / nyquist) * frequencyBinCount)
+      // Spreads the musical spectrum (bass, mids, presence) across the full
+      // 0..barCount-1 range so the 100% canvas width is utilized end-to-end
+      // instead of clustering bass energy on the left and leaving the right blank.
+      const minFreq = 20;
+      const maxFreq = 10000;
+      const nyquist = analyserNode
+        ? (analyserNode.context as AudioContext).sampleRate / 2
+        : 22050;
       const freqBinCount = raw.length;
 
       let anyOverflow = false;
       for (let i = 0; i < barCount; i++) {
-        // Map bar position 0..barCount-1 to log frequency 20Hz..10kHz
-        const t = i / (barCount - 1); // 0 → 20Hz, 1 → 10kHz
-        const logFreq = logMin + t * (logMax - logMin);
-        const freq = Math.pow(10, logFreq);
-        // Convert frequency back to bin index (relative to fft bin count)
-        const binIdx = Math.round((freq / 10000) * (freqBinCount - 1));
-        const safeIdx = Math.max(0, Math.min(freqBinCount - 1, binIdx));
-        const v = raw[safeIdx] / 255;
+        // Log-spaced frequency: bar 0 → 20Hz, last bar → 10kHz
+        const freq = minFreq * Math.pow(maxFreq / minFreq, i / (barCount - 1));
+        // Bin index: (freq / nyquist) × frequencyBinCount
+        const binIndex = Math.round((freq / nyquist) * freqBinCount);
+        const constrainedBin = Math.min(
+          Math.max(binIndex, 0),
+          freqBinCount - 1,
+        );
+        const v = raw[constrainedBin] / 255;
         const next = Math.min(v, 1.0);
         smoothed[i] += (next - smoothed[i]) * (1 - smoothing);
         if (smoothed[i] > peakHold[i]) {

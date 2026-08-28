@@ -84,7 +84,8 @@
       "Bash(cp *)",
       "Bash(grep -o '.{0,30}01.{0,30}' .next/static/chunks/1akvict7lguh_.js)",
       "Bash(grep -v \"^\\\\-\\\\-$\")",
-      "Bash(git ls-tree *)"
+      "Bash(git ls-tree *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} — built: %{time_total}s\\\\n\" http://localhost:3000/)"
     ]
   }
 }
