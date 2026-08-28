@@ -5,13 +5,26 @@ import React, { useState, useEffect, useMemo } from "react";
 const cos = (deg: number) => Math.cos((deg * Math.PI) / 180);
 const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
 
-export default function Turntable({ playState = 'stopped', className, progress }: { playState?: 'playing' | 'paused' | 'stopped'; className?: string; progress?: number }) {
+export default function Turntable({ isPlaying = false, className, progress }: { isPlaying?: boolean; className?: string; progress?: number }) {
   const [internalPlaying, setInternalPlaying] = useState(false);
+  const active = isPlaying ?? internalPlaying;
   const toggleInternal = () => setInternalPlaying((s) => !s);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0); // -8 to +8 (%)
   const [isTracking, setIsTracking] = useState(false);
+
+  const currentProgress = progress ?? 0;
+
+  // Phase 1: Infer the 3 states from active + progress (no parent changes needed)
+  let playState: 'playing' | 'paused' | 'stopped' = 'stopped';
+  if (active) {
+    playState = 'playing';
+  } else if (currentProgress > 0 && currentProgress < 1) {
+    playState = 'paused';
+  } else {
+    playState = 'stopped';
+  }
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -27,7 +40,6 @@ export default function Turntable({ playState = 'stopped', className, progress }
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
   const REST_X = TPX; const REST_Y = TPY + 220; const PARK_ANGLE = 0;
   const PLAY_ANGLE = 55; const INNER_ANGLE = 75;
-  const currentProgress = progress ?? 0;
   const activeAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
 
   // 3-State Angle Logic
@@ -42,8 +54,8 @@ export default function Turntable({ playState = 'stopped', className, progress }
 
   // Z-Axis Logic: Lifted when stopped, paused, or cueing (dropping)
   const isLifted = playState === 'stopped' || playState === 'paused' || (playState === 'playing' && !isTracking);
-  const liftShadow = isLifted ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))' : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.7))';
-  const liftScale = isLifted ? 'scale(1.02)' : 'scale(1)';
+
+  const liftShadow = isLifted ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))' : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))';
 
   const tipRad = (armAngle * Math.PI) / 180;
   const tipX = Number((TPX + Math.sin(tipRad) * WAND_LEN).toFixed(3));
@@ -159,19 +171,27 @@ export default function Turntable({ playState = 'stopped', className, progress }
               <text x={TPX - 34} y={TPY + 44} textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
             </g>
 
-            {/* Rotating tonearm with Z-elevation — CSS rotate around pivot at (TPX, TPY) */}
+            {/* 2. LIFT WRAPPER — handles ONLY the Z-axis scale + drop shadow */}
             <g
               style={{
-                transform: `rotate(${armAngle}deg) scale(${isLifted ? 1.03 : 1})`,
+                transform: `scale(${isLifted ? 1.03 : 1})`,
                 transformOrigin: `${TPX}px ${TPY}px`,
                 filter: isLifted
                   ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))'
                   : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
-                transition: (playState === 'playing' && isTracking)
-                  ? 'transform 0.1s linear, filter 0.3s ease, scale 0.3s ease'
-                  : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.6s ease, scale 0.6s ease',
+                transition: 'transform 0.3s ease, filter 0.3s ease',
               }}
             >
+              {/* 3. ROTATION WRAPPER — handles ONLY the X/Y angle around the pivot */}
+              <g
+                style={{
+                  transform: `rotate(${armAngle}deg)`,
+                  transformOrigin: `${TPX}px ${TPY}px`,
+                  transition: (playState === 'playing' && isTracking)
+                    ? 'transform 0.1s linear'
+                    : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+              >
                 {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
                 <g filter="url(#shadow-md)">
                   <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W}
@@ -245,6 +265,7 @@ export default function Turntable({ playState = 'stopped', className, progress }
                   fill="url(#silver-aluminum)" stroke="#5a6878" strokeWidth="0.3" />
                 <polygon points={`${TPX + 2},${TPY + WAND_LEN + 2} ${TPX + 6},${TPY + WAND_LEN + 4.5} ${TPX + 2},${TPY + WAND_LEN + 7} ${TPX + 3.5},${TPY + WAND_LEN + 4.5}`}
                   fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.3" />
+              </g>
             </g>
 
             {/* Pitch fader */}
