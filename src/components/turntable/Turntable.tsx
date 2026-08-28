@@ -3,77 +3,68 @@
 import React, { useState, useMemo } from "react";
 
 /**
- * Turntable — luxury audiophile chassis.
+ * Turntable — luxury DJ deck chassis (Technics SL-1200 inspired).
  *
- * One unified 720×520 viewBox hosts the Platter, Tonearm, and Hardware Controls
- * in a single coordinate system, so mounting is exact.
+ * Single 720×520 viewBox hosts the Platter (left) and Tonearm (right)
+ * in a unified coordinate system, so mounting is exact.
  *
  * Coordinate map:
- *   Plinth  : full viewBox, 0 0 720 520
- *   Platter : center (215, 215), outer radius 175 (so vinyl outer edge ≈ 295)
- *   Tonearm : pivot (445, 200); arm extends leftward
- *              - parked : rotated +30° → headshell rests on arm rest at left
- *              - playing: rotated -12° → headshell tips the outer vinyl groove
- *   Strobe dots: arranged at radius 165 on platter
- *   Hardware: bottom row at y=440 (outside this SVG, in Tailwind overlay)
+ *   Plinth        : full viewBox, 0 0 720 520
+ *   Platter       : center (215, 215), outer radius 175
+ *   Spindle       : same center, small chrome disc
+ *   Tonearm pivot : (445, 200) — right side of chassis
+ *   Park angle    : +30° (arm swung outward, rests on cradle)
+ *   Play angle    : -10° (arm swung inward, stylus on outer lead-in groove)
+ *   Hardware      : bottom-left controls, pitch fader far right
  *
- * Hardware controls (power, start/stop, speed, pitch) are rendered in Tailwind
- * absolutely-positioned on top of the deck.
+ * The platter spins continuously while `isPlaying` is true; when paused,
+ * `animation-play-state: paused` coasts the rotation smoothly to a stop.
  */
 
 // ── Helpers ──────────────────────────────────────────────────────────────
 const cos = (deg: number) => Math.cos((deg * Math.PI) / 180);
 const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
 
-export default function Turntable({ className }: { className?: string }) {
-  const [isPlaying, setIsPlaying] = useState(false);
+export default function Turntable({ isPlaying, className }: { isPlaying?: boolean; className?: string }) {
+  const [internalPlaying, setInternalPlaying] = useState(false);
+  const active = isPlaying ?? internalPlaying;
+  const toggleInternal = () => setInternalPlaying((s) => !s);
+
   const [speed, setSpeed] = useState<33 | 45>(33);
-  const [pitch, setPitch] = useState(0); // -50 to +50
+  const [pitch, setPitch] = useState(0); // -8 to +8 (%)
 
   // Platter coordinates
   const PCX = 215;
   const PCY = 215;
-  const PLATTER_R = 175;     // outer platter edge
-  const VINYL_R = 145;       // vinyl record radius
-  const LABEL_R = 48;        // center label
-  const STROBE_R = PLATTER_R - 18; // strobe dot ring
-  const SPINDLE_R = 14;
-  const DOT_COUNT = 33;
+  const PLATTER_R = 175;
+  const VINYL_R = 145;
+  const LABEL_R = 48;
+  const SPINDLE_R = 8;
 
-  // Tonearm coordinates
-  const TPX = 445;  // gimbal pivot X
-  const TPY = 200;  // gimbal pivot Y
-  const HSX_END = -260; // headshell tip relative to pivot (left = negative)
-  const HSY_END = 25;   // slight downward offset
-  const REST_X = TPX - 110;
-  const REST_Y = TPY;
-  const PARK_ANGLE = 30;  // parked: headshell rests on arm rest
-  const PLAY_ANGLE = -12; // playing: stylus tips outer groove
-  const armAngle = isPlaying ? PLAY_ANGLE : PARK_ANGLE;
+  // Tonearm coordinates — strict vertical-axis system, Technics SL-1200 style
+  const TPX = 490;
+  const TPY = 75;
+  const WAND_LEN = 220;          // wand length (downward)
+  const CW_LEN = 50;             // counterweight length (upward)
+  const WAND_W = 7;              // wand stroke width
+  // Native arm points STRAIGHT DOWN (positive Y axis from pivot)
+  // Cradle sits where the arm rests at PARK_ANGLE
+  const REST_X = TPX;
+  const REST_Y = TPY + 220;
+  const PARK_ANGLE = 0;
+  const PLAY_ANGLE = 28;
+  const armAngle = active ? PLAY_ANGLE : PARK_ANGLE;
 
-  // Strobe dots
-  const dots = useMemo(
-    () =>
-      Array.from({ length: DOT_COUNT }, (_, i) => {
-        const deg = (i * 360) / DOT_COUNT - 90;
-        return {
-          x: PCX + cos(deg) * STROBE_R,
-          y: PCY + sin(deg) * STROBE_R,
-        };
-      }),
-    [PCX, PCY, STROBE_R]
-  );
+  // Stylus tip in chassis coords — wand natively points straight down (+Y)
+  // At angle θ (CCW negative in screen y-down), tip = (TPX + sin(θ)·L, TPY + cos(θ)·L)
+  const tipRad = (armAngle * Math.PI) / 180;
+  const tipX = Number((TPX + Math.sin(tipRad) * WAND_LEN).toFixed(3));
+  const tipY = Number((TPY + Math.cos(tipRad) * WAND_LEN).toFixed(3));
 
-  // Compute where the stylus tip lands when playing.
-  // The headshell extends from pivot at angle (armAngle) for distance
-  // sqrt(HSX_END^2 + HSY_END^2), so tip position in deck coords:
-  const wandLen = Math.hypot(HSX_END, HSY_END);
-  const wandBaseAng = Math.atan2(HSY_END, HSX_END); // angle of HS_END vector (radians)
-  const tipAngle = wandBaseAng + (armAngle * Math.PI) / 180;
-  const tipX = TPX + Math.cos(tipAngle) * wandLen;
-  const tipY = TPY + Math.sin(tipAngle) * wandLen;
-  // Distance from platter center
-  const tipFromCenter = Math.hypot(tipX - PCX, tipY - PCY);
+  // Pitch fader (far right edge, near bottom)
+  const PITCH_X = 660;
+  const PITCH_Y = 130;
+  const PITCH_LEN = 230;
 
   return (
     <div
@@ -83,7 +74,7 @@ export default function Turntable({ className }: { className?: string }) {
       }}
     >
       {/* ════════════════════════════════════════════════════════
-          OUTER PLINTH (chassis bezel) — Tailwind
+          OUTER PLINTH (chassis bezel)
       ════════════════════════════════════════════════════════ */}
       <div
         className="relative w-full rounded-[36px] p-3 border border-white/[0.07]"
@@ -94,7 +85,7 @@ export default function Turntable({ className }: { className?: string }) {
             "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)",
         }}
       >
-        {/* Inner deck — bevel */}
+        {/* Inner deck */}
         <div
           className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]"
           style={{
@@ -119,13 +110,17 @@ export default function Turntable({ className }: { className?: string }) {
                 from { transform: rotate(0deg); }
                 to   { transform: rotate(360deg); }
               }
-              .vinyl-spin { animation: ${isPlaying ? "spin-vinyl 2.4s linear infinite" : "none"}; }
-              .strobe-spin { animation: ${isPlaying ? "spin-vinyl 2.4s linear infinite" : "none"}; }
-              .tonearm-spin { transition: transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94); }
+              .vinyl-spin  {
+                animation: spin-vinyl 2.4s linear infinite;
+                animation-play-state: ${active ? "running" : "paused"};
+              }
+              .tonearm-spin {
+                transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+              }
             `}</style>
 
             <defs>
-              {/* Gunmetal (structural) */}
+              {/* Gunmetal */}
               <linearGradient id="gm" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%"   stopColor="#3c4352" />
                 <stop offset="28%"  stopColor="#5c6678" />
@@ -133,7 +128,7 @@ export default function Turntable({ className }: { className?: string }) {
                 <stop offset="76%"  stopColor="#5c6678" />
                 <stop offset="100%" stopColor="#2c3340" />
               </linearGradient>
-              {/* Brushed gunmetal — micro horizontal banding */}
+              {/* Brushed gunmetal */}
               <linearGradient id="gm-brushed" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%"   stopColor="#4e5565" />
                 <stop offset="9%"   stopColor="#6a7588" />
@@ -154,7 +149,7 @@ export default function Turntable({ className }: { className?: string }) {
                 <stop offset="45%"  stopColor="#18191f" />
                 <stop offset="100%" stopColor="#0c0d12" />
               </linearGradient>
-              {/* Brushed silver / die-cast aluminum */}
+              {/* Brushed silver */}
               <linearGradient id="silver-deep" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%"   stopColor="#8892a0" />
                 <stop offset="20%"  stopColor="#b8c0cc" />
@@ -162,15 +157,20 @@ export default function Turntable({ className }: { className?: string }) {
                 <stop offset="80%"  stopColor="#c8d0da" />
                 <stop offset="100%" stopColor="#6a7488" />
               </linearGradient>
-              {/* Chrome */}
+              {/* Chrome (for spindle) */}
+              <radialGradient id="chrome-spindle" cx="35%" cy="30%" r="75%">
+                <stop offset="0%"   stopColor="#ffffff" />
+                <stop offset="20%"  stopColor="#d8e0ec" />
+                <stop offset="50%"  stopColor="#9aaab8" />
+                <stop offset="80%"  stopColor="#5a6a78" />
+                <stop offset="100%" stopColor="#2c3340" />
+              </radialGradient>
+              {/* Chrome (linear, for clips/screws) */}
               <linearGradient id="chrome" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#edf1f7" />
-                <stop offset="12%"  stopColor="#9aaab8" />
-                <stop offset="28%"  stopColor="#dde6ef" />
-                <stop offset="50%"  stopColor="#f4f7fb" />
-                <stop offset="72%"  stopColor="#a8b8c8" />
-                <stop offset="88%"  stopColor="#d8e2ec" />
-                <stop offset="100%" stopColor="#788898" />
+                <stop offset="0%"   stopColor="#e8eef8" />
+                <stop offset="35%"  stopColor="#b8c0cc" />
+                <stop offset="70%"  stopColor="#6a7488" />
+                <stop offset="100%" stopColor="#3a3e4c" />
               </linearGradient>
               {/* Gold */}
               <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -179,28 +179,30 @@ export default function Turntable({ className }: { className?: string }) {
                 <stop offset="62%"  stopColor="#be942e" />
                 <stop offset="100%" stopColor="#7c6018" />
               </linearGradient>
-              {/* Cartridge body */}
+              {/* Cartridge */}
               <linearGradient id="cartridge" x1="0%" y1="0%" x2="0%" y2="100%">
                 <stop offset="0%"   stopColor="#1c2028" />
                 <stop offset="50%"  stopColor="#262c38" />
                 <stop offset="100%" stopColor="#0c0e14" />
               </linearGradient>
-              {/* Counterweight radial */}
+              {/* Counterweight */}
               <radialGradient id="cw-rad" cx="38%" cy="32%" r="62%">
                 <stop offset="0%"   stopColor="#7c8698" />
                 <stop offset="58%"  stopColor="#4a5262" />
                 <stop offset="100%" stopColor="#2c3040" />
               </radialGradient>
-              {/* Hydraulic lever */}
-              <linearGradient id="hydraulic" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%"   stopColor="#9aacbc" />
-                <stop offset="42%"  stopColor="#c0d0e0" />
-                <stop offset="100%" stopColor="#708090" />
+              {/* VTA / Gimbal metallic */}
+              <linearGradient id="gimbal-metal" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#8892a0" />
+                <stop offset="40%" stopColor="#b8c0cc" />
+                <stop offset="70%" stopColor="#6a7488" />
+                <stop offset="100%" stopColor="#3a3e4c" />
               </linearGradient>
-              {/* Anti-skate dial face */}
-              <radialGradient id="dial-face" cx="45%" cy="40%" r="55%">
-                <stop offset="0%"   stopColor="#2c3040" />
-                <stop offset="100%" stopColor="#10121a" />
+              {/* Anti-skate brass */}
+              <radialGradient id="antiskate-brass" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#c8a850" />
+                <stop offset="60%" stopColor="#9a7d30" />
+                <stop offset="100%" stopColor="#554820" />
               </radialGradient>
               {/* Vinyl base */}
               <linearGradient id="vinyl-deep" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -209,13 +211,12 @@ export default function Turntable({ className }: { className?: string }) {
                 <stop offset="70%"  stopColor="#080810" />
                 <stop offset="100%" stopColor="#06070e" />
               </linearGradient>
-              {/* Vinyl band (slight variation) */}
               <linearGradient id="vinyl-mid" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%"   stopColor="#141620" />
                 <stop offset="50%"  stopColor="#161828" />
                 <stop offset="100%" stopColor="#101218" />
               </linearGradient>
-              {/* Specular sheen */}
+              {/* Specular sheen on vinyl */}
               <linearGradient id="spec-strong" x1="30%" y1="0%" x2="70%" y2="100%">
                 <stop offset="0%"   stopColor="rgba(245,250,255,0.08)" />
                 <stop offset="35%"  stopColor="rgba(240,248,255,0.35)" />
@@ -230,27 +231,23 @@ export default function Turntable({ className }: { className?: string }) {
               <filter id="shadow-md" x="-35%" y="-25%" width="170%" height="170%">
                 <feDropShadow dx="2" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.72" />
               </filter>
-              <filter id="shadow-lg" x="-50%" y="-35%" width="200%" height="200%">
-                <feDropShadow dx="4" dy="8" stdDeviation="8" floodColor="#000" floodOpacity="0.82" />
-              </filter>
             </defs>
 
             {/* ════════════════════════════════════════════════════
-                PLATTER — die-cast aluminum edge + vinyl + spindle
+                PLATTER — die-cast aluminum + vinyl + center spindle
             ════════════════════════════════════════════════════ */}
 
-            {/* Platter surface (subtle brushed disk beneath the rim) */}
-            <circle cx={PCX} cy={PCY} r={PLATTER_R + 5}
-              fill="#0c0d12" />
+            {/* Platter surface (dark backing) */}
+            <circle cx={PCX} cy={PCY} r={PLATTER_R + 5} fill="#0c0d12" />
 
             {/* Platter rim — thick brushed silver */}
             <g filter="url(#shadow-md)">
               <circle cx={PCX} cy={PCY} r={PLATTER_R}
                 fill="none" stroke="url(#silver-deep)" strokeWidth="22" />
-              {/* Inner bevel — dark gunmetal */}
+              {/* Inner bevel */}
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 11}
                 fill="none" stroke="url(#gm-brushed)" strokeWidth="8" />
-              {/* Deep inner shadow transition */}
+              {/* Deep inner transition */}
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 22}
                 fill="none" stroke="#0a0c12" strokeWidth="6" />
               {/* Top-left chrome specular arc */}
@@ -260,27 +257,14 @@ export default function Turntable({ className }: { className?: string }) {
               />
             </g>
 
-            {/* Strobe dots — recessed speed mirrors, rotating with platter */}
-            <g className={isPlaying ? "strobe-spin" : ""}
-              style={{ transformOrigin: `${PCX}px ${PCY}px` }}>
-              {dots.map((dot, i) => (
-                <g key={i}>
-                  <circle cx={dot.x} cy={dot.y} r="5"
-                    fill="#0a0c12" stroke="#181a22" strokeWidth="0.5" />
-                  <circle cx={dot.x} cy={dot.y} r="3.2"
-                    fill="url(#chrome)" opacity="0.92" />
-                  <circle cx={dot.x - 1} cy={dot.y - 1} r="1.2"
-                    fill="rgba(235,242,252,0.7)" />
-                </g>
-              ))}
-            </g>
-
-            {/* Vinyl record — rotating */}
-            <g className="vinyl-spin"
-              style={{ transformOrigin: `${PCX}px ${PCY}px` }}>
+            {/* Vinyl record (rotating) */}
+            <g
+              className="vinyl-spin"
+              style={{ transformOrigin: `${PCX}px ${PCY}px` }}
+            >
               {/* Base black */}
               <circle cx={PCX} cy={PCY} r={VINYL_R} fill="url(#vinyl-deep)" />
-              {/* Micro-groove concentric bands */}
+              {/* Concentric groove bands */}
               {Array.from({ length: 24 }, (_, j) => {
                 const bandR = VINYL_R - j * 5.8;
                 if (bandR < LABEL_R + 4) return null;
@@ -303,7 +287,6 @@ export default function Turntable({ className }: { className?: string }) {
                     transform={`rotate(${g * 3}, ${PCX}, ${PCY})`} />
                 ))}
               </g>
-
               {/* Center label — gold foil */}
               <circle cx={PCX} cy={PCY} r={LABEL_R} fill="#0a0c14" />
               <circle cx={PCX} cy={PCY} r={LABEL_R - 2}
@@ -325,497 +308,570 @@ export default function Turntable({ className }: { className?: string }) {
                 fontFamily="monospace">
                 180g • 33⅓ RPM
               </text>
-              <line x1={PCX - 16} y1={PCY + 4} x2={PCX + 16} y2={PCY + 4}
-                stroke="#8a7860" strokeWidth="1" opacity="0.5" />
-            </g>
-
-            {/* Specular highlight (static overlay) */}
-            <g style={{ pointerEvents: "none" }}>
-              <path
-                d={`M ${PCX - 95},${PCY - 35} Q ${PCX + 10},${PCY - 75} ${PCX + 90},${PCY - 20} L ${PCX + 25},${PCY + 60} Q ${PCX - 25},${PCY + 25} ${PCX - 80},${PCY - 35} Z`}
-                fill="url(#spec-strong)" />
-              <path
-                d={`M ${PCX - 55},${PCY - 95} Q ${PCX + 35},${PCY - 60} ${PCX + 60},${PCY - 10}`}
-                fill="none" stroke="#f0f4f8" strokeWidth="6" opacity="0.32" />
-              <ellipse
-                cx={PCX + 30} cy={PCY - 30} rx="30" ry="10"
-                fill="rgba(245,250,255,0.22)"
-                transform={`rotate(-15, ${PCX + 30}, ${PCY - 30})`} />
             </g>
 
             {/* Vinyl outer edge ring */}
             <circle cx={PCX} cy={PCY} r={VINYL_R}
               fill="none" stroke="#8898aa" strokeWidth="1" opacity="0.3" />
 
-            {/* Center spindle — polished chrome */}
-            <g filter="url(#shadow-sm)">
-              <ellipse cx={PCX} cy={PCY + 3}
-                rx={SPINDLE_R * 1.1} ry={SPINDLE_R * 0.8}
-                fill="rgba(0,0,0,0.5)" opacity="0.55" />
-              <ellipse cx={PCX} cy={PCY - 6}
-                rx={SPINDLE_R} ry={SPINDLE_R - 1.5}
-                fill="url(#chrome)" stroke="#8898a8" strokeWidth="0.5" />
-              <ellipse cx={PCX} cy={PCY - 12}
-                rx={SPINDLE_R - 2} ry={SPINDLE_R - 3.5}
-                fill="url(#chrome)" stroke="#5a6a78" strokeWidth="0.4" />
-              <ellipse cx={PCX - 3} cy={PCY - 10}
-                rx="4" ry="5.5"
-                fill="rgba(250,252,255,0.9)"
-                transform={`rotate(-35, ${PCX - 3}, ${PCY - 10})`} />
-              <ellipse cx={PCX + 2} cy={PCY - 8}
-                rx="2.5" ry="3"
-                fill="rgba(250,252,255,0.5)" />
-              <circle cx={PCX} cy={PCY - 1.5}
-                r={SPINDLE_R + 3.5}
-                fill="none" stroke="#a0a8b8" strokeWidth="1" opacity="0.7" />
+            {/* Center SPINDLE — small crisp silver disc, does NOT rotate */}
+            <g>
+              {/* Cast shadow under spindle */}
+              <ellipse cx={PCX} cy={PCY + 1.5}
+                rx={SPINDLE_R + 1} ry={SPINDLE_R - 1}
+                fill="rgba(0,0,0,0.55)" opacity="0.7" />
+              {/* Spindle body */}
+              <circle cx={PCX} cy={PCY} r={SPINDLE_R}
+                fill="url(#chrome-spindle)"
+                stroke="#5a6a78" strokeWidth="0.6" />
+              {/* Bright specular catch */}
+              <ellipse cx={PCX - 2} cy={PCY - 2}
+                rx="3" ry="2"
+                fill="rgba(255,255,255,0.9)"
+                transform={`rotate(-35, ${PCX - 2}, ${PCY - 2})`} />
+              {/* Inner pin */}
+              <circle cx={PCX} cy={PCY} r="1.4"
+                fill="#1a1d24" />
             </g>
 
             {/* ════════════════════════════════════════════════════
-                TONEARM — placed to the right of platter
+                TONEARM ASSEMBLY — RIGHT SIDE OF CHASSIS
             ════════════════════════════════════════════════════ */}
 
-            {/* Arm Rest — left of pivot */}
+            {/* Arm Rest / Cradle — directly under pivot at (430, 280), cradles vertical arm at PARK */}
             <g filter="url(#shadow-md)">
-              <rect x={REST_X + 18} y={REST_Y - 40}
-                width="20" height="44" rx="4"
+              {/* Base plate — centered under pivot */}
+              <rect x={REST_X - 32} y={REST_Y - 4}
+                width="64" height="12" rx="3"
                 fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-              <rect x={REST_X} y={REST_Y + 2}
-                width="50" height="11" rx="3"
-                fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-              <ellipse cx={REST_X + 28} cy={REST_Y - 1}
-                rx="24" ry="7"
+              {/* Cradle cup */}
+              <ellipse cx={REST_X} cy={REST_Y - 4}
+                rx="20" ry="6"
                 fill="url(#matte-blk)" stroke="#2c3040" strokeWidth="0.6" />
-              <rect x={REST_X - 3} y={REST_Y - 25}
-                width="13" height="15" rx="2"
+              {/* Vertical clip post */}
+              <rect x={REST_X - 4} y={REST_Y - 28}
+                width="8" height="20" rx="2"
                 fill="url(#chrome)" stroke="#5a6478" strokeWidth="0.4" />
-              {[-7, 7].map((dx, i) => (
-                <circle key={i} cx={REST_X + 28 + dx} cy={REST_Y - 35} r="2.5"
-                  fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.3" />
-              ))}
-              <text x={REST_X + 28} y={REST_Y + 22}
-                textAnchor="middle" fontSize="6" fill="#4a5060"
-                fontFamily="sans-serif" letterSpacing="0.5">REST</text>
+              {/* Magnetic latch */}
+              <circle cx={REST_X} cy={REST_Y - 18} r="2.2"
+                fill="#a82828" opacity="0.85" />
             </g>
 
             {/* Arm Base Column */}
             <g filter="url(#shadow-md)">
-              <rect x={TPX - 15} y={TPY + 18}
-                width="30" height="11" rx="2.5"
+              <rect x={TPX - 16} y={TPY + 18}
+                width="32" height="12" rx="3"
                 fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-              <rect x={TPX - 15} y={TPY - 10}
-                width="30" height="30" rx="5"
+              <rect x={TPX - 16} y={TPY - 10}
+                width="32" height="30" rx="5"
                 fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
-              <ellipse cx={TPX} cy={TPY - 8} rx="18" ry="6"
+              <ellipse cx={TPX} cy={TPY - 8} rx="19" ry="6"
                 fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.5" />
-              <ellipse cx={TPX} cy={TPY + 18} rx="14" ry="4"
-                fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.4" />
-              <circle cx={TPX - 18} cy={TPY + 24} r="3.5"
+              <circle cx={TPX - 20} cy={TPY + 24} r="3.5"
                 fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-              <circle cx={TPX + 18} cy={TPY + 24} r="3.5"
+              <circle cx={TPX + 20} cy={TPY + 24} r="3.5"
                 fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
             </g>
 
-            {/* Gimbal Bearing Housing */}
+            {/* Anti-Skate Dial — brass knob to the RIGHT of pivot (Technics-style) */}
+            <g filter="url(#shadow-sm)">
+              <circle cx={TPX + 58} cy={TPY - 8} r="9"
+                fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.5" />
+              <circle cx={TPX + 58} cy={TPY - 8} r="6.5"
+                fill="url(#antiskate-brass)" stroke="#4a3a18" strokeWidth="0.4" />
+              <line x1={TPX + 58} y1={TPY - 12} x2={TPX + 58} y2={TPY - 5}
+                stroke="#1e1410" strokeWidth="1" />
+              <circle cx={TPX + 58} cy={TPY - 8} r="1.2" fill="#1a1410" />
+              <text x={TPX + 58} y={TPY + 9} textAnchor="middle"
+                fontSize="4" fill="#5a6478" fontFamily="monospace"
+                letterSpacing="0.4">A-SKATE</text>
+            </g>
+
+            {/* Gimbal Bearing Housing — multi-layer concentric metal ring */}
             <g filter="url(#shadow-md)">
-              <circle cx={TPX} cy={TPY} r="32"
-                fill="none" stroke="url(#gm)" strokeWidth="6" />
-              <circle cx={TPX} cy={TPY} r="26"
+              {/* Outer mounting plate */}
+              <circle cx={TPX} cy={TPY} r="34"
+                fill="url(#matte-blk)" stroke="#1e222a" strokeWidth="0.8" />
+              {/* VTA adjustment ring (knurled) */}
+              <circle cx={TPX} cy={TPY} r="30"
+                fill="none" stroke="url(#gimbal-metal)" strokeWidth="6" />
+              {/* Knurl tick marks around VTA ring */}
+              {Array.from({ length: 24 }, (_, i) => {
+                const a = (i * 360) / 24;
+                const rad = (a * Math.PI) / 180;
+                const x1 = TPX + Math.cos(rad) * 27;
+                const y1 = TPY + Math.sin(rad) * 27;
+                const x2 = TPX + Math.cos(rad) * 33;
+                const y2 = TPY + Math.sin(rad) * 33;
+                return (
+                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+                    stroke="#1e222a" strokeWidth="0.5" opacity="0.7" />
+                );
+              })}
+              {/* Mid bearing housing */}
+              <circle cx={TPX} cy={TPY} r="24"
                 fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
-              <circle cx={TPX} cy={TPY} r="21"
-                fill="url(#chrome)" stroke="#7a8898" strokeWidth="0.5" />
-              <circle cx={TPX} cy={TPY} r="14"
+              {/* Bearing ring (chrome) */}
+              <circle cx={TPX} cy={TPY} r="20"
+                fill="none" stroke="url(#silver-deep)" strokeWidth="2.4" />
+              {/* Bearing inner race */}
+              <circle cx={TPX} cy={TPY} r="16"
+                fill="url(#gimbal-metal)" stroke="#3a3e4c" strokeWidth="0.5" />
+              {/* Center bearing ball */}
+              <circle cx={TPX} cy={TPY} r="9"
                 fill="url(#matte-blk)" stroke="#0c0d12" strokeWidth="0.4" />
-              <ellipse cx={TPX - 6} cy={TPY - 6} rx="8" ry="5"
+              <ellipse cx={TPX - 3} cy={TPY - 3} rx="5" ry="3"
                 fill="rgba(225,235,248,0.4)"
-                transform={`rotate(-35, ${TPX - 6}, ${TPY - 6})`} />
-              <ellipse cx={TPX + 8} cy={TPY - 4} rx="4" ry="2"
-                fill="rgba(225,235,248,0.15)"
-                transform={`rotate(20, ${TPX + 8}, ${TPY - 4})`} />
-              {/* 4 micro-screws */}
+                transform={`rotate(-35, ${TPX - 3}, ${TPY - 3})`} />
+              {/* 4 micro-screws on outer plate */}
               {[
-                [TPX + 26, TPY, 0],
-                [TPX, TPY + 26, 90],
-                [TPX - 26, TPY, 180],
-                [TPX, TPY - 26, 270],
+                [TPX + 28, TPY, 0],
+                [TPX, TPY + 28, 90],
+                [TPX - 28, TPY, 180],
+                [TPX, TPY - 28, 270],
               ].map(([sx, sy, deg], i) => (
                 <g key={i}>
-                  <circle cx={sx} cy={sy} r="3.2"
+                  <circle cx={sx} cy={sy} r="2.4"
                     fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                  {deg === 0   && <line x1={TPX + 22} y1={TPY} x2={TPX + 30} y2={TPY}  stroke="#252830" strokeWidth="1" />}
-                  {deg === 90  && <line x1={TPX} y1={TPY + 22} x2={TPX} y2={TPY + 30}  stroke="#252830" strokeWidth="1" />}
-                  {deg === 180 && <line x1={TPX - 30} y1={TPY} x2={TPX - 22} y2={TPY}  stroke="#252830" strokeWidth="1" />}
-                  {deg === 270 && <line x1={TPX} y1={TPY - 30} x2={TPX} y2={TPY - 22} stroke="#252830" strokeWidth="1" />}
+                  {deg === 0   && <line x1={sx - 2} y1={sy} x2={sx + 2} y2={sy}  stroke="#252830" strokeWidth="0.8" />}
+                  {deg === 90  && <line x1={sx} y1={sy - 2} x2={sx} y2={sy + 2}  stroke="#252830" strokeWidth="0.8" />}
+                  {deg === 180 && <line x1={sx - 2} y1={sy} x2={sx + 2} y2={sy}  stroke="#252830" strokeWidth="0.8" />}
+                  {deg === 270 && <line x1={sx} y1={sy - 2} x2={sx} y2={sy + 2}  stroke="#252830" strokeWidth="0.8" />}
                 </g>
               ))}
             </g>
 
-            {/* Anti-skate dial — below-left of gimbal */}
+            {/* Cue hydraulic lever (left of pivot) */}
             <g filter="url(#shadow-sm)">
-              <circle cx={TPX - 50} cy={TPY + 35} r="22"
-                fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-              <circle cx={TPX - 50} cy={TPY + 35} r="22"
-                fill="none" stroke="url(#chrome)" strokeWidth="2.5" strokeDasharray="2.5 4" />
-              <circle cx={TPX - 50} cy={TPY + 35} r="17"
-                fill="url(#dial-face)" stroke="#2c3040" strokeWidth="0.5" />
-              {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
-                const rad = (deg - 90) * Math.PI / 180;
-                return (
-                  <line key={i}
-                    x1={TPX - 50 + Math.cos(rad) * 15}
-                    y1={TPY + 35 + Math.sin(rad) * 15}
-                    x2={TPX - 50 + Math.cos(rad) * 19}
-                    y2={TPY + 35 + Math.sin(rad) * 19}
-                    stroke="#4a5060" strokeWidth="1" />
-                );
-              })}
-              <line x1={TPX - 50} y1={TPY + 35}
-                x2={TPX - 50} y2={TPY + 19}
-                stroke="url(#gold)" strokeWidth="3" strokeLinecap="round" />
-              <circle cx={TPX - 50} cy={TPY + 35} r="4.5"
-                fill="url(#chrome)" stroke="#5a6478" strokeWidth="0.4" />
-              <text x={TPX - 50} y={TPY + 17} textAnchor="middle"
-                fontSize="6" fill="#8a9aaa" fontFamily="monospace">2</text>
-              <text x={TPX - 33} y={TPY + 38} textAnchor="middle"
-                fontSize="6" fill="#8a9aaa" fontFamily="monospace">3</text>
-              <text x={TPX - 50} y={TPY + 56} textAnchor="middle"
-                fontSize="6" fill="#8a9aaa" fontFamily="monospace">1</text>
-              <text x={TPX - 67} y={TPY + 38} textAnchor="middle"
-                fontSize="6" fill="#8a9aaa" fontFamily="monospace">0</text>
-              <text x={TPX - 50} y={TPY + 70}
-                textAnchor="middle" fontSize="5" fill="#5a6478"
-                fontFamily="sans-serif" letterSpacing="0.6">ANTI-SKATE</text>
-            </g>
-
-            {/* Cue hydraulic lever — right of gimbal */}
-            <g filter="url(#shadow-sm)">
-              <rect x={TPX + 24} y={TPY - 3} width="10" height="38" rx="3"
-                fill="url(#gm-brushed)" stroke="#2c3040" strokeWidth="0.5" />
-              <ellipse cx={TPX + 29} cy={TPY + 35} rx="9" ry="4.5"
-                fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.5" />
+              <rect x={TPX - 38} y={TPY - 2} width="8" height="32" rx="2"
+                fill="url(#gm-brushed)" stroke="#2c3040" strokeWidth="0.4" />
+              <ellipse cx={TPX - 34} cy={TPY + 30} rx="8" ry="4"
+                fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.4" />
               <rect
-                x={TPX + 14}
-                y={isPlaying ? TPY - 17 : TPY - 7}
-                width="32" height="7" rx="3.5"
-                fill="url(#hydraulic)" stroke="#5a6878" strokeWidth="0.5"
+                x={TPX - 36}
+                y={active ? TPY - 14 : TPY - 4}
+                width="28" height="6" rx="3"
+                fill="url(#silver-deep)" stroke="#5a6878" strokeWidth="0.4"
                 style={{
-                  transformOrigin: `${TPX + 29}px ${TPY}px`,
-                  transform: `rotate(${isPlaying ? 22 : -14}deg)`,
-                  transition: "transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
+                  transformOrigin: `${TPX - 34}px ${TPY}px`,
+                  transform: `rotate(${active ? 22 : -14}deg)`,
+                  transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               />
-              <circle
-                cx={TPX + 14} cy={isPlaying ? TPY - 20 : TPY - 8}
-                r="6"
-                fill="url(#chrome)" stroke="#6a7888" strokeWidth="0.4"
-                style={{
-                  transformOrigin: `${TPX + 29}px ${TPY}px`,
-                  transform: `rotate(${isPlaying ? 22 : -14}deg)`,
-                  transition: "transform 0.45s cubic-bezier(0.34,1.56,0.64,1)",
-                }}
-              />
-              <circle cx={TPX + 29} cy={TPY} r="2.8"
-                fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.3" />
-              <text x={TPX + 29} y={TPY + 50}
+              <text x={TPX - 34} y={TPY + 44}
                 textAnchor="middle" fontSize="5" fill="#5a6478"
                 fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
             </g>
 
-            {/* VTA fine-tune screw */}
-            <g filter="url(#shadow-sm)">
-              <circle cx={TPX + 38} cy={TPY - 16} r="6"
-                fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-              <line x1={TPX + 38 - 3.5} y1={TPY - 16}
-                x2={TPX + 38 + 3.5} y2={TPY - 16}
-                stroke="#252830" strokeWidth="1.4" />
-              <text x={TPX + 38} y={TPY - 28}
-                textAnchor="middle" fontSize="5" fill="#5a6478"
-                fontFamily="sans-serif" letterSpacing="0.4">VTA</text>
-            </g>
-
             {/* ════════════════════════════════════════════════════
-                ROTATING TONEARM GROUP — wand + headshell + counterweight
+                ROTATING TONEARM GROUP — nested architecture
+                Outer wrapper: STATIC translate, pins pivot at (TPX, TPY) forever.
+                Inner wrapper: DYNAMIC rotate, isolated from translate, with local 0,0 origin.
             ════════════════════════════════════════════════════ */}
-            <g
-              className="tonearm-spin"
-              style={{
-                transformOrigin: `${TPX}px ${TPY}px`,
-                transform: `rotate(${armAngle}deg)`,
-              }}
-            >
-              {/* Counterweight — right of pivot */}
+            <g transform={`translate(${TPX}, ${TPY})`}>
+              <g
+                className="tonearm-spin"
+                style={{
+                  transform: `rotate(${active ? PLAY_ANGLE : PARK_ANGLE}deg)`,
+                  transformOrigin: "0px 0px",
+                  transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+              {/* ── Counterweight — straight UP from pivot (native) ── */}
               <g filter="url(#shadow-md)">
-                <rect x={TPX} y={TPY - 130}
-                  width="14" height="130" rx="4"
-                  fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-                <ellipse cx={TPX + 7} cy={TPY - 128}
-                  rx="10" ry="3.5"
-                  fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.5" />
-                <ellipse cx={TPX + 7} cy={TPY - 145}
-                  rx="26" ry="15"
-                  fill="url(#cw-rad)" stroke="#1e222a" strokeWidth="0.8" />
-                {[-9, -5, 0, 5, 9].map((dy, i) => (
-                  <ellipse key={i}
-                    cx={TPX + 7} cy={TPY - 145 + dy}
-                    rx="25" ry="2.4"
-                    fill="none" stroke="#1e222a" strokeWidth="1.2" />
-                ))}
-                <text x={TPX - 18} y={TPY - 140} textAnchor="middle"
-                  fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
-                <text x={TPX + 32} y={TPY - 140} textAnchor="middle"
-                  fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
-                <ellipse cx={TPX + 7} cy={TPY - 160}
-                  rx="20" ry="8"
-                  fill="url(#gm)" stroke="#252830" strokeWidth="0.6" />
-                <ellipse cx={TPX - 1} cy={TPY - 152}
-                  rx="9" ry="3.5"
-                  fill="rgba(185,198,215,0.3)"
-                  transform={`rotate(-12, ${TPX - 1}, ${TPY - 152})`} />
+                {/* Body: vertical cylinder from pivot upward */}
+                <rect
+                  x={TPX - WAND_W}
+                  y={TPY - CW_LEN}
+                  width={WAND_W * 2}
+                  height={CW_LEN}
+                  rx={WAND_W}
+                  fill="url(#gm-brushed)"
+                  stroke="#1e222a"
+                  strokeWidth="0.8"
+                />
+                {/* Left highlight face */}
+                <rect
+                  x={TPX - WAND_W + 2}
+                  y={TPY - CW_LEN + 2}
+                  width={WAND_W * 0.45}
+                  height={CW_LEN - 4}
+                  rx={WAND_W * 0.45}
+                  fill="rgba(195,205,225,0.22)"
+                />
+                {/* Right shadow face */}
+                <rect
+                  x={TPX + WAND_W * 0.1}
+                  y={TPY - CW_LEN + 2}
+                  width={WAND_W * 0.45}
+                  height={CW_LEN - 4}
+                  rx={WAND_W * 0.45}
+                  fill="rgba(0,0,0,0.3)"
+                />
+                {/* Knurl rings — horizontal stripes across the cylinder */}
+                {Array.from({ length: 4 }, (_, k) => {
+                  const ky = TPY - CW_LEN + 10 * (k + 1);
+                  return (
+                    <line key={k}
+                      x1={TPX - WAND_W + 1}
+                      y1={ky}
+                      x2={TPX + WAND_W - 1}
+                      y2={ky}
+                      stroke="#1e222a"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+                {/* Domed end cap at far end (top) */}
+                <ellipse
+                  cx={TPX}
+                  cy={TPY - CW_LEN}
+                  rx={WAND_W * 0.9}
+                  ry={WAND_W * 0.55}
+                  fill="url(#gm)"
+                  stroke="#252830"
+                  strokeWidth="0.6"
+                />
+                {/* Highlight catch on end cap */}
+                <ellipse
+                  cx={TPX - WAND_W * 0.3}
+                  cy={TPY - CW_LEN - 1}
+                  rx={WAND_W * 0.5}
+                  ry={WAND_W * 0.22}
+                  fill="rgba(225,235,248,0.4)"
+                />
+                {/* Scale markings -5 and +5 */}
+                <text
+                  x={TPX - WAND_W - 4}
+                  y={TPY - CW_LEN / 2}
+                  textAnchor="end"
+                  fontSize="4.5"
+                  fill="#7a8598"
+                  fontFamily="monospace"
+                >-5</text>
+                <text
+                  x={TPX + WAND_W + 4}
+                  y={TPY - CW_LEN / 2}
+                  textAnchor="start"
+                  fontSize="4.5"
+                  fill="#7a8598"
+                  fontFamily="monospace"
+                >+5</text>
               </g>
 
-              {/* Arm wand — extends LEFT from pivot toward headshell */}
-              {/* S-curve path from pivot (0,0) to (HSX_END, HSY_END) */}
+              {/* ── S-Wand — straight DOWN from pivot, gentle S bowing right ── */}
               {(() => {
-                const WAND_PATH = `M 0,0
-                  L ${HSX_END * 0.6},0
-                  Q ${HSX_END * 0.8},0 ${HSX_END * 0.85},${HSY_END * 0.4}
-                  Q ${HSX_END * 0.95},${HSY_END * 0.8} ${HSX_END},${HSY_END}`;
+                // Wand is drawn from pivot (0,0) down to (0, +WAND_LEN).
+                // S-curve bows right: control points push x positive then back to 0.
+                //   cp1: ( 14,  55) — bulge right early
+                //   cp2: ( 14, 165) — bulge right late
+                //   end: (  0, 220) — straight down at tip
+                const cp1x = 14, cp1y = 55;
+                const cp2x = 14, cp2y = 165;
+                const ex = 0, ey = WAND_LEN;
+                const D = WAND_W;
                 return (
-                  <>
-                    <path d={WAND_PATH} fill="none"
-                      stroke="rgba(0,0,0,0.65)" strokeWidth="9" strokeLinecap="round" />
-                    <path d={WAND_PATH} fill="none"
-                      stroke="url(#matte-blk)" strokeWidth="8" strokeLinecap="round" />
-                    <path d={WAND_PATH} fill="none"
-                      stroke="rgba(95,108,124,0.4)" strokeWidth="3" strokeLinecap="round"
-                      transform="translate(0, -1.5)" />
-                  </>
+                  <g>
+                    {/* Shadow outline */}
+                    <path
+                      d={`M 0,0 C ${cp1x},${cp1y} ${cp2x},${cp2y} ${ex},${ey}`}
+                      fill="none"
+                      stroke="rgba(0,0,0,0.5)"
+                      strokeWidth={D * 2 + 3}
+                      strokeLinecap="round"
+                    />
+                    {/* Main tube body — metallic gradient stroke */}
+                    <path
+                      d={`M 0,0 C ${cp1x},${cp1y} ${cp2x},${cp2y} ${ex},${ey}`}
+                      fill="none"
+                      stroke="url(#silver-deep)"
+                      strokeWidth={D * 2}
+                      strokeLinecap="round"
+                    />
+                    {/* Specular highlight along left (inner) edge of curve */}
+                    <path
+                      d={`M ${-D * 0.4},${D * 0.6} C ${cp1x - D},${cp1y} ${cp2x - D},${cp2y} ${ex - D * 0.4},${ey - D * 0.6}`}
+                      fill="none"
+                      stroke="rgba(245,250,255,0.55)"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                    {/* Dark outer (right) curve shadow */}
+                    <path
+                      d={`M ${D * 0.4},${D * 0.6} C ${cp1x + D},${cp1y + 2} ${cp2x + D},${cp2y + 2} ${ex + D * 0.4},${ey - D * 0.4}`}
+                      fill="none"
+                      stroke="rgba(20,25,35,0.45)"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  </g>
                 );
               })()}
 
-              {/* Locking Collar at wand tip */}
-              <g filter="url(#shadow-sm)">
-                <ellipse cx={HSX_END} cy={HSY_END}
-                  rx="11" ry="6.5"
-                  fill="url(#gm-brushed)" stroke="#252830" strokeWidth="0.5"
-                  transform={`rotate(-5, ${HSX_END}, ${HSY_END})`} />
-                {[-5, 0, 5].map((dy, i) => (
-                  <line key={i}
-                    x1={HSX_END - 5} y1={HSY_END + dy}
-                    x2={HSX_END + 5} y2={HSY_END + dy}
-                    stroke="#2c3040" strokeWidth="1" />
-                ))}
-              </g>
-
-              {/* Headshell */}
-              <g filter="url(#shadow-sm)"
-                transform={`translate(${HSX_END - 70}, ${HSY_END - 1}) rotate(-5)`}>
-                <path d="M 0,-9 L 90,-10 L 105,0 L 90,10 L 0,9 Z"
-                  fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.8" />
-                <path d="M 0,-7.5 L 88,-9 L 100,-1.5 L 0,-5.5 Z"
-                  fill="rgba(92,105,122,0.4)" />
-                <path d="M 0,5.5 L 88,7 L 100,1.5 L 0,3.5 Z"
-                  fill="rgba(0,0,0,0.5)" />
-                {[1, 2, 3].map((dx, i) => (
-                  <line key={i}
-                    x1={88 - dx * 6} y1={-9} x2={88 - dx * 6} y2={9}
-                    stroke="#252830" strokeWidth="0.9" />
-                ))}
-
-                {/* Finger lift */}
-                <rect x="-20" y="-7" width="18" height="14" rx="4"
+              {/* ── Headshell — mounted at the bottom tip of the wand (0, +WAND_LEN) ── */}
+              <g
+                filter="url(#shadow-sm)"
+                transform={`translate(0, ${WAND_LEN}) rotate(25)`}
+              >
+                {/* Headshell body: rectangular block ~52×20 with trapezoidal front */}
+                <path
+                  d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z"
+                  fill="url(#matte-blk)"
+                  stroke="#252830"
+                  strokeWidth="0.8"
+                />
+                {/* Top highlight face */}
+                <path
+                  d="M -25,-9 L 11,-9 L 22,-5 L -25,-4 Z"
+                  fill="rgba(195,205,225,0.2)"
+                />
+                {/* Bottom shadow face */}
+                <path
+                  d="M -25,9 L 11,11 L 22,4 L -25,4 Z"
+                  fill="rgba(0,0,0,0.4)"
+                />
+                {/* Gold connector ring at base of headshell (attaches to wand tip) */}
+                <ellipse cx="-22" cy="0" rx="6.5" ry="9"
+                  fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
+                {/* Finger lift — protruding past front of headshell */}
+                <rect x="12" y="-10" width="10" height="20" rx="2.5"
                   fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.5" />
-                <line x1="-16" y1="-2" x2="-4" y2="-2" stroke="#1e222a" strokeWidth="1.2" />
-                <line x1="-16" y1="2"  x2="-4" y2="2"  stroke="#1e222a" strokeWidth="1.2" />
-                <line x1="-16" y1="6"  x2="-4" y2="6"  stroke="#1e222a" strokeWidth="1.2" />
-
-                {/* Gold connector ring */}
-                <ellipse cx="0" cy="0" rx="7" ry="9"
-                  fill="url(#gold)" stroke="#7c6018" strokeWidth="0.5" />
-                <ellipse cx="-1.5" cy="-3.5" rx="2.8" ry="3.5"
-                  fill="rgba(220,190,75,0.45)" />
-
-                {/* Cartridge */}
-                <g transform="translate(38, 0)">
-                  <rect x="-19" y="-15" width="50" height="30" rx="4.5"
+                {[0, 1, 2].map((i) => (
+                  <line key={i}
+                    x1="14" y1={-5 + i * 5}
+                    x2="20" y2={-5 + i * 5}
+                    stroke="#1e222a" strokeWidth="0.8" />
+                ))}
+                {/* Cartridge body — mounted on the front half of headshell */}
+                <g transform="translate(-2, 0)">
+                  {/* Cartridge main body */}
+                  <rect x="-15" y="-9" width="30" height="18" rx="3"
                     fill="url(#cartridge)" stroke="#1e222a" strokeWidth="0.6" />
-                  <rect x="-15" y="-14" width="42" height="10" rx="1.8"
+                  {/* Top face detail */}
+                  <rect x="-12" y="-8" width="24" height="6" rx="1.5"
                     fill="rgba(78,88,105,0.25)" />
-                  <rect x="28" y="-12" width="6" height="24" rx="2"
-                    fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.4" />
-                  <circle cx="-10" cy="-11" r="3.2"
+                  {/* Mounting screws */}
+                  <circle cx="-8" cy="-5" r="1.8"
                     fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                  <circle cx="-10" cy="11" r="3.2"
+                  <circle cx="-8" cy="5" r="1.8"
                     fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                  <path d="M -19,-6 Q -28,0 -19,6" fill="none"
-                    stroke="#c02828" strokeWidth="1.4" strokeLinecap="round" />
-                  <path d="M -19,0 Q -28,3 -19,8" fill="none"
-                    stroke="#dcdce0" strokeWidth="1.4" strokeLinecap="round" />
-
-                  {/* Cantilever */}
-                  <line x1="34" y1="0" x2="58" y2="4"
+                  {/* Cantilever tube (chrome) — pointing forward (right in headshell local frame) */}
+                  <line x1="15" y1="0" x2="30" y2="4"
                     stroke="url(#chrome)" strokeWidth="2.2" strokeLinecap="round" />
-                  <circle cx="58" cy="4" r="2.4"
+                  {/* Stylus mount */}
+                  <circle cx="31" cy="4.5" r="1.8"
                     fill="url(#chrome)" stroke="#6a7888" strokeWidth="0.4" />
-
                   {/* Diamond stylus */}
-                  <polygon
-                    points="60,1 65,4 60,7 62,4"
+                  <polygon points="33,1 38,4.5 33,8 35,4.5"
                     fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.4" />
-                  <circle cx="63" cy="4" r="2"
-                    fill="rgba(220,55,90,0.6)" />
-                  <circle cx="62" cy="3" r="0.8"
-                    fill="rgba(255,180,200,0.75)" />
                 </g>
+              </g>
               </g>
             </g>
 
-            {/* Stylus contact indicator — at the actual tip position */}
+            {/* Stylus contact indicator (glows at tip when playing) */}
             <circle
               cx={tipX}
               cy={tipY}
-              r={isPlaying ? 5 : 0}
+              r={active ? 4 : 0}
               fill="#cc1a4a"
-              opacity={isPlaying ? 0.75 : 0}
+              opacity={active ? 0.7 : 0}
               style={{
                 filter: "url(#shadow-sm)",
                 transition: "opacity 0.7s ease, r 0.4s ease",
               }}
             />
 
+            {/* ════════════════════════════════════════════════════
+                PITCH FADER — far right edge, vertical track
+            ════════════════════════════════════════════════════ */}
+            <g>
+              {/* Fader track recess (dark groove) */}
+              <rect
+                x={PITCH_X - 4}
+                y={PITCH_Y}
+                width="8"
+                height={PITCH_LEN}
+                rx="3"
+                fill="#06070b"
+                stroke="#252830"
+                strokeWidth="0.5"
+              />
+              {/* Inner track shadow */}
+              <rect
+                x={PITCH_X - 2}
+                y={PITCH_Y + 2}
+                width="4"
+                height={PITCH_LEN - 4}
+                rx="2"
+                fill="url(#matte-blk)"
+              />
+              {/* Scale tick marks: +% top, -% bottom, 0 middle */}
+              {Array.from({ length: 9 }, (_, i) => {
+                const t = i / 8; // 0..1
+                const y = PITCH_Y + t * PITCH_LEN;
+                const isMajor = i === 0 || i === 4 || i === 8;
+                return (
+                  <g key={i}>
+                    <line
+                      x1={PITCH_X + 5} y1={y}
+                      x2={PITCH_X + (isMajor ? 14 : 9)} y2={y}
+                      stroke={isMajor ? "#7a8598" : "#3c4352"}
+                      strokeWidth={isMajor ? 0.8 : 0.5}
+                    />
+                  </g>
+                );
+              })}
+              {/* Scale labels */}
+              <text x={PITCH_X + 17} y={PITCH_Y + 3} fontSize="6" fill="#7a8598" fontFamily="monospace">+8%</text>
+              <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN / 2 + 2} fontSize="6" fill="#7a8598" fontFamily="monospace">0</text>
+              <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN + 4} fontSize="6" fill="#7a8598" fontFamily="monospace">-8%</text>
+              {/* Fader handle knob — centered at 0% */}
+              <g
+                style={{
+                  transform: `translate(${PITCH_X}px, ${PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)}px)`,
+                  transition: "transform 0.15s ease-out",
+                }}
+              >
+                {/* Knob shadow */}
+                <rect x={-9} y={-7} width="18" height="14" rx="2.5"
+                  fill="rgba(0,0,0,0.6)" opacity="0.5" filter="url(#shadow-sm)" />
+                {/* Knob body — brushed silver cap */}
+                <rect x={-9} y={-7} width="18" height="14" rx="2.5"
+                  fill="url(#silver-deep)" stroke="#3a3e4c" strokeWidth="0.5" />
+                {/* Center indicator line */}
+                <line x1={-6} y1={0} x2={6} y2={0}
+                  stroke="#1a1d24" strokeWidth="1.2" />
+                {/* Side grip lines */}
+                <line x1={-7} y1={-3.5} x2={-7} y2={3.5} stroke="#252830" strokeWidth="0.5" />
+                <line x1={7} y1={-3.5} x2={7} y2={3.5} stroke="#252830" strokeWidth="0.5" />
+                {/* Specular */}
+                <rect x={-8} y={-6} width="16" height="3" rx="1.5"
+                  fill="rgba(255,255,255,0.35)" />
+              </g>
+              {/* "PITCH" label */}
+              <text x={PITCH_X} y={PITCH_Y - 6} textAnchor="middle"
+                fontSize="6" fill="#5a6478" fontFamily="sans-serif"
+                letterSpacing="0.8">PITCH</text>
+            </g>
+
           </svg>
 
           {/* ════════════════════════════════════════════════════
-              HARDWARE CONTROLS OVERLAY (Tailwind) — bottom row
-              Positioned in % so it scales with the deck's aspect ratio.
+              BOTTOM-LEFT HARDWARE CONTROLS OVERLAY (Tailwind)
           ════════════════════════════════════════════════════ */}
-          <div className="absolute inset-x-0 bottom-0 px-4 pb-3 z-30 flex items-end justify-between pointer-events-none">
-            <div className="flex items-end gap-3 pointer-events-auto">
-              {/* Power / Strobe Tower */}
-              <div className="flex flex-col items-center gap-1">
-                <div className="relative">
-                  <div
-                    className="w-7 h-9 rounded-t-md rounded-b-sm shadow-[inset_0_0_6px_rgba(0,0,0,0.6),0_2px_4px_rgba(0,0,0,0.4)] border border-white/[0.05] flex flex-col items-center pt-1.5"
+          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
+            {/* Power Switch with red LED */}
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative">
+                <div
+                  className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center"
+                  style={{
+                    background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)",
+                    boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <button
+                    onClick={toggleInternal}
+                    aria-label="Power"
+                    className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                     style={{
-                      background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)",
+                      background: active
+                        ? "radial-gradient(circle at 35% 30%, #e85858 0%, #a82828 60%, #581418 100%)"
+                        : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
+                      boxShadow: active
+                        ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)"
+                        : "inset 0 1px 2px rgba(255,255,255,0.1)",
                     }}
                   >
-                    {/* Rotating power dial */}
-                    <button
-                      onClick={() => setIsPlaying((s) => !s)}
-                      aria-label="Power"
-                      className="w-4 h-4 rounded-full flex items-center justify-center shadow-[0_0_4px_rgba(220,50,50,0.4)] hover:shadow-[0_0_10px_rgba(220,50,50,0.6)] transition-shadow"
-                      style={{ background: isPlaying ? "#a82828" : "#2a3038" }}
-                    >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_3px_rgba(220,50,50,0.8)]"
-                        style={{
-                          animation: isPlaying ? "spin-vinyl 0.8s linear infinite" : "none",
-                        }}
-                      />
-                    </button>
-                    {/* Strobe light */}
-                    <div className="mt-auto mb-0.5 w-2 h-1 rounded-full bg-gradient-to-r from-red-500 via-rose-400 to-blue-400 shadow-[0_0_4px_rgba(220,50,50,0.6),0_0_8px_rgba(60,100,220,0.3)]" />
-                  </div>
-                  <div
-                    className="w-10 h-1.5 rounded-full mx-auto border border-white/[0.05]"
-                    style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 100%)" }}
-                  />
+                    {/* Red LED */}
+                    <span
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background: active ? "#ff3a3a" : "#3a1010",
+                        boxShadow: active
+                          ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)"
+                          : "none",
+                      }}
+                    />
+                  </button>
                 </div>
-                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
               </div>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
+            </div>
 
-              {/* Start / Stop button */}
+            {/* Start/Stop button */}
+            <div className="flex flex-col items-center gap-1">
               <button
-                onClick={() => setIsPlaying((s) => !s)}
-                aria-label={isPlaying ? "Stop" : "Start"}
-                className="w-9 h-9 rounded-lg shadow-[inset_0_0_6px_rgba(0,0,0,0.8),0_2px_6px_rgba(0,0,0,0.6)] flex items-center justify-center transition-all duration-200 hover:scale-[1.05] active:scale-[0.97] border border-white/[0.06]"
+                onClick={toggleInternal}
+                aria-label={active ? "Stop" : "Start"}
+                className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95"
                 style={{
-                  background: isPlaying
-                    ? "linear-gradient(135deg, #2c3542 0%, #161822 50%, #0e1015 100%)"
-                    : "linear-gradient(135deg, #363b48 0%, #1e232c 50%, #0e1016 100%)",
-                  boxShadow: isPlaying
-                    ? "inset 0 0 10px rgba(220,50,50,0.25), 0 4px 12px rgba(220,50,50,0.15)"
-                    : "inset 0 0 6px rgba(0,0,0,0.6), 0 3px 10px rgba(0,0,0,0.5)",
+                  background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
+                  boxShadow: active
+                    ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)"
+                    : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)",
                 }}
               >
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center shadow-[inset_0_0_3px_rgba(0,0,0,0.5)]"
-                  style={{ background: isPlaying ? "#2c3542" : "#363b48" }}
-                >
-                  <span
-                    className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 shadow-[0_0_6px_rgba(0,216,246,0.5)]"
+                {active ? (
+                  <div className="flex gap-1">
+                    <div className="w-1 h-4 rounded-sm bg-cyan-400" />
+                    <div className="w-1 h-4 rounded-sm bg-cyan-400" />
+                  </div>
+                ) : (
+                  <div
+                    className="w-0 h-0 ml-0.5"
                     style={{
-                      animation: isPlaying ? "spin-vinyl 2.4s linear infinite" : "none",
+                      borderLeft: "8px solid #00d8f6",
+                      borderTop: "6px solid transparent",
+                      borderBottom: "6px solid transparent",
+                      filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))",
                     }}
                   />
-                </div>
+                )}
               </button>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">
+                {active ? "Stop" : "Start"}
+              </span>
+            </div>
 
-              {/* Speed Selectors */}
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[6px] text-neutral-500 font-mono tracking-[0.2em] text-center mb-0.5">RPM</span>
+            {/* Speed selectors 33 / 45 */}
+            <div className="flex flex-col gap-1">
+              <div className="flex gap-1">
                 {[33, 45].map((rpm) => (
                   <button
                     key={rpm}
                     onClick={() => setSpeed(rpm as 33 | 45)}
                     aria-label={`${rpm} RPM`}
-                    className={`w-7 h-5 rounded text-[8px] font-mono font-bold shadow-[inset_0_0_4px_rgba(0,0,0,0.5)] transition-all ${
+                    aria-pressed={speed === rpm}
+                    className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${
                       speed === rpm
-                        ? "bg-cyan-700/40 text-cyan-300 shadow-[0_0_6px_rgba(0,216,246,0.3)]"
-                        : "bg-neutral-800/70 text-neutral-400"
+                        ? "text-cyan-300"
+                        : "text-neutral-500 hover:text-neutral-300"
                     }`}
+                    style={{
+                      background: speed === rpm
+                        ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)"
+                        : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)",
+                      boxShadow: speed === rpm
+                        ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)"
+                        : "inset 0 0 4px rgba(0,0,0,0.6)",
+                      border: speed === rpm
+                        ? "1px solid rgba(0,216,246,0.4)"
+                        : "1px solid rgba(255,255,255,0.05)",
+                    }}
                   >
                     {rpm}
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="flex items-end gap-3 pointer-events-auto">
-              {/* Pitch Fader */}
-              <div className="flex flex-col items-center gap-0.5">
-                <span className="text-[6px] text-neutral-500 font-mono tracking-[0.15em] uppercase">Pitch</span>
-                <div
-                  className="w-3 h-12 rounded-full shadow-[inset_0_0_4px_rgba(0,0,0,0.7),0_1px_3px_rgba(0,0,0,0.4)] border border-white/[0.06] relative overflow-hidden"
-                  style={{
-                    background: "linear-gradient(180deg, #141620 0%, #080a10 40%, #0e1016 100%)",
-                  }}
-                >
-                  <div
-                    className="absolute top-0 left-0.5 w-2 h-full rounded-full opacity-20"
-                    style={{
-                      background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent)",
-                    }}
-                  />
-                  <div className="absolute top-0.5 left-2 text-[5px] text-neutral-600 font-mono">+</div>
-                  <div className="absolute top-1/2 -translate-y-1/2 left-1 text-[5px] text-neutral-500 font-mono">0</div>
-                  <div className="absolute bottom-0.5 left-2 text-[5px] text-neutral-600 font-mono">-</div>
-                  {/* Metallic cap */}
-                  <div
-                    className="absolute left-0 right-0 h-2 rounded-full shadow-[0_0_2px_rgba(0,0,0,0.5)] border-t border-white/[0.06]"
-                    style={{
-                      background: "linear-gradient(180deg, #5a6878 0%, #8898a8 40%, #4a5668 100%)",
-                      top: `${50 - pitch * 0.5}%`,
-                    }}
-                  />
-                  <div
-                    className="absolute left-0 right-0 h-[1px] bg-cyan-500/40 shadow-[0_0_3px_rgba(0,216,246,0.5)]"
-                    style={{ top: "50%" }}
-                  />
-                </div>
-              </div>
-
-              {/* Brand label */}
-              <div className="flex flex-col items-end gap-0">
-                <span className="text-[9px] font-bold text-neutral-300 tracking-[0.3em] uppercase">Lux</span>
-                <span className="text-[7px] text-neutral-600 tracking-[0.15em] font-mono">AUDIO</span>
-                <span className="text-[5px] text-neutral-700 tracking-[0.08em]">FLAGSHIP</span>
-              </div>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
             </div>
           </div>
+
         </div>
 
-        {/* ── Isolation feet at the corners ── */}
+        {/* ── Isolation feet ── */}
         {[
           "left-3 bottom-3",
           "right-3 bottom-3",

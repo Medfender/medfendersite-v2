@@ -5,6 +5,7 @@ import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-rea
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumCanvas from "@/components/visualizer/SpectrumCanvas";
+import Turntable from "@/components/turntable/Turntable";
 import type { VisualizerMode } from "@/lib/visualizer/visualizerRenderers";
 
 export default function VinylShowcase() {
@@ -284,36 +285,8 @@ export default function VinylShowcase() {
 
         {/* ── Right Column: Vinyl ────────────────────────────────────────── */}
         <div className="flex flex-col items-center justify-center">
-
-          <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center mb-10">
-            {/* Spinning vinyl */}
-            <div
-              className={`relative w-full h-full rounded-full bg-[#111] shadow-[0_0_30px_rgba(0,0,0,0.8)] border border-gray-700/30 flex items-center justify-center ${
-                isPlaying ? "animate-[spin_4s_linear_infinite]" : ""
-              }`}
-            >
-              <div className="absolute inset-2 rounded-full border-[0.5px] border-gray-800/50" />
-              <div className="absolute inset-4 rounded-full border-[0.5px] border-gray-800/50" />
-              <div className="absolute inset-8 rounded-full border-[0.5px] border-gray-800/50" />
-              <div className="absolute inset-12 rounded-full border-[0.5px] border-gray-800/50" />
-              <div className="absolute inset-16 rounded-full border border-gray-900/50 shadow-inner" />
-              {/* Center label */}
-              <div className="relative w-1/3 h-1/3 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden border-2 border-gray-900 z-10">
-                <div className="absolute inset-0 bg-gradient-to-tr from-blue-900 to-blue-400 opacity-80" />
-                <div className="w-3 h-3 bg-[#1a1a1a] rounded-full z-20 border shadow-inner" />
-              </div>
-            </div>
-
-            {/* Tone arm */}
-            <div className="absolute -right-4 top-4 w-4 h-4 rounded-full bg-gray-500 shadow-lg z-20">
-              <div
-                className={`w-2 h-48 bg-gradient-to-r from-gray-400 to-gray-600 absolute top-2 left-1 origin-top-left transition-transform duration-1000 ${
-                  isPlaying ? "rotate-[25deg]" : "rotate-0"
-                }`}
-              >
-                <div className="absolute bottom-0 -left-2 w-6 h-8 bg-gray-800 rounded-sm" />
-              </div>
-            </div>
+          <div className="w-full max-w-2xl">
+            <Turntable isPlaying={isPlaying} />
           </div>
 
           {/* Current Track Info */}
