@@ -22,7 +22,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
     >
       {/* Borderless / transparent container — visualizer canvas is incrusted
           on top of the hero background. All chrome is overlayed absolutely. */}
-      <div className="relative w-full h-[200px] sm:h-[200px] md:h-[240px] overflow-hidden bg-transparent">
+      <div className="relative w-full h-[200px] sm:h-[200px] md:h-[240px] overflow-hidden bg-transparent pt-7">
         {/* Spectrum Canvas — embedded seamlessly into the section */}
         <SpectrumCanvas
           analyserNode={analyserNode}
@@ -36,7 +36,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
 
         {/* Status badge — top-left, lifted above the grid so high-frequency
             spikes never collide with the text. */}
-        <div className="pointer-events-none absolute top-2 left-3 z-10 flex items-center gap-2.5">
+        <div className="pointer-events-none absolute top-1 left-3 z-10 flex items-center gap-2.5">
           <span
             className={`w-2 h-2 rounded-full ${
               isPlaying
@@ -58,7 +58,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
         </div>
 
         {/* Mode + theme controls — top-right, glassmorphic blur chips */}
-        <div className="absolute top-2 right-3 z-10 flex items-center gap-2.5">
+        <div className="absolute top-1 right-3 z-10 flex items-center gap-2.5">
           <div
             className="flex gap-0.5 rounded-lg p-0.5 border border-white/10"
             style={{
@@ -67,7 +67,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
               WebkitBackdropFilter: "blur(10px)",
             }}
           >
-            {(["curve", "bars", "waveform"] as VisualizerMode[]).map((m) => (
+            {(["curve", "bars"] as VisualizerMode[]).map((m) => (
               <button
                 key={m}
                 onClick={() => setMode(m)}
@@ -81,7 +81,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
                   textShadow: mode === m ? "0 0 8px rgba(56,189,248,0.5)" : "none",
                 }}
               >
-                {m === "curve" ? "Curve" : m === "bars" ? "Bars" : "Oscillo"}
+                {m === "curve" ? "Curve" : "Bars"}
               </button>
             ))}
           </div>

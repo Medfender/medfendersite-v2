@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   THEMES,
   drawBars,
@@ -26,7 +26,7 @@ interface MiniVisualizerProps {
  * the main head visualizer for visual consistency.
  *
  * Strict fixed footprint controlled by `width` × `height` props.
- * Overflowing (>+6 dB) bars trigger a white glow line at the canvas top edge.
+ * Features smooth fade-in/out transition when play/pause state changes.
  */
 export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
   analyserNode,
@@ -39,6 +39,15 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const [localMode, setLocalMode] = useState<VisualizerMode>(mode);
+  const cycleMode = () => {
+    setLocalMode((prev) => {
+      const modes: VisualizerMode[] = ['curve', 'bars', 'waveform'];
+      const idx = modes.indexOf(prev);
+      return modes[(idx + 1) % modes.length];
+    });
+  };
+
   // Persistent scratch buffers — survive re-renders without churn.
   const smoothedRef  = useRef<Float32Array<ArrayBuffer>>(new Float32Array(new ArrayBuffer(32 * 4)).fill(0) as Float32Array<ArrayBuffer>);
   const peaksRef     = useRef<Float32Array<ArrayBuffer>>(new Float32Array(new ArrayBuffer(32 * 4)).fill(0) as Float32Array<ArrayBuffer>);
@@ -46,8 +55,16 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
   const tdRef        = useRef<Float32Array<ArrayBuffer>>(new Float32Array(new ArrayBuffer(128 * 4)).fill(0) as Float32Array<ArrayBuffer>);
   const rawBufRef    = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
+  // Ref so the loop can read play state without being torn down on flips
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
   useEffect(() => {
+    // Persistent fade coefficient — survives outside the loop
+    let fadeLevel = 0;
+
     const theme = THEMES[themeKey] ?? THEMES.cyan;
+    const loopMode = localMode; // capture so the loop doesn't restart when mode flips
 
     const loop = createRenderLoop(() => {
       const canvas = canvasRef.current;
@@ -58,9 +75,26 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       const dpr = window.devicePixelRatio || 1;
       const cssW = width;
       const cssH = height;
-      canvas.width  = cssW * dpr;
+      canvas.width = cssW * dpr;
       canvas.height = cssH * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // Smooth interpolation of fade coefficient (read from ref so the loop
+      // outlives React state flips and the fade-out still renders).
+      fadeLevel += ((isPlayingRef.current ? 1 : 0) - fadeLevel) * 0.03;
+
+      // Apply global alpha so the entire drawing fades smoothly
+      ctx.globalAlpha = Math.max(0, fadeLevel);
+
+      // Idle short-circuit: if the audio is stopped AND the fade is finished,
+      // clear the canvas. The createRenderLoop wrapper self-schedules on every
+      // call, so returning here keeps the loop alive and waiting for the next play.
+      if (!isPlayingRef.current && fadeLevel <= 0.01) {
+        ctx.clearRect(0, 0, cssW, cssH);
+        ctx.globalAlpha = 1;
+        return;
+      }
+
       ctx.clearRect(0, 0, cssW, cssH);
 
       // Prepare frequency buffer
@@ -71,7 +105,7 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       }
       const raw = rawBufRef.current;
 
-      if (analyserNode && isPlaying) {
+      if (analyserNode && isPlayingRef.current) {
         analyserNode.getByteFrequencyData(raw);
         analyserNode.getFloatTimeDomainData(tdRef.current);
       } else {
@@ -100,11 +134,26 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
         if (v > 1.0) anyOverflow = true;
       }
 
+      // Scale amplitude by fadeLevel so the waveform collapses to a flatline
+      // smoothly as it fades to black, instead of freezing in mid-air.
+      const adjustedSmoothed = new Float32Array(smoothed.length);
+      for (let i = 0; i < smoothed.length; i++) {
+        adjustedSmoothed[i] = smoothed[i] * fadeLevel;
+      }
+      const adjustedPeaks = new Float32Array(peaks.length);
+      for (let i = 0; i < peaks.length; i++) {
+        adjustedPeaks[i] = peaks[i] * fadeLevel;
+      }
+      const adjustedTd = new Float32Array(tdRef.current.length);
+      for (let i = 0; i < tdRef.current.length; i++) {
+        adjustedTd[i] = tdRef.current[i] * fadeLevel;
+      }
+
       // ── Render by mode ───────────────────────────────────────────────────
-      if (mode === "bars") {
+      if (loopMode === "bars") {
         drawBars(ctx, cssW, cssH, 0, 0, theme, {
-          smoothed,
-          peaks,
+          smoothed: adjustedSmoothed,
+          peaks: adjustedPeaks,
           barCount,
           gap: 2,
           cornerRadius: 2,
@@ -122,23 +171,26 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
           ctx.stroke();
           ctx.restore();
         }
-      } else if (mode === "curve") {
-        drawCurve(ctx, cssW, cssH, 0, 0, theme, smoothed, peaks);
+      } else if (loopMode === "curve") {
+        drawCurve(ctx, cssW, cssH, 0, 0, theme, adjustedSmoothed, adjustedPeaks);
       } else {
-        drawWaveform(ctx, cssW, cssH, 0, 0, tdRef.current, theme);
+        drawWaveform(ctx, cssW, cssH, 0, 0, adjustedTd, theme);
       }
+
+      ctx.globalAlpha = 1;
     });
 
     const id = loop.start();
     return () => loop.stop();
-  }, [analyserNode, isPlaying, mode, width, height, themeKey, smoothing]);
+  }, [analyserNode, localMode, width, height, themeKey, smoothing]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="block"
+      className="block cursor-pointer"
+      onClick={cycleMode}
       style={{
-        width:  `${width}px`,
+        width: `${width}px`,
         height: `${height}px`,
         flexShrink: 0,
         imageRendering: "auto",

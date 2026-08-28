@@ -34,7 +34,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
   useEffect(() => { setCoverError(false); }, []);
 
   // ── Mini visualizer mode (3-way cycle) ──────────────────────────────────
-  const [miniMode, setMiniMode] = useState<VisualizerMode>("bars");
+  const [miniMode, setMiniMode] = useState<VisualizerMode>("curve");
   const cycleMiniMode = () => {
     setMiniMode((prev) => {
       const idx = MINI_MODES.indexOf(prev);
@@ -163,11 +163,21 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             />
           </div>
 
+          {/* Stop — immediately before the interactive Mini Visualizer */}
+          <button
+            onClick={stop}
+            title="Stop"
+            aria-label="Stop"
+            className="w-7 h-7 rounded-full text-neutral-500 hover:text-cyan-400 hover:bg-white/5 transition-colors shrink-0 flex items-center justify-center"
+          >
+            <Square fill="currentColor" size={13} />
+          </button>
+
           {/* Free-contained mini visualizer — no card, no border, no shadow.
               Fixed 150×50 footprint; click cycles bars → curve → waveform. */}
           <div
             onClick={cycleMiniMode}
-            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 rounded overflow-hidden transition-all duration-200 hover:brightness-110 group"
+            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-4 rounded overflow-hidden transition-all duration-200 hover:brightness-110 group"
             title={`${MODE_LABELS[miniMode]} — click to switch`}
             style={{
               width: 150,
@@ -187,16 +197,6 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               height={50}
             />
           </div>
-
-          {/* Stop */}
-          <button
-            onClick={stop}
-            title="Stop"
-            aria-label="Stop"
-            className="w-7 h-7 rounded-full text-neutral-500 hover:text-cyan-400 hover:bg-white/5 transition-colors shrink-0 flex items-center justify-center"
-          >
-            <Square fill="currentColor" size={13} />
-          </button>
         </div>
       </div>
     </div>

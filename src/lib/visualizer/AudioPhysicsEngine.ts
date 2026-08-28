@@ -43,7 +43,9 @@ export class AudioPhysicsEngine {
         const normalized = rawVal / 255.0;
 // Floor cutoff at -24 dB: anything quieter reads as silence (0 amplitude).
 // With analyser minDecibels=-90 / maxDecibels=0, -24 dB ≈ 0.267 of the 0..255 range.
-        const FLOOR = 0.267;
+        // Floor cutoff at -60 dB: with minDecibels=-90 / maxDecibels=0,
+        // the -60 dB point maps to ~0.08 of the 0..255 range.
+        const FLOOR = 0.08;
         const clipped = normalized < FLOOR ? 0 : (normalized - FLOOR) / (1 - FLOOR);
         // Sensitivity curve boost for high visual response
         targetAmp = Math.min(1.0, Math.pow(clipped, 1.05) * 1.45);
