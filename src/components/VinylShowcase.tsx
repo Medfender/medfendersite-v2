@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumCanvas from "@/components/visualizer/SpectrumCanvas";
@@ -86,6 +86,16 @@ export default function VinylShowcase() {
     playNext();
   };
 
+  // ── Stop: halt audio AND reset track progress to 0 ───────────────────────
+  // Resetting progress to 0 while paused triggers the Turntable's
+  // intelligent 'stopped' inference, which returns the tonearm to the rest.
+  const handleStop = () => {
+    if (isPlaying) {
+      togglePlay();
+    }
+    seek(0);
+  };
+
   return (
     <section className="w-full bg-[#111111] py-20 text-gray-300 font-sans border-y border-gray-900">
       {/* Hidden audio — owned by AudioProvider, not VinylShowcase */}
@@ -105,7 +115,7 @@ export default function VinylShowcase() {
         <div className="flex flex-col gap-10">
 
           {/* Transport + Progress */}
-          <div className="flex items-center gap-6 bg-[#1a1a1a] p-6 rounded-2xl border border-gray-800">
+          <div className="flex items-center gap-3 bg-[#1a1a1a] p-6 rounded-2xl border border-gray-800">
             <button onClick={handlePrev} className="text-gray-400 hover:text-white transition-colors">
               <SkipBack size={24} />
             </button>
@@ -114,6 +124,14 @@ export default function VinylShowcase() {
               className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
             >
               {isPlaying ? <Pause size={24} /> : <Play className="ml-1" size={24} />}
+            </button>
+            <button
+              onClick={handleStop}
+              aria-label="Stop"
+              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              title="Stop"
+            >
+              <Square className="w-5 h-5 fill-current" />
             </button>
             <button onClick={handleNext} className="text-gray-400 hover:text-white transition-colors">
               <SkipForward size={24} />
