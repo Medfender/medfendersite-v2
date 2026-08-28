@@ -33,6 +33,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
   const [coverError, setCoverError] = useState(false);
   useEffect(() => { setCoverError(false); }, []);
 
+
   // ── Mini visualizer mode (3-way cycle) ──────────────────────────────────
   const [miniMode, setMiniMode] = useState<VisualizerMode>("curve");
   const cycleMiniMode = () => {
@@ -94,12 +95,15 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
             <button
               onClick={togglePlay}
-              className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center font-bold shadow-[0_0_14px_rgba(0,216,246,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
+              className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(0,216,246,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0 overflow-hidden"
               aria-label={isPlaying ? "Pause" : "Play"}
+              style={{ aspectRatio: "1 / 1" }}
             >
-              {isPlaying
-                ? <Pause size={18} />
-                : <Play  size={18} className="ml-0.5" />}
+              <span className="flex items-center justify-center w-full h-full">
+                {isPlaying
+                  ? <Pause size={18} className="shrink-0" />
+                  : <Play size={18} className="shrink-0 ml-0.5" />}
+              </span>
             </button>
 
             <button
@@ -111,15 +115,10 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             </button>
           </div>
 
-          {/* Track info */}
-          <div className="flex flex-col min-w-0 hidden sm:flex">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <h4 className="text-sm font-bold text-white truncate">{trackName}</h4>
-              <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-800/50 shrink-0">
-                FEAT
-              </span>
-            </div>
-            <p className="text-[10px] text-neutral-500 truncate font-mono">{trackArtist}</p>
+          {/* Track info — title + artist, no numerotation badge, perfectly centered with transport controls */}
+          <div className="flex flex-col justify-center min-w-0 h-10 hidden sm:flex">
+            <h4 className="text-sm font-bold text-white truncate leading-tight">{trackName}</h4>
+            <p className="text-[10px] text-neutral-500 truncate font-mono leading-tight mt-0.5">{trackArtist}</p>
           </div>
         </div>
 
@@ -145,12 +144,13 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
         {/* ── Right: volume + mini visualizer + stop ───────────────────────── */}
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Volume */}
+          {/* Volume — mute toggle + always-visible slider */}
           <div className="hidden sm:flex items-center gap-1.5 shrink-0">
             <button
               onClick={toggleMute}
               aria-label={isMuted ? "Unmute" : "Mute"}
               className="w-7 h-7 rounded-full text-neutral-400 flex items-center justify-center hover:text-cyan-400 transition shrink-0"
+              title={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
             </button>
@@ -158,7 +158,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               type="range" min="0" max="1" step="0.01"
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-14 md:w-16 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0"
+              className="w-16 md:w-20 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0"
               aria-label="Volume"
             />
           </div>
