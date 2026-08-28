@@ -52,7 +52,7 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
   const REST_X = TPX;
   const REST_Y = TPY + 220;
   const PARK_ANGLE = 0;
-  const PLAY_ANGLE = 28;
+  const PLAY_ANGLE = 55;
   const armAngle = active ? PLAY_ANGLE : PARK_ANGLE;
 
   // Stylus tip in chassis coords — wand natively points straight down (+Y)
