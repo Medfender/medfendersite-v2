@@ -186,103 +186,113 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
               </g>
             </g>
 
-            {/* 2. Z-AXIS LIFT WRAPPER... */}
-            <g
-              style={{
-                transform: `scale(${isLifted ? 1.02 : 1})`,
-                transformOrigin: `${TPX}px ${TPY}px`,
-                filter: isLifted
-                  ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))'
-                  : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
-                transition: 'transform 0.3s ease, filter 0.3s ease',
-              }}
-            >
-              {/* 3. NATIVE SVG ROTATION WITH EXPLICIT CSS TRANSFORM ORIGIN */}
-              <g
-                transform={`rotate(${armAngle}, ${TPX}, ${TPY})`}
-                style={{
-                  transformOrigin: `${TPX}px ${TPY}px`,
+            {/* 2. Z-AXIS LIFT WRAPPER (Keeps the drop-shadow and scale) */}
+            <g style={{
+              transform: `scale(${isLifted ? 1.02 : 1})`,
+              transformOrigin: `${TPX}px ${TPY}px`,
+              filter: isLifted
+                ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))'
+                : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
+              transition: 'transform 0.3s ease, filter 0.3s ease',
+            }}>
+
+              {/* --- THE TRANSLATION SANDWICH --- */}
+
+              {/* Layer A: Move the coordinate system so 0,0 is exactly at the pivot */}
+              <g transform={`translate(${TPX}, ${TPY})`}>
+
+                {/* Layer B: Pure CSS rotation around 0,0 (Immune to bounding-box squish and offsets) */}
+                <g style={{
+                  transform: `rotate(${armAngle}deg)`,
                   transition: (playState === 'playing' && isTracking)
                     ? 'transform 0.1s linear'
                     : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-              >
-                {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
-                <g filter="url(#shadow-md)">
-                  <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W}
-                    fill="url(#silver-aluminum)" stroke="#1e222a" strokeWidth="0.8" />
-                  {/* Vertical grip lines for knurled tracking-force texture */}
-                  {Array.from({ length: 6 }, (_, k) => {
-                    const kx = TPX - WAND_W + 2 + k * 2.2;
-                    return <line key={k} x1={kx} y1={TPY - CW_LEN + 4} x2={kx} y2={TPY - 4} stroke="#0c0d12" strokeWidth="0.6" opacity="0.55" />;
-                  })}
-                  {/* Highlight band along the left edge */}
-                  <rect x={TPX - WAND_W + 2} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
-                    fill="rgba(195,205,225,0.22)" />
-                  {/* Dark right edge */}
-                  <rect x={TPX + WAND_W * 0.1} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
-                    fill="rgba(0,0,0,0.3)" />
-                  {/* Domed end cap */}
-                  <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.95} ry={WAND_W * 0.6}
-                    fill="url(#silver-aluminum)" stroke="#252830" strokeWidth="0.6" />
-                  <ellipse cx={TPX - WAND_W * 0.3} cy={TPY - CW_LEN - 1} rx={WAND_W * 0.5} ry={WAND_W * 0.22}
-                    fill="rgba(225,235,248,0.4)" />
-                  {/* Tracking-force scale markings */}
-                  <text x={TPX - WAND_W - 4} y={TPY - CW_LEN / 2} textAnchor="end"
-                    fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
-                  <text x={TPX + WAND_W + 4} y={TPY - CW_LEN / 2} textAnchor="start"
-                    fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
-                </g>
+                }}>
 
-                {/* Tonearm Wand — sleek cylindrical tube with dark-light-dark edge gradient (absolute chassis coords) */}
-                <g>
-                  <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
-                    fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
-                  <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
-                    fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
-                  {/* Tiny curved bar near the base — cueing lift bank (Technics SL-1200 style) */}
-                  <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
-                    fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
-                </g>
+                  {/* Layer C: Move the coordinate system back so absolute paths draw correctly */}
+                  <g transform={`translate(-${TPX}, -${TPY})`}>
 
-                {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
-                <g filter="url(#shadow-sm)" transform={`translate(${TPX}, ${TPY + WAND_LEN}) rotate(25)`}>
-                  {/* Matte-black headshell body */}
-                  <path d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z"
-                    fill="url(#carbon-black)" stroke="#252830" strokeWidth="0.8" />
-                  {/* Top highlight face */}
-                  <path d="M -25,-9 L 11,-9 L 22,-5 L -25,-4 Z"
-                    fill="rgba(195,205,225,0.2)" />
-                  {/* Bottom shadow face */}
-                  <path d="M -25,9 L 11,11 L 22,4 L -25,4 Z"
-                    fill="rgba(0,0,0,0.4)" />
-                  {/* Gold connector ring at base of headshell */}
-                  <ellipse cx="-22" cy="0" rx="6.5" ry="9"
-                    fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
-                  {/* Curved finger lift protruding from the rear of the headshell */}
-                  <path d="M -38,-7 C -45,-7 -48,-3 -45,0 C -48,3 -45,7 -38,7 L -32,7 L -32,-7 Z"
-                    fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.5" />
-                  <line x1="-45" y1="0" x2="-32" y2="0" stroke="#1e222a" strokeWidth="0.6" opacity="0.6" />
-                  {/* Ortofon-style vibrant red cartridge body underneath */}
-                  <g transform="translate(-2, 1)">
-                    <rect x="-15" y="-9" width="30" height="18" rx="3"
-                      fill="url(#gold-vibrant)" stroke="#7a1818" strokeWidth="0.6" />
-                    <rect x="-12" y="-7" width="24" height="4" rx="1.5"
-                      fill="rgba(255,255,255,0.18)" />
-                    {/* Mounting screws */}
-                    <circle cx="-9" cy="-5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
-                    <circle cx="-9" cy="5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
-                    {/* Tiny cantilever + tip pointing forward */}
-                    <line x1="13" y1="0" x2="24" y2="3" stroke="url(#silver-aluminum)" strokeWidth="1.6" strokeLinecap="round" />
-                    <circle cx="24" cy="3" r="1.3" fill="url(#silver-aluminum)" stroke="#6a7888" strokeWidth="0.3" />
+                    {/* ALL TONEARM PARTS (Counterweight, Wand, Headshell, etc.) GO HERE */}
+
+                    {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
+                    <g filter="url(#shadow-md)">
+                      <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W}
+                        fill="url(#silver-aluminum)" stroke="#1e222a" strokeWidth="0.8" />
+                      {/* Vertical grip lines for knurled tracking-force texture */}
+                      {Array.from({ length: 6 }, (_, k) => {
+                        const kx = TPX - WAND_W + 2 + k * 2.2;
+                        return <line key={k} x1={kx} y1={TPY - CW_LEN + 4} x2={kx} y2={TPY - 4} stroke="#0c0d12" strokeWidth="0.6" opacity="0.55" />;
+                      })}
+                      {/* Highlight band along the left edge */}
+                      <rect x={TPX - WAND_W + 2} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
+                        fill="rgba(195,205,225,0.22)" />
+                      {/* Dark right edge */}
+                      <rect x={TPX + WAND_W * 0.1} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
+                        fill="rgba(0,0,0,0.3)" />
+                      {/* Domed end cap */}
+                      <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.95} ry={WAND_W * 0.6}
+                        fill="url(#silver-aluminum)" stroke="#252830" strokeWidth="0.6" />
+                      <ellipse cx={TPX - WAND_W * 0.3} cy={TPY - CW_LEN - 1} rx={WAND_W * 0.5} ry={WAND_W * 0.22}
+                        fill="rgba(225,235,248,0.4)" />
+                      {/* Tracking-force scale markings */}
+                      <text x={TPX - WAND_W - 4} y={TPY - CW_LEN / 2} textAnchor="end"
+                        fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
+                      <text x={TPX + WAND_W + 4} y={TPY - CW_LEN / 2} textAnchor="start"
+                        fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
+                    </g>
+
+                    {/* Tonearm Wand — sleek cylindrical tube with dark-light-dark edge gradient (absolute chassis coords) */}
+                    <g>
+                      <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
+                        fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
+                      <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
+                        fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
+                      {/* Tiny curved bar near the base — cueing lift bank (Technics SL-1200 style) */}
+                      <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
+                        fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
+                    </g>
+
+                    {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
+                    <g filter="url(#shadow-sm)" transform={`translate(${TPX}, ${TPY + WAND_LEN}) rotate(25)`}>
+                      {/* Matte-black headshell body */}
+                      <path d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z"
+                        fill="url(#carbon-black)" stroke="#252830" strokeWidth="0.8" />
+                      {/* Top highlight face */}
+                      <path d="M -25,-9 L 11,-9 L 22,-5 L -25,-4 Z"
+                        fill="rgba(195,205,225,0.2)" />
+                      {/* Bottom shadow face */}
+                      <path d="M -25,9 L 11,11 L 22,4 L -25,4 Z"
+                        fill="rgba(0,0,0,0.4)" />
+                      {/* Gold connector ring at base of headshell */}
+                      <ellipse cx="-22" cy="0" rx="6.5" ry="9"
+                        fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
+                      {/* Curved finger lift protruding from the rear of the headshell */}
+                      <path d="M -38,-7 C -45,-7 -48,-3 -45,0 C -48,3 -45,7 -38,7 L -32,7 L -32,-7 Z"
+                        fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.5" />
+                      <line x1="-45" y1="0" x2="-32" y2="0" stroke="#1e222a" strokeWidth="0.6" opacity="0.6" />
+                      {/* Ortofon-style vibrant red cartridge body underneath */}
+                      <g transform="translate(-2, 1)">
+                        <rect x="-15" y="-9" width="30" height="18" rx="3"
+                          fill="url(#gold-vibrant)" stroke="#7a1818" strokeWidth="0.6" />
+                        <rect x="-12" y="-7" width="24" height="4" rx="1.5"
+                          fill="rgba(255,255,255,0.18)" />
+                        {/* Mounting screws */}
+                        <circle cx="-9" cy="-5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
+                        <circle cx="-9" cy="5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
+                        {/* Tiny cantilever + tip pointing forward */}
+                        <line x1="13" y1="0" x2="24" y2="3" stroke="url(#silver-aluminum)" strokeWidth="1.6" strokeLinecap="round" />
+                        <circle cx="24" cy="3" r="1.3" fill="url(#silver-aluminum)" stroke="#6a7888" strokeWidth="0.3" />
+                      </g>
+                    </g>
+
+                    {/* Stylus tip — tiny metallic circle resting at the calculated tip coordinate */}
+                    <circle cx={TPX} cy={TPY + WAND_LEN + 4} r="2"
+                      fill="url(#silver-aluminum)" stroke="#5a6878" strokeWidth="0.3" />
+                    <polygon points={`${TPX + 2},${TPY + WAND_LEN + 2} ${TPX + 6},${TPY + WAND_LEN + 4.5} ${TPX + 2},${TPY + WAND_LEN + 7} ${TPX + 3.5},${TPY + WAND_LEN + 4.5}`}
+                      fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.3" />
+
                   </g>
                 </g>
-
-                {/* Stylus tip — tiny metallic circle resting at the calculated tip coordinate */}
-                <circle cx={TPX} cy={TPY + WAND_LEN + 4} r="2"
-                  fill="url(#silver-aluminum)" stroke="#5a6878" strokeWidth="0.3" />
-                <polygon points={`${TPX + 2},${TPY + WAND_LEN + 2} ${TPX + 6},${TPY + WAND_LEN + 4.5} ${TPX + 2},${TPY + WAND_LEN + 7} ${TPX + 3.5},${TPY + WAND_LEN + 4.5}`}
-                  fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.3" />
               </g>
             </g>
 
