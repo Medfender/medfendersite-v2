@@ -35,7 +35,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
 
   // ── Mini visualizer mode (3-way cycle) ──────────────────────────────────
-  const [miniMode, setMiniMode] = useState<VisualizerMode>("curve");
+  const [miniMode, setMiniMode] = useState<VisualizerMode>("bars");
   const cycleMiniMode = () => {
     setMiniMode((prev) => {
       const idx = MINI_MODES.indexOf(prev);
@@ -133,7 +133,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             max={duration || 100}
             value={currentTime || 0}
             onChange={(e) => seek(Number(e.target.value))}
-            className="w-full accent-cyan-400 cursor-pointer h-1 bg-neutral-700 rounded-lg appearance-none"
+            className="w-full accent-cyan-400 cursor-pointer h-1 bg-neutral-700 rounded-lg appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)]"
             aria-label="Seek"
           />
           <span className="text-[10px] font-mono text-neutral-500 shrink-0 tabular-nums">
@@ -158,7 +158,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               type="range" min="0" max="1" step="0.01"
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-16 md:w-20 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0"
+              className="w-16 md:w-20 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)]"
               aria-label="Volume"
             />
           </div>
@@ -177,15 +177,15 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               Fixed 150×50 footprint; click cycles bars → curve → waveform. */}
           <div
             onClick={cycleMiniMode}
-            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-4 rounded overflow-hidden transition-all duration-200 hover:brightness-110 group"
+            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-4 rounded overflow-hidden transition-all duration-200 hover:brightness-110 group h-9"
             title={`${MODE_LABELS[miniMode]} — click to switch`}
             style={{
               width: 150,
-              height: 50,
+              height: 36,
               minWidth: 150,
-              minHeight: 50,
+              minHeight: 36,
               maxWidth: 150,
-              maxHeight: 50,
+              maxHeight: 36,
               flexShrink: 0,
             }}
           >
@@ -195,7 +195,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               mode={miniMode}
               onModeCycle={cycleMiniMode}
               width={150}
-              height={50}
+              height={36}
             />
           </div>
         </div>

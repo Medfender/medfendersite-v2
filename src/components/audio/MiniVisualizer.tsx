@@ -217,7 +217,7 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
           ctx.restore();
         }
       } else if (loopMode === "curve") {
-        drawCurve(ctx, cssW, cssH, 0, 0, theme, adjustedSmoothed, adjustedPeaks);
+        drawCurve(ctx, cssW, cssH, 0, 0, theme, adjustedSmoothed, adjustedPeaks, barCount);
       } else {
         drawWaveform(ctx, cssW, cssH, 0, 0, adjustedTd, theme);
       }

@@ -87,7 +87,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
           </div>
 
           <div
-            className="flex items-center gap-1.5 rounded-lg border border-white/10 p-1"
+            className="flex items-center gap-3 rounded-lg border border-white/10 p-1"
             style={{
               background: "rgba(10, 14, 23, 0.55)",
               backdropFilter: "blur(10px)",

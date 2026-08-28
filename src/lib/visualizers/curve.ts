@@ -15,16 +15,22 @@ export function drawCurve(
   theme: ThemeConfig,
   smoothed: Float32Array,
   peaks: Float32Array,
+  /** Number of populated bars/points — must match the log-mapped barCount.
+   *  Used so the curve spans 0→cssW exactly, not over the full smoothed.length. */
+  barCount?: number,
 ): void {
   const gW = width - padLeft;
   const gH = height - padBottom;
-  const getX = (i: number) => padLeft + (i / (smoothed.length - 1)) * gW;
+  // Use barCount when provided so the last point lands at x = cssW.
+  // Fall back to smoothed.length-1 (the old behaviour) for callers that omit it.
+  const n = (barCount && barCount > 1) ? barCount : Math.max(2, smoothed.length);
+  const getX = (i: number) => padLeft + (i / (n - 1)) * gW;
   const getY = (val: number) => gH - Math.min(val, 1.0) * gH * CEILING;
 
-  // Peak-hold line
+  // Peak-hold line — iterate only over the filled [0..barCount-1] region
   ctx.beginPath();
   ctx.moveTo(getX(0), getY(peaks[0]));
-  for (let i = 0; i < peaks.length - 1; i++) {
+  for (let i = 0; i < n - 1; i++) {
     const x0 = getX(i), y0 = getY(peaks[i]);
     const x1 = getX(i + 1), y1 = getY(peaks[i + 1]);
     ctx.bezierCurveTo((x0 + x1) / 2, y0, (x0 + x1) / 2, y1, x1, y1);
@@ -33,10 +39,10 @@ export function drawCurve(
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // Wave spline
+  // Wave spline — same; stop at barCount-1 so last point lands at cssW (10kHz)
   const wavePath = new Path2D();
   wavePath.moveTo(getX(0), getY(smoothed[0]));
-  for (let i = 0; i < smoothed.length - 1; i++) {
+  for (let i = 0; i < n - 1; i++) {
     const x0 = getX(i), y0 = getY(smoothed[i]);
     const x1 = getX(i + 1), y1 = getY(smoothed[i + 1]);
     wavePath.bezierCurveTo((x0 + x1) / 2, y0, (x0 + x1) / 2, y1, x1, y1);
