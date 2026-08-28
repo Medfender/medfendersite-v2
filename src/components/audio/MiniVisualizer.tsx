@@ -81,7 +81,11 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
 
       // Smooth interpolation of fade coefficient (read from ref so the loop
       // outlives React state flips and the fade-out still renders).
-      fadeLevel += ((isPlayingRef.current ? 1 : 0) - fadeLevel) * 0.03;
+      if (isPlayingRef.current) {
+        fadeLevel = Math.min(1, fadeLevel + 0.02); // Smooth, quick fade in
+      } else {
+        fadeLevel = Math.max(0, fadeLevel - 0.005); // Very slow, cinematic fade out
+      }
 
       // Apply global alpha so the entire drawing fades smoothly
       ctx.globalAlpha = Math.max(0, fadeLevel);
@@ -89,7 +93,7 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       // Idle short-circuit: if the audio is stopped AND the fade is finished,
       // clear the canvas. The createRenderLoop wrapper self-schedules on every
       // call, so returning here keeps the loop alive and waiting for the next play.
-      if (!isPlayingRef.current && fadeLevel <= 0.01) {
+      if (!isPlayingRef.current && fadeLevel <= 0.001) {
         ctx.clearRect(0, 0, cssW, cssH);
         ctx.globalAlpha = 1;
         return;
@@ -106,11 +110,11 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       const raw = rawBufRef.current;
 
       if (analyserNode && isPlayingRef.current) {
+        // ONLY fetch new frequency/waveform data if music is playing.
+        // If stopped, we bypass the fetch so the buffers freeze at their last
+        // known active state, allowing `fadeLevel` to scale them down smoothly.
         analyserNode.getByteFrequencyData(raw);
         analyserNode.getFloatTimeDomainData(tdRef.current);
-      } else {
-        raw.fill(0);
-        tdRef.current.fill(0);
       }
 
       // ── Smoothed frequency + peak hold ───────────────────────────────────
