@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumCanvas from "@/components/visualizer/SpectrumCanvas";
 import type { VisualizerMode } from "@/lib/visualizer/visualizerRenderers";
@@ -52,6 +53,7 @@ export default function VinylShowcase() {
   };
 
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [visTheme, setVisTheme] = useState<ColorTheme>("cyan");
 
   // Click outside closes the volume popover; clicking the speaker toggles it.
   useEffect(() => {
@@ -248,6 +250,24 @@ export default function VinylShowcase() {
                     </button>
                   ))}
                 </div>
+                {/* Three color theme circles — cyan / red (neon) / green (emerald) */}
+                <div className="flex items-center gap-2 ml-2">
+                  {(
+                    [
+                      { theme: "cyan" as ColorTheme, label: "Cyan / Blue", colorClass: "bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.6)]" },
+                      { theme: "neon" as ColorTheme, label: "Red / Neon", colorClass: "bg-rose-500 shadow-[0_0_4px_rgba(244,63,94,0.6)]" },
+                      { theme: "emerald" as ColorTheme, label: "Green / Emerald", colorClass: "bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.6)]" },
+                    ] as const
+                  ).map(({ theme, label, colorClass }) => (
+                    <button
+                      key={theme}
+                      onClick={() => setVisTheme(theme)}
+                      aria-label={label + " theme"}
+                      title={label}
+                      className={`w-4 h-4 rounded-full ${colorClass} border-2 border-neutral-700 transition-all duration-200 hover:scale-110 ${visTheme === theme ? "ring-2 ring-white ring-offset-1 ring-offset-neutral-900 scale-110" : "opacity-50 hover:opacity-100"}`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
             <div className="w-full h-24 relative">
@@ -255,7 +275,7 @@ export default function VinylShowcase() {
                 analyserNode={analyserNode}
                 isPlaying={isPlaying}
                 mode={visMode}
-                theme="cyan"
+                theme={visTheme || "cyan"}
                 className="w-full h-full block"
               />
             </div>
