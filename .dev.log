@@ -2335,3 +2335,595 @@ Import traces:
  GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 5ms)
 [audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
  GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 4ms)
+ GET / 200 in 30ms (next.js: 7ms, application-code: 23ms)
+✓ Compiled in 85ms
+ GET / 200 in 58ms (next.js: 3ms, application-code: 55ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 10ms (next.js: 3ms, application-code: 7ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 3ms, application-code: 4ms)
+✓ Compiled in 46ms
+ GET / 200 in 47ms (next.js: 6ms, application-code: 41ms)
+✓ Compiled in 63ms
+ GET / 200 in 55ms (next.js: 12ms, application-code: 44ms)
+✓ Compiled in 43ms
+ GET / 200 in 36ms (next.js: 7ms, application-code: 29ms)
+✓ Compiled in 105ms
+ GET / 200 in 45ms (next.js: 8ms, application-code: 37ms)
+ GET / 200 in 65ms (next.js: 3ms, application-code: 62ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 11ms (next.js: 3ms, application-code: 8ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 6ms (next.js: 2ms, application-code: 4ms)
+ GET / 200 in 29ms (next.js: 6ms, application-code: 23ms)
+✓ Compiled in 41ms
+✓ Compiled in 50ms
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawNeon doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawNeon was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-client] (ecmascript).
+Did you mean to import drawWaveform?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawNeon doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawNeon was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-ssr] (ecmascript).
+Did you mean to import drawWaveform?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawTimeline doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawTimeline was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-client] (ecmascript).
+Did you mean to import drawCurve?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawTimeline doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawTimeline was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-ssr] (ecmascript).
+Did you mean to import drawCurve?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+ GET / 200 in 37ms (next.js: 8ms, application-code: 29ms)
+ GET / 200 in 28ms (next.js: 6ms, application-code: 22ms)
+✓ Compiled in 36ms
+ GET / 200 in 32ms (next.js: 9ms, application-code: 23ms)
+✓ Compiled in 54ms
+ GET / 200 in 54ms (next.js: 2ms, application-code: 52ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 8ms (next.js: 2ms, application-code: 6ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 5ms)
+✓ Compiled in 134ms
+[browser] ./src/lib/visualizer/useAudioVisualizer.ts:456:17
+Error: the name `createRenderLoop` is defined multiple times
+  454 | export type RenderFn = (timestamp: number) => void;
+  455 |
+> 456 | export function createRenderLoop(fn: RenderFn): { start: () => number; stop: () => void } {
+      |                 ^^^^^^^^^^^^^^^^
+  457 |   let animId = 0;
+  458 |   const loop = (ts: number) => {
+  459 |     fn(ts);
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component Browser]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component Browser]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component SSR]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component SSR]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 94ms
+[browser] ./src/lib/visualizer/useAudioVisualizer.ts:525:17
+Error: the name `createRenderLoop` is defined multiple times
+  523 | export type RenderFn = (timestamp: number) => void;
+  524 |
+> 525 | export function createRenderLoop(fn: RenderFn): { start: () => number; stop: () => void } {
+      |                 ^^^^^^^^^^^^^^^^
+  526 |   let animId = 0;
+  527 |   const loop = (ts: number) => {
+  528 |     fn(ts);
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component Browser]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component Browser]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component SSR]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component SSR]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+✓ Compiled in 43ms
+[browser] ./src/lib/visualizer/useAudioVisualizer.ts:525:17
+Error: the name `createRenderLoop` is defined multiple times
+  523 | export type RenderFn = (timestamp: number) => void;
+  524 |
+> 525 | export function createRenderLoop(fn: RenderFn): { start: () => number; stop: () => void } {
+      |                 ^^^^^^^^^^^^^^^^
+  526 |   let animId = 0;
+  527 |   const loop = (ts: number) => {
+  528 |     fn(ts);
+
+Ecmascript file had an error
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component Browser]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component Browser]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/useAudioVisualizer.ts [Client Component SSR]
+    ./src/components/audio/MiniVisualizer.tsx [Client Component SSR]
+    ./src/components/audio/FeaturedPlayer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+ GET / 200 in 50ms (next.js: 11ms, application-code: 40ms)
+ GET / 200 in 55ms (next.js: 3ms, application-code: 52ms)
+ GET / 200 in 65ms (next.js: 3ms, application-code: 62ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 10ms (next.js: 3ms, application-code: 7ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 5ms)
+ GET / 200 in 38ms (next.js: 1.6ms, application-code: 36ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 5ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 6ms (next.js: 1.4ms, application-code: 4ms)
+✓ Compiled in 40ms
+ GET / 200 in 52ms (next.js: 13ms, application-code: 39ms)
+✓ Compiled in 50ms
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawNeon doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawNeon was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-client] (ecmascript).
+Did you mean to import drawWaveform?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:8:1
+Error: Export drawNeon doesn't exist in target module
+   6 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   7 |
+>  8 | import {
+     | ^^^^^^^
+>  9 |   THEMES,
+     | ^^^^^^^^^
+> 10 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+> 11 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawBars,
+     | ^^^^^^^^^^^
+> 13 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 14 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 15 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 16 |   drawNeon,
+     | ^^^^^^^^^^^
+> 17 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  18 |
+  19 | export function renderStudioVisualizer(
+  20 |   ctx: CanvasRenderingContext2D,
+
+The export drawNeon was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-ssr] (ecmascript).
+Did you mean to import drawWaveform?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+ GET / 200 in 49ms (next.js: 9ms, application-code: 40ms)
+✓ Compiled in 102ms
+ GET / 200 in 46ms (next.js: 11ms, application-code: 35ms)
+✓ Compiled in 44ms
+ GET / 200 in 35ms (next.js: 9ms, application-code: 27ms)
+✓ Compiled in 51ms
+ GET / 200 in 36ms (next.js: 8ms, application-code: 28ms)
+ GET / 200 in 68ms (next.js: 2ms, application-code: 65ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 1.9ms, application-code: 5ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 2ms, application-code: 5ms)
+ GET / 200 in 32ms (next.js: 7ms, application-code: 25ms)
+✓ Compiled in 33ms
+ GET / 200 in 32ms (next.js: 8ms, application-code: 25ms)
+✓ Compiled in 40ms
+ GET / 200 in 25ms (next.js: 6ms, application-code: 19ms)
+✓ Compiled in 73ms
+✓ Compiled in 52ms
+ GET / 200 in 44ms (next.js: 8ms, application-code: 36ms)
+ GET / 200 in 47ms (next.js: 2ms, application-code: 45ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 1.7ms, application-code: 6ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 6ms (next.js: 2ms, application-code: 4ms)
+✓ Compiled in 53ms
+ GET / 200 in 44ms (next.js: 8ms, application-code: 36ms)
+ GET / 200 in 30ms (next.js: 8ms, application-code: 22ms)
+✓ Compiled in 82ms
+✓ Compiled in 76ms
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:6:1
+Error: Export drawTimeline doesn't exist in target module
+   4 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   5 |
+>  6 | import {
+     | ^^^^^^^
+>  7 |   THEMES,
+     | ^^^^^^^^^
+>  8 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+>  9 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 10 |   drawBars,
+     | ^^^^^^^^^^^
+> 11 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 13 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 14 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 |
+  16 | export function renderStudioVisualizer(
+  17 |   ctx: CanvasRenderingContext2D,
+
+The export drawTimeline was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-client] (ecmascript).
+Did you mean to import drawCurve?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+[browser] ./src/lib/visualizer/visualizerRenderers.ts:6:1
+Error: Export drawTimeline doesn't exist in target module
+   4 | export type { VisualizerMode, ColorTheme } from './useAudioVisualizer';
+   5 |
+>  6 | import {
+     | ^^^^^^^
+>  7 |   THEMES,
+     | ^^^^^^^^^
+>  8 |   drawDbGrid,
+     | ^^^^^^^^^^^^^
+>  9 |   drawFreqGrid,
+     | ^^^^^^^^^^^^^^^
+> 10 |   drawBars,
+     | ^^^^^^^^^^^
+> 11 |   drawWaveform,
+     | ^^^^^^^^^^^^^^^
+> 12 |   drawCurve,
+     | ^^^^^^^^^^^^
+> 13 |   drawTimeline,
+     | ^^^^^^^^^^^^^^^
+> 14 | } from './useAudioVisualizer';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  15 |
+  16 | export function renderStudioVisualizer(
+  17 |   ctx: CanvasRenderingContext2D,
+
+The export drawTimeline was not found in module [project]/src/lib/visualizer/useAudioVisualizer.ts [app-ssr] (ecmascript).
+Did you mean to import drawCurve?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component Browser]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component Browser]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component Browser]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/visualizer/visualizerRenderers.ts [Client Component SSR]
+    ./src/components/visualizer/SpectrumCanvas.tsx [Client Component SSR]
+    ./src/components/hero/HeroVisualizer.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Client Component SSR]
+    ./src/components/sections/FeaturedAudioSection.tsx [Server Component]
+    ./src/app/page.tsx [Server Component] 
+ GET / 200 in 33ms (next.js: 8ms, application-code: 25ms)
+✓ Compiled in 44ms
+ GET / 200 in 43ms (next.js: 7ms, application-code: 36ms)
+✓ Compiled in 66ms
+ GET / 200 in 49ms (next.js: 8ms, application-code: 40ms)
+ GET / 200 in 79ms (next.js: 1.9ms, application-code: 77ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 8ms (next.js: 1.9ms, application-code: 6ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 7ms (next.js: 1.9ms, application-code: 5ms)
+✓ Compiled in 101ms
+ GET / 200 in 60ms (next.js: 11ms, application-code: 49ms)
+ GET / 200 in 78ms (next.js: 3ms, application-code: 76ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 8ms (next.js: 2ms, application-code: 6ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 9ms (next.js: 3ms, application-code: 6ms)
+✓ Compiled in 169ms
+ GET / 200 in 48ms (next.js: 9ms, application-code: 39ms)
+ GET / 200 in 85ms (next.js: 3ms, application-code: 82ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 8ms (next.js: 2.0ms, application-code: 6ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 9ms (next.js: 3ms, application-code: 5ms)
+✓ Compiled in 55ms
+ GET / 200 in 40ms (next.js: 5ms, application-code: 35ms)
+ GET / 200 in 25ms (next.js: 5ms, application-code: 19ms)
+✓ Compiled in 35ms
+✓ Compiled in 61ms
+ GET / 200 in 35ms (next.js: 6ms, application-code: 30ms)
+ GET / 200 in 54ms (next.js: 2ms, application-code: 51ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 10ms (next.js: 3ms, application-code: 7ms)
+[audio/featured] Scanned /home/medfender/projects/medfendersite-v2/public/audio/featured-artists (3 audio) and /home/medfender/projects/medfendersite-v2/public/images/Thumbnails (2 thumb). Returning 3 tracks.
+ GET /api/audio/featured 200 in 5ms (next.js: 1.9ms, application-code: 3ms)
+✓ Compiled in 100ms
+ GET / 200 in 41ms (next.js: 10ms, application-code: 31ms)
+✓ Compiled in 59ms
+ GET / 200 in 42ms (next.js: 8ms, application-code: 34ms)
+✓ Compiled in 68ms
+ GET / 200 in 53ms (next.js: 12ms, application-code: 41ms)
+✓ Compiled in 46ms
+ GET / 200 in 40ms (next.js: 8ms, application-code: 32ms)
+✓ Compiled in 46ms
+ GET / 200 in 36ms (next.js: 8ms, application-code: 28ms)
+✓ Compiled in 111ms
+ GET / 200 in 37ms (next.js: 7ms, application-code: 30ms)
