@@ -52,8 +52,11 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
   const REST_X = TPX;
   const REST_Y = TPY + 220;
   const PARK_ANGLE = 0;
-  const PLAY_ANGLE = 55;
-  const armAngle = active ? PLAY_ANGLE : PARK_ANGLE;
+  const PLAY_ANGLE = 33;
+  const INNER_ANGLE = 48;
+  const progress = active ? 1.0 : 0.0; // track progress: 1.0 = playing / fully tracked
+  const activeAngle = PLAY_ANGLE + (progress * (INNER_ANGLE - PLAY_ANGLE));
+  const armAngle = active ? activeAngle : PARK_ANGLE;
 
   // Stylus tip in chassis coords — wand natively points straight down (+Y)
   // At angle θ (CCW negative in screen y-down), tip = (TPX + sin(θ)·L, TPY + cos(θ)·L)
@@ -472,7 +475,7 @@ export default function Turntable({ isPlaying, className }: { isPlaying?: boolea
               <g
                 className="tonearm-spin"
                 style={{
-                  transform: `rotate(${active ? PLAY_ANGLE : PARK_ANGLE}deg)`,
+                  transform: `rotate(${armAngle}deg)`,
                   transformOrigin: "0px 0px",
                   transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
