@@ -7,11 +7,10 @@ const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
 
 export default function Turntable({ playState = 'stopped', className, progress }: { playState?: 'playing' | 'paused' | 'stopped'; className?: string; progress?: number }) {
   const [internalPlaying, setInternalPlaying] = useState(false);
-  const active = playState === 'playing' || (internalPlaying && playState !== 'stopped');
   const toggleInternal = () => setInternalPlaying((s) => !s);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
-  const [pitch, setPitch] = useState(0);
+  const [pitch, setPitch] = useState(0); // -8 to +8 (%)
   const [isTracking, setIsTracking] = useState(false);
 
   useEffect(() => {
@@ -31,11 +30,18 @@ export default function Turntable({ playState = 'stopped', className, progress }
   const currentProgress = progress ?? 0;
   const activeAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
 
-  const armAngle = playState === 'stopped'
-    ? PARK_ANGLE
-    : (playState === 'paused' ? activeAngle : (isTracking ? activeAngle : PLAY_ANGLE));
+  // 3-State Angle Logic
+  let armAngle = PARK_ANGLE;
+  if (playState === 'stopped') {
+    armAngle = PARK_ANGLE;
+  } else if (playState === 'paused') {
+    armAngle = activeAngle; // Hold position exactly where it is!
+  } else if (playState === 'playing') {
+    armAngle = isTracking ? activeAngle : PLAY_ANGLE;
+  }
 
-  const isLifted = playState !== 'playing';
+  // Z-Axis Logic: Lifted when stopped, paused, or cueing (dropping)
+  const isLifted = playState === 'stopped' || playState === 'paused' || (playState === 'playing' && !isTracking);
   const liftShadow = isLifted ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))' : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.7))';
   const liftScale = isLifted ? 'scale(1.02)' : 'scale(1)';
 
@@ -74,6 +80,9 @@ export default function Turntable({ playState = 'stopped', className, progress }
               <filter id="shadow-md" x="-35%" y="-25%" width="170%" height="170%"><feDropShadow dx="2" dy="4" stdDeviation="4" floodColor="#000" floodOpacity="0.72"/></filter>
               <filter id="lift-shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="6" dy="10" stdDeviation="8" floodColor="#000" floodOpacity="0.5"/></filter>
               <linearGradient id="tube-dark" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#2a3038"/><stop offset="40%" stopColor="#8892a0"/><stop offset="60%" stopColor="#8892a0"/><stop offset="100%" stopColor="#2a3038"/></linearGradient>
+              <linearGradient id="silver-aluminum" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#c5ccd4"/><stop offset="30%" stopColor="#8892a0"/><stop offset="60%" stopColor="#5a6678"/><stop offset="100%" stopColor="#2a3038"/></linearGradient>
+              <linearGradient id="tube-cylindrical" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#18191f"/><stop offset="35%" stopColor="#646f7d"/><stop offset="65%" stopColor="#646f7d"/><stop offset="100%" stopColor="#18191f"/></linearGradient>
+              <linearGradient id="carbon-black" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#111418"/><stop offset="40%" stopColor="#2a3038"/><stop offset="70%" stopColor="#18191f"/><stop offset="100%" stopColor="#0a0c12"/></linearGradient>
               <linearGradient id="gold-vibrant" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#d92525"/><stop offset="50%" stopColor="#ff4444"/><stop offset="100%" stopColor="#8a1818"/></linearGradient>
             </defs>
 
@@ -150,67 +159,92 @@ export default function Turntable({ playState = 'stopped', className, progress }
               <text x={TPX - 34} y={TPY + 44} textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
             </g>
 
-            {/* Rotating tonearm with Z-elevation */}
-            <g transform={`translate(${TPX}, ${TPY})`} style={{ transition: "transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)", transformOrigin: `${TPX}px ${TPY}px` }}>
-              <g
-                style={{
-                  transform: `rotate(${armAngle}deg) ${liftScale}`,
-                  transformOrigin: "0px 0px",
-                  transition: (!active || !isTracking) ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'transform 0.1s linear',
-                  filter: isLifted ? "drop-shadow(6px 10px 8px rgba(0,0,0,0.5))" : "drop-shadow(2px 4px 4px rgba(0,0,0,0.7))",
-                }}
-              >
-                {/* Counterweight */}
+            {/* Rotating tonearm with Z-elevation — CSS rotate around pivot at (TPX, TPY) */}
+            <g
+              style={{
+                transform: `rotate(${armAngle}deg) scale(${isLifted ? 1.03 : 1})`,
+                transformOrigin: `${TPX}px ${TPY}px`,
+                filter: isLifted
+                  ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))'
+                  : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
+                transition: (playState === 'playing' && isTracking)
+                  ? 'transform 0.1s linear, filter 0.3s ease, scale 0.3s ease'
+                  : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.6s ease, scale 0.6s ease',
+              }}
+            >
+                {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
                 <g filter="url(#shadow-md)">
-                  <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W} fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.8" />
-                  <rect x={TPX - WAND_W + 2} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45} fill="rgba(195,205,225,0.22)" />
-                  <rect x={TPX + WAND_W * 0.1} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45} fill="rgba(0,0,0,0.3)" />
-                  {Array.from({ length: 4 }, (_, k) => { const ky = TPY - CW_LEN + 10 * (k + 1); return <line key={k} x1={TPX - WAND_W + 1} y1={ky} x2={TPX + WAND_W - 1} y2={ky} stroke="#1e222a" strokeWidth="1" />; })}
-                  <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.9} ry={WAND_W * 0.55} fill="url(#gm)" stroke="#252830" strokeWidth="0.6" />
-                  <ellipse cx={TPX - WAND_W * 0.3} cy={TPY - CW_LEN - 1} rx={WAND_W * 0.5} ry={WAND_W * 0.22} fill="rgba(225,235,248,0.4)" />
-                  <text x={TPX - WAND_W - 4} y={TPY - CW_LEN / 2} textAnchor="end" fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
-                  <text x={TPX + WAND_W + 4} y={TPY - CW_LEN / 2} textAnchor="start" fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
+                  <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W}
+                    fill="url(#silver-aluminum)" stroke="#1e222a" strokeWidth="0.8" />
+                  {/* Vertical grip lines for knurled tracking-force texture */}
+                  {Array.from({ length: 6 }, (_, k) => {
+                    const kx = TPX - WAND_W + 2 + k * 2.2;
+                    return <line key={k} x1={kx} y1={TPY - CW_LEN + 4} x2={kx} y2={TPY - 4} stroke="#0c0d12" strokeWidth="0.6" opacity="0.55" />;
+                  })}
+                  {/* Highlight band along the left edge */}
+                  <rect x={TPX - WAND_W + 2} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
+                    fill="rgba(195,205,225,0.22)" />
+                  {/* Dark right edge */}
+                  <rect x={TPX + WAND_W * 0.1} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45}
+                    fill="rgba(0,0,0,0.3)" />
+                  {/* Domed end cap */}
+                  <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.95} ry={WAND_W * 0.6}
+                    fill="url(#silver-aluminum)" stroke="#252830" strokeWidth="0.6" />
+                  <ellipse cx={TPX - WAND_W * 0.3} cy={TPY - CW_LEN - 1} rx={WAND_W * 0.5} ry={WAND_W * 0.22}
+                    fill="rgba(225,235,248,0.4)" />
+                  {/* Tracking-force scale markings */}
+                  <text x={TPX - WAND_W - 4} y={TPY - CW_LEN / 2} textAnchor="end"
+                    fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
+                  <text x={TPX + WAND_W + 4} y={TPY - CW_LEN / 2} textAnchor="start"
+                    fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
                 </g>
 
-                {/* Wand — polished carbon/aluminum tube */}
+                {/* Tonearm Wand — sleek cylindrical tube with dark-light-dark edge gradient (absolute chassis coords) */}
                 <g>
-                  <path d={`M 0,0 C 14,55 14,165 0,220`} fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
-                  <path d={`M 0,0 C 14,55 14,165 0,220`} fill="none" stroke="url(#tube-dark)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
-                  <path d={`M ${-WAND_W * 0.4},${WAND_W * 0.6} C ${14 - WAND_W},55 ${14 - WAND_W},165 ${-WAND_W * 0.4},220 - WAND_W * 0.6}`} fill="none" stroke="rgba(245,250,255,0.55)" strokeWidth="2" strokeLinecap="round" />
-                  <path d={`M ${WAND_W * 0.4},${WAND_W * 0.6} C ${14 + WAND_W},57 ${14 + WAND_W},167 ${WAND_W * 0.4},220 - WAND_W * 0.4}`} fill="none" stroke="rgba(20,25,35,0.45)" strokeWidth="1.2" strokeLinecap="round" />
+                  <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
+                    fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
+                  <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
+                    fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
                 </g>
 
-                {/* Headshell — angled inward, matte black */}
-                <g filter="url(#shadow-sm)" transform={`translate(0, ${WAND_LEN}) rotate(25)`}>
-                  <path d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.8" />
-                  <path d="M -25,-9 L 11,-9 L 22,-5 L -25,-4 Z" fill="rgba(195,205,225,0.2)" />
-                  <path d="M -25,9 L 11,11 L 22,4 L -25,4 Z" fill="rgba(0,0,0,0.4)" />
-                  <ellipse cx="-22" cy="0" rx="6.5" ry="9" fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
-                  <rect x="12" y="-10" width="10" height="20" rx="2.5" fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.5" />
-                  {[0,1,2].map(i => <line key={i} x1="14" y1={-5 + i*5} x2="20" y2={-5 + i*5} stroke="#1e222a" strokeWidth="0.8" />)}
-                  <g transform="translate(-2, 0)">
-                    <rect x="-15" y="-9" width="30" height="18" rx="3" fill="url(#cartridge)" stroke="#1e222a" strokeWidth="0.6" />
-                    <rect x="-12" y="-8" width="24" height="6" rx="1.5" fill="rgba(78,88,105,0.25)" />
-                    <circle cx="-8" cy="-5" r="1.8" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                    <circle cx="-8" cy="5" r="1.8" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                    <line x1="15" y1="0" x2="30" y2="4" stroke="url(#chrome)" strokeWidth="2.2" strokeLinecap="round" />
-                    <circle cx="31" cy="4.5" r="1.8" fill="url(#chrome)" stroke="#6a7888" strokeWidth="0.4" />
-                  </g>
-                  {/* Finger lift */}
-                  <rect x="-45" y="-6" width="16" height="8" rx="2" fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.4" />
-                  {/* Cartridge — Ortofon-style vibrant red */}
-                  <g transform="translate(10, 2)">
-                    <rect x="-14" y="-11" width="28" height="22" rx="3" fill="url(#gold-vibrant)" stroke="#7a1818" strokeWidth="0.6" />
-                    <rect x="-10" y="-7" width="20" height="6" rx="1" fill="rgba(255,255,255,0.15)" />
+                {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
+                <g filter="url(#shadow-sm)" transform={`translate(${TPX}, ${TPY + WAND_LEN}) rotate(25)`}>
+                  {/* Matte-black headshell body */}
+                  <path d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z"
+                    fill="url(#carbon-black)" stroke="#252830" strokeWidth="0.8" />
+                  {/* Top highlight face */}
+                  <path d="M -25,-9 L 11,-9 L 22,-5 L -25,-4 Z"
+                    fill="rgba(195,205,225,0.2)" />
+                  {/* Bottom shadow face */}
+                  <path d="M -25,9 L 11,11 L 22,4 L -25,4 Z"
+                    fill="rgba(0,0,0,0.4)" />
+                  {/* Gold connector ring at base of headshell */}
+                  <ellipse cx="-22" cy="0" rx="6.5" ry="9"
+                    fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
+                  {/* Curved finger lift protruding from the rear of the headshell */}
+                  <path d="M -38,-7 C -45,-7 -48,-3 -45,0 C -48,3 -45,7 -38,7 L -32,7 L -32,-7 Z"
+                    fill="url(#gm-brushed)" stroke="#3a3e4c" strokeWidth="0.5" />
+                  <line x1="-45" y1="0" x2="-32" y2="0" stroke="#1e222a" strokeWidth="0.6" opacity="0.6" />
+                  {/* Ortofon-style vibrant red cartridge body underneath */}
+                  <g transform="translate(-2, 1)">
+                    <rect x="-15" y="-9" width="30" height="18" rx="3"
+                      fill="url(#gold-vibrant)" stroke="#7a1818" strokeWidth="0.6" />
+                    <rect x="-12" y="-7" width="24" height="4" rx="1.5"
+                      fill="rgba(255,255,255,0.18)" />
+                    {/* Mounting screws */}
+                    <circle cx="-9" cy="-5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
+                    <circle cx="-9" cy="5" r="1.6" fill="url(#silver-aluminum)" stroke="#4a5262" strokeWidth="0.3" />
+                    {/* Tiny cantilever + tip pointing forward */}
+                    <line x1="13" y1="0" x2="24" y2="3" stroke="url(#silver-aluminum)" strokeWidth="1.6" strokeLinecap="round" />
+                    <circle cx="24" cy="3" r="1.3" fill="url(#silver-aluminum)" stroke="#6a7888" strokeWidth="0.3" />
                   </g>
                 </g>
 
-                {/* Stylus tip at calculated coordinate */}
-                <g>
-                  <circle cx={0} cy={WAND_LEN + 4} r="2" fill="url(#chrome)" stroke="#5a6878" strokeWidth="0.3" />
-                  <polygon points={`2,${WAND_LEN + 2} 6,${WAND_LEN + 4.5} 2,${WAND_LEN + 7} 3.5,${WAND_LEN + 4.5}`} fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.3" />
-                </g>
-              </g>
+                {/* Stylus tip — tiny metallic circle resting at the calculated tip coordinate */}
+                <circle cx={TPX} cy={TPY + WAND_LEN + 4} r="2"
+                  fill="url(#silver-aluminum)" stroke="#5a6878" strokeWidth="0.3" />
+                <polygon points={`${TPX + 2},${TPY + WAND_LEN + 2} ${TPX + 6},${TPY + WAND_LEN + 4.5} ${TPX + 2},${TPY + WAND_LEN + 7} ${TPX + 3.5},${TPY + WAND_LEN + 4.5}`}
+                  fill="#cc1a4a" stroke="#aa1240" strokeWidth="0.3" />
             </g>
 
             {/* Pitch fader */}
