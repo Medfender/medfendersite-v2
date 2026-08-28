@@ -77,7 +77,14 @@
       "Bash(curl -s -o /dev/null -w \"Dev server: HTTP %{http_code}\\\\n\" http://localhost:3000/)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\" http://localhost:3000)",
       "Bash(sed *)",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(pnpm add *)",
+      "Bash(mkdir -p /tmp/download)",
+      "Bash(curl -L -o /tmp/download/dummy.mp3 \"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3\")",
+      "Bash(cp *)",
+      "Bash(grep -o '.{0,30}01.{0,30}' .next/static/chunks/1akvict7lguh_.js)",
+      "Bash(grep -v \"^\\\\-\\\\-$\")",
+      "Bash(git ls-tree *)"
     ]
   }
 }

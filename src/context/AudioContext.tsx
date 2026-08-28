@@ -288,6 +288,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!raw || typeof raw !== "string") {
       // Fallback to the real file that exists on disk
       return "/audio/featured/Sidi Bouganga feat Younes Hadir.mp3";
+      // NOTE: the API at /api/audio/featured returns the playlist in alphabetical
+      // order from `public/audio/featured-artists/`. To make "Vices et Bordel" the
+      // default, its filename is prefixed with `01 - ` (renamed on disk), so it
+      // sorts first. Fallback above preserves the original default if the API
+      // is unavailable.
     }
     // Strip origin if accidentally included (e.g. full URL pasted in)
     const stripped = raw.startsWith("http")
@@ -492,10 +497,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Mute → remember current level, set to 0
       if (volume > 0.01) lastVolumeRef.current = volume;
       setIsMuted(true);
-      // Visualizer decoupling: HTML audio stays at 100% — mute via GainNode only.
       if (audioRef.current) {
-        audioRef.current.muted = false;
-        audioRef.current.volume = 1.0;
+        audioRef.current.muted = true;
+        audioRef.current.volume = 0;
       }
       const el = audioRef.current;
       if (el && gainNodesRef.current.get(el) && audioCtxRef.current) {

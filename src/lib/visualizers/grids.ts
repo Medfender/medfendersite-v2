@@ -58,12 +58,12 @@ export function drawDbGrid(
 
 // ── Frequency grid ─────────────────────────────────────────────────────────────
 
-export const FREQ_GRID = [
+// 5 key markers — avoids the cramped 500Hz/5kHz cluster that caused overlap.
+// All positions computed in log space; spacing guards prevent any label collision.
+export const FREQ_GRID: { freq: number; label: string }[] = [
   { freq: 20,    label: '20Hz'  },
   { freq: 100,   label: '100Hz' },
-  { freq: 500,   label: '500Hz' },
   { freq: 1000,  label: '1kHz'  },
-  { freq: 5000,  label: '5kHz'  },
   { freq: 10000, label: '10kHz' },
   { freq: 20000, label: '20kHz' },
 ];
@@ -79,13 +79,24 @@ export function drawFreqGrid(
   const gH = height - padBottom;
   const rightInset = 22;
 
-  FREQ_GRID.forEach(({ freq, label }, i) => {
-    const isLast = i === FREQ_GRID.length - 1;
-    const normX = isLast
-      ? 1 - rightInset / gW
-      : (Math.log10(freq) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20));
-    const x = padLeft + normX * gW;
+  const norm = (freq: number) =>
+    (Math.log10(freq) - Math.log10(20)) / (Math.log10(20000) - Math.log10(20));
 
+  // Pre-compute pixel positions so we can guard against collisions
+  const entries = FREQ_GRID.map(({ freq, label }, i) => {
+    const isLast = i === FREQ_GRID.length - 1;
+    const xFrac = isLast ? 1 - rightInset / gW : norm(freq);
+    const x = padLeft + xFrac * gW;
+    return { freq, label, x, isLast };
+  });
+
+  // Compute character widths for collision detection
+  ctx.font = '500 10px Inter, system-ui, sans-serif';
+
+  for (let i = 0; i < entries.length; i++) {
+    const { freq, label, x, isLast } = entries[i];
+
+    // Vertical guide line (skip the rightmost inset marker)
     if (!isLast) {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.beginPath();
@@ -94,13 +105,17 @@ export function drawFreqGrid(
       ctx.stroke();
     }
 
+    // Collision guard: skip label if it would overlap the previous one.
+    // Uses 7 chars × 6px as a safe minimum gap across all label lengths.
+    const prevEntry = entries[i - 1];
+    const labelW = label.length * 6; // conservative px estimate
+    if (prevEntry && x - prevEntry.x < labelW + 8) continue;
+
+    // Also skip labels that fall too close to the right edge
+    if (x > width - 10) continue;
+
     ctx.fillStyle = 'rgba(148, 163, 184, 0.5)';
-    if (isLast) {
-      ctx.textAlign = 'right';
-      ctx.fillText(label, width - 4, height - 6);
-    } else {
-      ctx.textAlign = 'center';
-      ctx.fillText(label, x, height - 6);
-    }
-  });
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, height - 6);
+  }
 }

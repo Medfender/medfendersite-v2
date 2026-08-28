@@ -2,6 +2,7 @@ import FeaturedAudioSection from "@/components/sections/FeaturedAudioSection";
 import PresetsSection from "@/components/store/PresetsSection";
 import MediaSection from "@/components/media/MediaSection";
 import ContactSection from "@/components/contact/ContactSection";
+import VinylShowcase from "@/components/VinylShowcase";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
         <PresetsSection />
       </section>
 
+      <VinylShowcase />
 
       <section id="media">
         <MediaSection />

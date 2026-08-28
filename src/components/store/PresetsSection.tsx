@@ -19,7 +19,7 @@ export default function PresetsSection() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {presets.map((preset) => (
           <PresetCard key={preset.id} preset={preset} />
         ))}
