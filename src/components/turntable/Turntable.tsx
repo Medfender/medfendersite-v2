@@ -124,13 +124,7 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
               <circle cx={PCX} cy={PCY} r="1.4" fill="#1a1d24" />
             </g>
 
-            {/* Arm assembly */}
-            <g filter="url(#shadow-md)">
-              <rect x={REST_X - 32} y={REST_Y - 4} width="64" height="12" rx="3" fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
-              <ellipse cx={REST_X} cy={REST_Y - 4} rx="20" ry="6" fill="url(#matte-blk)" stroke="#2c3040" strokeWidth="0.6" />
-              <rect x={REST_X - 4} y={REST_Y - 28} width="8" height="20" rx="2" fill="url(#chrome)" stroke="#5a6478" strokeWidth="0.4" />
-              <circle cx={REST_X} cy={REST_Y - 18} r="2.2" fill="#a82828" opacity="0.85" />
-            </g>
+            {/* Arm base column — static plinth mount behind the gimbal (keeps gimbal screws visible) */}
             <g filter="url(#shadow-md)">
               <rect x={TPX - 16} y={TPY + 18} width="32" height="12" rx="3" fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
               <rect x={TPX - 16} y={TPY - 10} width="32" height="30" rx="5" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
@@ -138,55 +132,75 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
               <circle cx={TPX - 20} cy={TPY + 24} r="3.5" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
               <circle cx={TPX + 20} cy={TPY + 24} r="3.5" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
             </g>
-            <g filter="url(#shadow-sm)">
-              <circle cx={TPX + 58} cy={TPY - 8} r="9" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.5" />
-              <circle cx={TPX + 58} cy={TPY - 8} r="6.5" fill="url(#antiskate-brass)" stroke="#4a3a18" strokeWidth="0.4" />
-              <line x1={TPX + 58} y1={TPY - 12} x2={TPX + 58} y2={TPY - 5} stroke="#1e1410" strokeWidth="1" />
-              <circle cx={TPX + 58} cy={TPY - 8} r="1.2" fill="#1a1410" />
-              <text x={TPX + 58} y={TPY + 9} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
-            </g>
-            <g filter="url(#shadow-md)">
-              <circle cx={TPX} cy={TPY} r="34" fill="url(#matte-blk)" stroke="#1e222a" strokeWidth="0.8" />
-              <circle cx={TPX} cy={TPY} r="30" fill="none" stroke="url(#gimbal-metal)" strokeWidth="6" />
-              {Array.from({ length: 24 }, (_, i) => { const a = (i * 360) / 24; const rad = (a * Math.PI) / 180; const x1 = +(TPX + Math.cos(rad) * 27).toFixed(3); const y1 = +(TPY + Math.sin(rad) * 27).toFixed(3); const x2 = +(TPX + Math.cos(rad) * 33).toFixed(3); const y2 = +(TPY + Math.sin(rad) * 33).toFixed(3); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1e222a" strokeWidth="0.5" opacity="0.7" />; })}
-              <circle cx={TPX} cy={TPY} r="24" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
-              <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#silver-deep)" strokeWidth="2.4" />
-              <circle cx={TPX} cy={TPY} r="16" fill="url(#gimbal-metal)" stroke="#3a3e4c" strokeWidth="0.5" />
-              <circle cx={TPX} cy={TPY} r="9" fill="url(#matte-blk)" stroke="#0c0d12" strokeWidth="0.4" />
-              <ellipse cx={TPX - 3} cy={TPY - 3} rx="5" ry="3" fill="rgba(225,235,248,0.4)" transform={`rotate(-35, ${TPX - 3}, ${TPY - 3})`} />
-              {[ [TPX + 28, TPY, 0], [TPX, TPY + 28, 90], [TPX - 28, TPY, 180], [TPX, TPY - 28, 270] ].map(([sx, sy, deg], i) => (
-                <g key={i}>
-                  <circle cx={sx} cy={sy} r="2.4" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4" />
-                  {deg === 0 && <line x1={sx - 2} y1={sy} x2={sx + 2} y2={sy} stroke="#252830" strokeWidth="0.8" />}
-                  {deg === 90 && <line x1={sx} y1={sy - 2} x2={sx} y2={sy + 2} stroke="#252830" strokeWidth="0.8" />}
-                  {deg === 180 && <line x1={sx - 2} y1={sy} x2={sx + 2} y2={sy} stroke="#252830" strokeWidth="0.8" />}
-                  {deg === 270 && <line x1={sx} y1={sy - 2} x2={sx} y2={sy + 2} stroke="#252830" strokeWidth="0.8" />}
-                </g>
-              ))}
-            </g>
-            <g filter="url(#shadow-sm)">
-              <rect x={TPX - 38} y={TPY - 2} width="8" height="32" rx="2" fill="url(#gm-brushed)" stroke="#2c3040" strokeWidth="0.4" />
-              <ellipse cx={TPX - 34} cy={TPY + 30} rx="8" ry="4" fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.4" />
-              <rect x={TPX - 36} y={playState === 'playing' ? TPY - 14 : TPY - 4} width="28" height="6" rx="3" fill="url(#silver-deep)" stroke="#5a6878" strokeWidth="0.4" style={{ transformOrigin: `${TPX - 34}px ${TPY}px`, transform: `rotate(${playState === 'playing' ? 22 : -14}deg)`, transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)" }} />
-              <text x={TPX - 34} y={TPY + 44} textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
+
+            {/* 1. STATIC BASE — bolted to plinth, never rotates */}
+            <g className="static-tonearm-base">
+              {/* Cradle / rest at PARK_ANGLE (0°) — sits exactly where arm rests */}
+              <g filter="url(#shadow-md)">
+                <rect x={REST_X - 32} y={REST_Y - 4} width="64" height="12" rx="3"
+                  fill="url(#gm-brushed)" stroke="#1e222a" strokeWidth="0.6" />
+                <ellipse cx={REST_X} cy={REST_Y - 4} rx="20" ry="6"
+                  fill="url(#matte-blk)" stroke="#2c3040" strokeWidth="0.6" />
+                <rect x={REST_X - 4} y={REST_Y - 28} width="8" height="20" rx="2"
+                  fill="url(#chrome)" stroke="#5a6478" strokeWidth="0.4" />
+                <circle cx={REST_X} cy={REST_Y - 18} r="2.2"
+                  fill="#a82828" opacity="0.85" />
+              </g>
+
+              {/* Gimbal / Pivot Base — heavily machined bearing housing at (TPX, TPY) */}
+              <g filter="url(#shadow-md)">
+                <circle cx={TPX} cy={TPY} r="34" fill="url(#matte-blk)" stroke="#1e222a" strokeWidth="0.8" />
+                <circle cx={TPX} cy={TPY} r="30" fill="none" stroke="url(#gimbal-metal)" strokeWidth="6" />
+                {Array.from({ length: 24 }, (_, i) => { const a=(i*360)/24; const rad=(a*Math.PI)/180; const x1=+(TPX+Math.cos(rad)*27).toFixed(3); const y1=+(TPY+Math.sin(rad)*27).toFixed(3); const x2=+(TPX+Math.cos(rad)*33).toFixed(3); const y2=+(TPY+Math.sin(rad)*33).toFixed(3); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1e222a" strokeWidth="0.5" opacity="0.7"/>; })}
+                <circle cx={TPX} cy={TPY} r="24" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
+                <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#silver-deep)" strokeWidth="2.4" />
+                <circle cx={TPX} cy={TPY} r="16" fill="url(#gimbal-metal)" stroke="#3a3e4c" strokeWidth="0.5" />
+                <circle cx={TPX} cy={TPY} r="9" fill="url(#matte-blk)" stroke="#0c0d12" strokeWidth="0.4" />
+                <ellipse cx={TPX-3} cy={TPY-3} rx="5" ry="3" fill="rgba(225,235,248,0.4)" transform={`rotate(-35, ${TPX-3}, ${TPY-3})`} />
+                {[ [TPX+28,TPY,0],[TPX,TPY+28,90],[TPX-28,TPY,180],[TPX,TPY-28,270] ].map(([sx,sy,deg],i)=> (
+                  <g key={i}>
+                    <circle cx={sx} cy={sy} r="2.4" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4"/>
+                    {deg===0 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
+                    {deg===90 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
+                    {deg===180 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
+                    {deg===270 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
+                  </g>
+                ))}
+              </g>
+
+              {/* Anti-Skate Dial — smaller textured dial to the right of gimbal */}
+              <g filter="url(#shadow-sm)">
+                <circle cx={TPX + 58} cy={TPY - 8} r="9" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.5" />
+                <circle cx={TPX + 58} cy={TPY - 8} r="6.5" fill="url(#antiskate-brass)" stroke="#4a3a18" strokeWidth="0.4" />
+                <line x1={TPX+58} y1={TPY-12} x2={TPX+58} y2={TPY-5} stroke="#1e1410" strokeWidth="1" />
+                <circle cx={TPX+58} cy={TPY-8} r="1.2" fill="#1a1410" />
+                <text x={TPX+58} y={TPY+9} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
+              </g>
+
+              {/* Cue Hydraulic Lever (left of pivot) — static, only moves via its own internal state */}
+              <g filter="url(#shadow-sm)">
+                <rect x={TPX-38} y={TPY-2} width="8" height="32" rx="2" fill="url(#gm-brushed)" stroke="#2c3040" strokeWidth="0.4" />
+                <ellipse cx={TPX-34} cy={TPY+30} rx="8" ry="4" fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.4" />
+                <rect x={TPX-36} y={playState === 'playing' ? TPY-14 : TPY-4} width="28" height="6" rx="3" fill="url(#silver-deep)" stroke="#5a6878" strokeWidth="0.4" style={{ transformOrigin: `${TPX-34}px ${TPY}px`, transform: `rotate(${playState === 'playing' ? 22 : -14}deg)`, transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+                <text x={TPX-34} y={TPY+44} textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
+              </g>
             </g>
 
-            {/* 2. LIFT WRAPPER — handles ONLY the Z-axis scale + drop shadow */}
+            {/* 2. Z-AXIS LIFT WRAPPER... */}
             <g
               style={{
-                transform: `scale(${isLifted ? 1.03 : 1})`,
+                transform: `scale(${isLifted ? 1.02 : 1})`,
                 transformOrigin: `${TPX}px ${TPY}px`,
                 filter: isLifted
-                  ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))'
+                  ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))'
                   : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
                 transition: 'transform 0.3s ease, filter 0.3s ease',
               }}
             >
-              {/* 3. ROTATION WRAPPER — handles ONLY the X/Y angle around the pivot */}
+              {/* 3. NATIVE SVG ROTATION (no CSS transforms — kills the warp) */}
               <g
+                transform={`rotate(${armAngle}, ${TPX}, ${TPY})`}
                 style={{
-                  transform: `rotate(${armAngle}deg)`,
-                  transformOrigin: `${TPX}px ${TPY}px`,
                   transition: (playState === 'playing' && isTracking)
                     ? 'transform 0.1s linear'
                     : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -225,6 +239,9 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
                     fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
                   <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
                     fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
+                  {/* Tiny curved bar near the base — cueing lift bank (Technics SL-1200 style) */}
+                  <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
+                    fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
                 </g>
 
                 {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
