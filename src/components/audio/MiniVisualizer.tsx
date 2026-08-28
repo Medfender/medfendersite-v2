@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   THEMES,
   drawBars,
@@ -18,6 +18,8 @@ interface MiniVisualizerProps {
   height?: number;
   themeKey?: ColorTheme;
   smoothing?: number;
+  /** Optional click handler to cycle visualizer mode — single source of truth lives in parent. */
+  onModeCycle?: () => void;
 }
 
 /**
@@ -36,16 +38,14 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
   height = 50,
   themeKey = "cyan",
   smoothing = 0.25,
+  onModeCycle,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [localMode, setLocalMode] = useState<VisualizerMode>(mode);
-  const cycleMode = () => {
-    setLocalMode((prev) => {
-      const modes: VisualizerMode[] = ['curve', 'bars', 'waveform'];
-      const idx = modes.indexOf(prev);
-      return modes[(idx + 1) % modes.length];
-    });
+  // Mode is driven entirely by the parent's `mode` prop. The canvas cycles mode
+  // on click via the optional `onModeCycle` callback so there is no dual state.
+  const handleClick = () => {
+    if (onModeCycle) onModeCycle();
   };
 
   // Persistent scratch buffers — survive re-renders without churn.
@@ -64,7 +64,7 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
     let fadeLevel = 0;
 
     const theme = THEMES[themeKey] ?? THEMES.cyan;
-    const loopMode = localMode; // capture so the loop doesn't restart when mode flips
+    const loopMode = mode; // capture so the loop doesn't restart when mode flips
 
     const loop = createRenderLoop(() => {
       const canvas = canvasRef.current;
@@ -89,10 +89,10 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       // causing ctx.scale(dpr) to compress all drawing into the left half.
       canvas.width  = cssW * dpr;
       canvas.height = cssH * dpr;
-      // scale() composes with the identity matrix set by getContext('2d') each call,
-      // mapping all drawing coordinates (in cssW/cssH logical pixels) to the full
-      // physical canvas backing store. All draw calls pass cssW/cssH directly.
-      ctx.scale(dpr, dpr);
+      // setTransform RESETS the matrix each frame, then scales. ctx.scale(dpr,dpr)
+      // would COMPOUND with any prior transform and grow geometrically over many
+      // rAF frames — eventually shrinking drawing to zero. setTransform avoids that.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Smooth interpolation of fade coefficient (read from ref so the loop
       // outlives React state flips and the fade-out still renders).
@@ -219,18 +219,21 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
 
     const id = loop.start();
     return () => loop.stop();
-  }, [analyserNode, localMode, width, height, themeKey, smoothing]);
+  }, [analyserNode, mode, width, height, themeKey, smoothing]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="block cursor-pointer"
-      onClick={cycleMode}
+      className="block cursor-pointer w-full h-full"
+      onClick={handleClick}
       style={{
-        width: `${width}px`,
-        height: `${height}px`,
+        // Fallback intrinsic size in case the parent is unsized; with w-full/h-full
+        // the canvas grows to fill its flex/grid container.
+        minWidth: width,
+        minHeight: height,
         flexShrink: 0,
         imageRendering: "auto",
+        display: "block",
       }}
     />
   );

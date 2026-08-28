@@ -193,6 +193,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               analyserNode={analyserNode}
               isPlaying={isPlaying}
               mode={miniMode}
+              onModeCycle={cycleMiniMode}
               width={150}
               height={50}
             />
