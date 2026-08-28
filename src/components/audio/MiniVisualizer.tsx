@@ -73,10 +73,20 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       if (!ctx) return;
 
       const dpr = window.devicePixelRatio || 1;
-      const cssW = width;
-      const cssH = height;
-      canvas.width = cssW * dpr;
-      canvas.height = cssH * dpr;
+
+      // Read the ACTUAL rendered bounding box — respects flex sizing, responsive
+      // layout, and any CSS width overrides from the parent container. This
+      // replaces the stale `width` prop which defaults to 150 and never updates.
+      const rect = canvas.getBoundingClientRect();
+      const cssW = rect.width  || width;
+      const cssH = rect.height || height;
+
+      // Resize canvas backing store to match bounding rect so drawing fills 100%
+      // of the visible area at native DPR resolution.
+      if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
+        canvas.width  = cssW * dpr;
+        canvas.height = cssH * dpr;
+      }
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Smooth interpolation of fade coefficient (read from ref so the loop
@@ -118,15 +128,31 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       }
 
       // ── Smoothed frequency + peak hold ───────────────────────────────────
+      // Logarithmic frequency-to-bin mapping: bins are spaced in log-space
+      // so the entire 20Hz–20kHz range fills the full canvas width evenly.
+      // Each bar i reads from a log-positioned bin index instead of linear step.
       const barCount = 16;
-      const step = Math.max(1, Math.floor(raw.length / (barCount * 2)));
       const smoothed  = smoothedRef.current;
       const peaks    = peaksRef.current;
       const peakHold = peakHoldRef.current;
 
+      // Log-normalised bin spread: 20Hz → index near 0, 20kHz → index near raw.length-1.
+      // Without this, linear `raw[i*step]` clusters most energy in the left/middle
+      // (low/mid bands) and leaves the high-frequency right side blank/dead.
+      const logMin = Math.log10(20);
+      const logMax = Math.log10(20000);
+      const freqBinCount = raw.length;
+
       let anyOverflow = false;
       for (let i = 0; i < barCount; i++) {
-        const v = raw[i * step] / 255;
+        // Map bar position 0..barCount-1 to log frequency 20Hz..20kHz
+        const t = i / (barCount - 1); // 0 → 20Hz, 1 → 20kHz
+        const logFreq = logMin + t * (logMax - logMin);
+        const freq = Math.pow(10, logFreq);
+        // Convert frequency back to bin index (relative to fft bin count)
+        const binIdx = Math.round((freq / 20000) * (freqBinCount - 1));
+        const safeIdx = Math.max(0, Math.min(freqBinCount - 1, binIdx));
+        const v = raw[safeIdx] / 255;
         const next = Math.min(v, 1.0);
         smoothed[i] += (next - smoothed[i]) * (1 - smoothing);
         if (smoothed[i] > peakHold[i]) {
