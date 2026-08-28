@@ -81,13 +81,18 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       const cssW = rect.width  || width;
       const cssH = rect.height || height;
 
-      // Resize canvas backing store to match bounding rect so drawing fills 100%
-      // of the visible area at native DPR resolution.
-      if (canvas.width !== cssW * dpr || canvas.height !== cssH * dpr) {
-        canvas.width  = cssW * dpr;
-        canvas.height = cssH * dpr;
-      }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Always set physical backing store to match CSS size × DPR so the canvas
+      // fills the correct number of physical pixels on HiDPI/Retina screens.
+      // The conditional guard is removed because comparing canvas.width (physical)
+      // against cssW*dpr (also physical) can incorrectly evaluate false on first
+      // render when canvas.width already equals rect.width (raw CSS value) —
+      // causing ctx.scale(dpr) to compress all drawing into the left half.
+      canvas.width  = cssW * dpr;
+      canvas.height = cssH * dpr;
+      // scale() composes with the identity matrix set by getContext('2d') each call,
+      // mapping all drawing coordinates (in cssW/cssH logical pixels) to the full
+      // physical canvas backing store. All draw calls pass cssW/cssH directly.
+      ctx.scale(dpr, dpr);
 
       // Smooth interpolation of fade coefficient (read from ref so the loop
       // outlives React state flips and the fade-out still renders).
