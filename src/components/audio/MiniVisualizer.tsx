@@ -133,21 +133,23 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
       }
 
       // ── Smoothed frequency + peak hold ───────────────────────────────────
-      // Logarithmic frequency-to-bin mapping: bins are spaced in log-space
-      // so the entire 20Hz–20kHz range fills the full canvas width evenly.
-      // Each bar i reads from a log-positioned bin index instead of linear step.
-      const barCount = 16;
+      // Dynamically calculate barCount so bars always fill the full cssW width.
+      // Formula: barCount = floor((cssW + gap) / (minBarWidth + gap))
+      // This ensures the last bar ends at cssW with no dead space on the right.
+      const gap = 3;
+      const minBarWidth = 4;
+      const barCount = Math.max(1, Math.floor((cssW + gap) / (minBarWidth + gap)));
+      // Width per bar (remaining space after gaps divided evenly)
+      const barW = Math.max(1, (cssW - (barCount - 1) * gap) / barCount);
       const smoothed  = smoothedRef.current;
       const peaks    = peaksRef.current;
       const peakHold = peakHoldRef.current;
 
       // Log-spaced frequency mapping: bar 0 → 20Hz, bar 15 → 10kHz.
-      // Logarithmic frequency-to-bin mapping: 20Hz → 10kHz.
       //   freq(i) = minFreq * (maxFreq / minFreq)^(i / (barCount - 1))
       //   binIndex = round((freq / nyquist) * frequencyBinCount)
       // Spreads the musical spectrum (bass, mids, presence) across the full
-      // 0..barCount-1 range so the 100% canvas width is utilized end-to-end
-      // instead of clustering bass energy on the left and leaving the right blank.
+      // 0..barCount-1 range so the 100% canvas width is utilized end-to-end.
       const minFreq = 20;
       const maxFreq = 10000;
       const nyquist = analyserNode
@@ -198,7 +200,7 @@ export const MiniVisualizer: React.FC<MiniVisualizerProps> = ({
           smoothed: adjustedSmoothed,
           peaks: adjustedPeaks,
           barCount,
-          gap: 2,
+          gap,
           cornerRadius: 2,
         });
         // Overflow glow along the top edge
