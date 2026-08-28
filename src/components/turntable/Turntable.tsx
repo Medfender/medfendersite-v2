@@ -197,10 +197,11 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
                 transition: 'transform 0.3s ease, filter 0.3s ease',
               }}
             >
-              {/* 3. NATIVE SVG ROTATION (no CSS transforms — kills the warp) */}
+              {/* 3. NATIVE SVG ROTATION WITH EXPLICIT CSS TRANSFORM ORIGIN */}
               <g
                 transform={`rotate(${armAngle}, ${TPX}, ${TPY})`}
                 style={{
+                  transformOrigin: `${TPX}px ${TPY}px`,
                   transition: (playState === 'playing' && isTracking)
                     ? 'transform 0.1s linear'
                     : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
