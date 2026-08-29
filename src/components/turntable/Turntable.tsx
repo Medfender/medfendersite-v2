@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
-
-const cos = (deg: number) => Math.cos((deg * Math.PI) / 180);
-const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
+import React, { useState } from "react";
 
 export default function Turntable({
   transportState = 'stopped',
+  isPendingPlay = false,
   className,
   progress,
   onTogglePlay,
@@ -16,7 +14,10 @@ export default function Turntable({
   onTogglePower,
   bpm = 0,
 }: {
+  /** The authoritative 3-state transport from the audio engine. */
   transportState?: 'playing' | 'paused' | 'stopped';
+  /** True during the needle-drop animation (arm swinging, needle still in air). */
+  isPendingPlay?: boolean;
   className?: string;
   progress?: number;
   onTogglePlay?: () => void;
@@ -38,158 +39,52 @@ export default function Turntable({
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0); // -8 to +8 (%)
 
-  const [isLifted, setIsLifted] = useState(false);
-  const [isTracking, setIsTracking] = useState(false);
-  const [armAngle, setArmAngle] = useState(0); // mutable target angle
+  // ─── State-to-visual bindings ──────────────────────────────────────────────
+  // The ONLY source of truth for mechanical state is the transportState prop.
+  // NO local animation state (no isLifted, no armAngle useState, no timers).
 
-  // Ref-mirror the prop so the orchestrator can read the latest source of truth
-  // without re-rendering on every animation tick. transportMode is now a
-  // DERIVED value of transportState — local useState has been removed so the
-  // visual state of the local Start/Stop button can never drift from the prop.
-  const transportMode: 'stopped' | 'paused' | 'playing' = transportState;
+  // Lift: needle is in the air when paused, stopped, or still dropping.
+  const isLifted = transportState === 'paused' || transportState === 'stopped' || isPendingPlay;
 
-  // Refs to manage timeout chains safely across rapid clicks / prop changes.
-  const timersRef = useRef<NodeJS.Timeout[]>([]);
-  const isMountedRef = useRef(true);
+  // Spin: vinyl rotates only when audio is actually playing.
+  const vinylSpinning = transportState === 'playing' && isPoweredOn;
 
-  const clearTimers = useCallback(() => {
-    timersRef.current.forEach((t) => clearTimeout(t));
-    timersRef.current = [];
-  }, []);
-
-  const schedule = useCallback((fn: () => void, ms: number) => {
-    const t = setTimeout(() => {
-      // Always re-check mount state before running scheduled work.
-      if (isMountedRef.current) fn();
-    }, ms);
-    timersRef.current.push(t);
-    return t;
-  }, []);
-
-  // Cleanup on unmount.
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-      clearTimers();
-    };
-  }, [clearTimers]);
-
-  const currentProgress = progress ?? 0;
-
-  // 3-state playState is a direct alias of the prop-derived transportMode.
-  // Using transportState directly (not local useState) guarantees the local
-  // Start/Stop button visual can never disagree with the parent's intent.
-  const playState: 'playing' | 'paused' | 'stopped' = transportMode;
-
-  // Derived angle based on progress (used while tracking).
+  // Angle constants.
   const PCX = 215; const PCY = 215; const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
   const REST_X = TPX; const REST_Y = TPY + 220; const PARK_ANGLE = 0;
   const PLAY_ANGLE = 55; const INNER_ANGLE = 75;
-  const activeAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
 
-  // The displayed angle follows armAngle state (set by the orchestrator),
-  // and is fine-tuned by progress while tracking.
-  const displayAngle = isTracking && transportMode === 'playing' ? activeAngle : armAngle;
+  const currentProgress = progress ?? 0;
 
-  // Strict tracking-only hook: ONLY updates for groove tracking when needle is down.
-  const trackingAngle = activeAngle;
-  useEffect(() => {
-    if (transportMode === 'playing' && !isLifted && isTracking) {
-      setArmAngle(trackingAngle);
-    }
-  }, [trackingAngle, transportMode, isLifted, isTracking]);
+  // Arm angle: mathematically derived from transport state + progress.
+  // - stopped:       0°  (resting in cradle)
+  // - pending play:   PLAY_ANGLE (arm swung over record, needle in air)
+  // - playing:        linearly tracks from PLAY_ANGLE → INNER_ANGLE with progress
+  // - paused:         frozen at the angle corresponding to current progress
+  //                   (the arm stays exactly where it was when pause was pressed)
+  let displayAngle: number;
+  if (transportState === 'stopped') {
+    displayAngle = PARK_ANGLE;
+  } else if (isPendingPlay) {
+    displayAngle = PLAY_ANGLE;
+  } else if (transportState === 'playing') {
+    displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
+  } else {
+    // paused — freeze the angle at the progress point when pause was pressed
+    displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
+  }
 
-  // === DEDICATED IMPERATIVE SEQUENCE FUNCTIONS ================================
-
-  // 1. PLAY SEQUENCE (from stopped or paused): lift → swing → drop
-  // The needle completes its physical drop at ~900ms; at that exact moment
-  // we fire onNeedleDrop() so the parent can synchronise the audio engine.
-  const runPlaySequence = useCallback(() => {
-    clearTimers();
-    const currentMode = transportState;
-    if (currentMode === 'stopped') {
-      setIsLifted(true);
-      setIsTracking(false);
-      setArmAngle(PARK_ANGLE);
-      schedule(() => setArmAngle(PLAY_ANGLE), 300);
-      // Final drop timer — needle hits vinyl. This is the synchronisation point.
-      schedule(() => {
-        setIsLifted(false);
-        setArmAngle(PLAY_ANGLE); // needle dropped on track start
-        if (onNeedleDrop) onNeedleDrop();
-      }, 900);
-    } else if (currentMode === 'paused') {
-      setIsLifted(false);
-      // When resuming from pause the needle is already on the record,
-      // so we fire the callback immediately to keep audio/state aligned.
-      if (onNeedleDrop) onNeedleDrop();
-    } else {
-      // already playing - no-op
-    }
-  }, [clearTimers, schedule, transportState, onNeedleDrop]);
-
-  // 2. PAUSE SEQUENCE: lift immediately, hold position
-  const runPauseSequence = useCallback(() => {
-    clearTimers();
-    setIsLifted(true);
-    setIsTracking(false);
-  }, [clearTimers]);
-
-  // 3. STOP SEQUENCE: lift → swing to rest → drop into cradle
-  const runStopSequence = useCallback(() => {
-    clearTimers();
-    setIsLifted(true);
-    setIsTracking(false);
-    schedule(() => setArmAngle(PARK_ANGLE), 300);
-    schedule(() => setIsLifted(false), 900);
-  }, [clearTimers, schedule]);
-
-  // === PROP SYNCHRONIZATION (The Missing Link) ================================
-
-  // === PROP SYNCHRONIZATION (explicit 3-state string) =============================
-  // The ONLY driver of mechanical animation. Changes in transportState
-  // (from parent) always trigger the correct sequence.
-  useEffect(() => {
-    if (!isPoweredOn) {
-      clearTimers();
-      setIsLifted(false);
-      setIsTracking(false);
-      setArmAngle(PARK_ANGLE);
-      return;
-    }
-    if (transportState === 'playing') {
-      runPlaySequence();
-    } else if (transportState === 'paused') {
-      runPauseSequence();
-    } else if (transportState === 'stopped') {
-      runStopSequence();
-    }
-    // sequence functions are useCallback-wrapped and stable
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transportState, isPoweredOn]);
-
-  // Effect to flip isTracking true ~600ms after entering playing (after drop).
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (transportMode === 'playing' && !isTracking && !isLifted) {
-      timer = setTimeout(() => setIsTracking(true), 600);
-    } else if (transportMode !== 'playing') {
-      setIsTracking(false);
-    }
-    return () => clearTimeout(timer);
-  }, [transportMode, isLifted, isTracking]);
-
-  // === LOCAL BUTTON (unidirectional: local click → parent callback → prop change → orchestrator)
-  // handleTransportToggle removed — callbacks are the only local action.
-  // The orchestrator is driven exclusively by the isPlaying prop change.
-
-  const liftShadow = isLifted ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))' : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))';
+  // Lift shadow: more diffuse when needle is raised.
+  const liftShadow = isLifted
+    ? 'drop-shadow(8px 14px 12px rgba(0,0,0,0.55))'
+    : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.85))';
 
   const tipRad = (displayAngle * Math.PI) / 180;
   const tipX = Number((TPX + Math.sin(tipRad) * WAND_LEN).toFixed(3));
   const tipY = Number((TPY + Math.cos(tipRad) * WAND_LEN).toFixed(3));
 
+  // Vinyl spin speed scales with BPM (future: wire BPM prop).
   const PITCH_X = 660; const PITCH_Y = 130; const PITCH_LEN = 230;
 
   return (
@@ -199,7 +94,7 @@ export default function Turntable({
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
             <style>{`
               @keyframes spin-vinyl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; animation-play-state: ${playState === 'playing' && isPoweredOn ? "running" : "paused"}; }
+              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; animation-play-state: ${vinylSpinning ? "running" : "paused"}; }
               .tonearm-spin { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
             `}</style>
             <defs>
@@ -310,7 +205,7 @@ export default function Turntable({
               <g filter="url(#shadow-sm)">
                 <rect x={TPX-38} y={TPY-2} width="8" height="32" rx="2" fill="url(#gm-brushed)" stroke="#2c3040" strokeWidth="0.4" />
                 <ellipse cx={TPX-34} cy={TPY+30} rx="8" ry="4" fill="url(#gm)" stroke="#3a3e4c" strokeWidth="0.4" />
-                <rect x={TPX-36} y={playState === 'playing' ? TPY-14 : TPY-4} width="28" height="6" rx="3" fill="url(#silver-deep)" stroke="#5a6878" strokeWidth="0.4" style={{ transformOrigin: `${TPX-34}px ${TPY}px`, transform: `rotate(${playState === 'playing' ? 22 : -14}deg)`, transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+                <rect x={TPX-36} y={transportState === 'playing' ? TPY-14 : TPY-4} width="28" height="6" rx="3" fill="url(#silver-deep)" stroke="#5a6878" strokeWidth="0.4" style={{ transformOrigin: `${TPX-34}px ${TPY}px`, transform: `rotate(${transportState === 'playing' ? 22 : -14}deg)`, transition: "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)" }} />
                 <text x={TPX-34} y={TPY+44} textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
               </g>
             </g>
@@ -340,7 +235,7 @@ export default function Turntable({
                 {/* Layer B: Pure CSS rotation around 0,0 (Immune to bounding-box squish and offsets) */}
                 <g style={{
                   transform: `rotate(${displayAngle}deg)`,
-                  transition: (!isLifted && playState === 'playing')
+                  transition: (transportState === 'playing' && !isLifted)
                     ? 'transform 0.1s linear'
                     : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}>
