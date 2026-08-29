@@ -573,6 +573,7 @@ export default function VinylShowcase() {
           <div className="w-full max-w-2xl">
             <Turntable
               transportState={currentTransportState}
+              isPendingPlay={pendingPlay}
               progress={duration > 0 ? (currentTime / duration) : 0}
               onTogglePlay={handleTogglePlay}
               onStop={handleTurntableStop}
