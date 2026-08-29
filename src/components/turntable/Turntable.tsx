@@ -128,7 +128,6 @@ export default function Turntable({
               <circle cx={PCX} cy={PCY} r={PLATTER_R} fill="none" stroke="url(#silver-deep)" strokeWidth="22" />
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 11} fill="none" stroke="url(#gm-brushed)" strokeWidth="8" />
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 22} fill="none" stroke="#0a0c12" strokeWidth="6" />
-              <path d={`M ${PCX},${PCY - PLATTER_R + 4} A ${PLATTER_R - 4} ${PLATTER_R - 4} 0 0 1 ${PCX},${PCY - PLATTER_R - 22}`} fill="none" stroke="#d8e0ec" strokeWidth="2" opacity="0.5" />
             </g>
             <g className="vinyl-spin" style={{ transformOrigin: `${PCX}px ${PCY}px` }}>
               <circle cx={PCX} cy={PCY} r={VINYL_R} fill="url(#vinyl-deep)" />
@@ -210,10 +209,9 @@ export default function Turntable({
               </g>
             </g>
 
-            {/* 2. Z-AXIS LIFT WRAPPER (Keeps the drop-shadow and scale) */}
+            {/* 2. Z-AXIS LIFT WRAPPER (translateY only — scale would dislocate the gimbal) */}
             <g style={{
-              transform: `scale(${isLifted ? 1.02 : 1})`,
-              transformOrigin: `${TPX}px ${TPY}px`,
+              transform: `translateY(${isLifted ? -3 : 0}px)`,
               filter: isLifted
                 ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))'
                 : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
@@ -221,7 +219,7 @@ export default function Turntable({
             }}>
 
               {/* --- CUEING LIFT BANK (lifts on Z-axis but is X/Y anchored) --- */}
-              {/* Sibling of the Translation Sandwich: scales with isLifted, never rotates. */}
+              {/* Sibling of the Translation Sandwich: translates with isLifted, never rotates. */}
               <g>
                 <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
                   fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
@@ -235,9 +233,10 @@ export default function Turntable({
                 {/* Layer B: Pure CSS rotation around 0,0 (Immune to bounding-box squish and offsets) */}
                 <g style={{
                   transform: `rotate(${displayAngle}deg)`,
-                  transition: (transportState === 'playing' && !isLifted)
-                    ? 'transform 0.1s linear'
-                    : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                  filter: transportState === 'playing'
+                    ? 'drop-shadow(-3px 5px 4px rgba(0,0,0,0.8))'
+                    : 'drop-shadow(-8px 15px 10px rgba(0,0,0,0.5))',
+                  transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-in-out',
                 }}>
 
                   {/* Layer C: Move the coordinate system back so absolute paths draw correctly */}
