@@ -209,13 +209,14 @@ export default function Turntable({
               </g>
             </g>
 
-            {/* 2. Z-AXIS LIFT WRAPPER (translateY only — scale would dislocate the gimbal) */}
+            {/* 2. Z-AXIS LIFT WRAPPER — shadow-only elevation, NO translateY or scale */}
+            {/* transform-origin is pinned at (TPX, TPY) = (490, 75) so the pivot socket
+                never moves — only the drop-shadow conveys Z-axis elevation. */}
             <g style={{
-              transform: `translateY(${isLifted ? -3 : 0}px)`,
               filter: isLifted
-                ? 'drop-shadow(6px 10px 8px rgba(0,0,0,0.5))'
-                : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
-              transition: 'transform 0.3s ease, filter 0.3s ease',
+                ? 'drop-shadow(8px 14px 10px rgba(0,0,0,0.55))'
+                : 'drop-shadow(-3px 5px 4px rgba(0,0,0,0.8))',
+              transition: 'filter 0.3s ease-in-out',
             }}>
 
               {/* --- CUEING LIFT BANK (lifts on Z-axis but is X/Y anchored) --- */}
