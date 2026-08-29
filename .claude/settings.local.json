@@ -91,7 +91,14 @@
       "Bash(timeout 15 sh -c 'npm run dev > /tmp/dev.log 2>&1 & sleep 3; node screenshot.mjs http://localhost:3000 2>/dev/null || echo \"screenshot script not found\"; kill %1 2>/dev/null' 2>&1 | tail -10)",
       "Bash(pkill -f \"next-server\")",
       "Bash(pkill -9 -f \"next\")",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(ffprobe -hide_banner /home/medfender/Videos/Screencasts/Screencast_20260829_060538.webm)",
+      "Bash(mkdir -p /tmp/tt_frames)",
+      "Bash(ffmpeg -y -i /home/medfender/Videos/Screencasts/Screencast_20260829_060538.webm -vf \"fps=1\" /tmp/tt_frames/frame_%03d.png)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(npm install *)",
+      "Bash(chromium --version)",
+      "Bash(google-chrome --version)"
     ]
   }
 }
