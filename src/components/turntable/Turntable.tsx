@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export default function Turntable({
   transportState = 'stopped',
@@ -57,6 +57,16 @@ export default function Turntable({
 
   const currentProgress = progress ?? 0;
 
+  // Frozen arm angle: when the user pauses, we capture the angle at that exact
+  // moment so the arm holds its position instead of drifting with currentTime.
+  const frozenAngleRef = useRef<number>(PLAY_ANGLE);
+  useEffect(() => {
+    if (transportState === 'paused') {
+      // Capture the angle the arm had when pause was pressed.
+      frozenAngleRef.current = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
+    }
+  }, [transportState, currentProgress]);
+
   // Arm angle: mathematically derived from transport state + progress.
   // - stopped:       0°  (resting in cradle)
   // - pending play:   PLAY_ANGLE (arm swung over record, needle in air)
@@ -71,14 +81,16 @@ export default function Turntable({
   } else if (transportState === 'playing') {
     displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
   } else {
-    // paused — freeze the angle at the progress point when pause was pressed
-    displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
+    // paused — freeze at the angle captured when pause was pressed
+    displayAngle = frozenAngleRef.current;
   }
 
   // Lift shadow: more diffuse when needle is raised.
-  const liftShadow = isLifted
+  // Only applied to the wand/headshell (the parts that physically lift).
+  // The pivot joint (static base circles) keeps a fixed small shadow.
+  const armShadow = isLifted
     ? 'drop-shadow(8px 14px 12px rgba(0,0,0,0.55))'
-    : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.85))';
+    : 'drop-shadow(-3px 5px 4px rgba(0,0,0,0.8))';
 
   const tipRad = (displayAngle * Math.PI) / 180;
   const tipX = Number((TPX + Math.sin(tipRad) * WAND_LEN).toFixed(3));
@@ -88,7 +100,7 @@ export default function Turntable({
   const PITCH_X = 660; const PITCH_Y = 130; const PITCH_LEN = 230;
 
   return (
-    <div className={`relative w-full max-w-[820px] mx-auto ${className}`} style={{ filter: liftShadow }}>
+    <div className={`relative w-full max-w-[820px] mx-auto ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
       <div className="relative w-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
         <div className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)", aspectRatio: "720 / 520" }}>
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
@@ -209,13 +221,10 @@ export default function Turntable({
               </g>
             </g>
 
-            {/* 2. Z-AXIS LIFT WRAPPER — shadow-only elevation, NO translateY or scale */}
-            {/* transform-origin is pinned at (TPX, TPY) = (490, 75) so the pivot socket
-                never moves — only the drop-shadow conveys Z-axis elevation. */}
+            {/* 2. Z-AXIS LIFT WRAPPER — shadow-only elevation, NO translateY or scale.
+                The pivot socket stays at (TPX, TPY) = (490, 75) permanently. */}
             <g style={{
-              filter: isLifted
-                ? 'drop-shadow(8px 14px 10px rgba(0,0,0,0.55))'
-                : 'drop-shadow(-3px 5px 4px rgba(0,0,0,0.8))',
+              filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))',
               transition: 'filter 0.3s ease-in-out',
             }}>
 
@@ -234,10 +243,7 @@ export default function Turntable({
                 {/* Layer B: Pure CSS rotation around 0,0 (Immune to bounding-box squish and offsets) */}
                 <g style={{
                   transform: `rotate(${displayAngle}deg)`,
-                  filter: transportState === 'playing'
-                    ? 'drop-shadow(-3px 5px 4px rgba(0,0,0,0.8))'
-                    : 'drop-shadow(-8px 15px 10px rgba(0,0,0,0.5))',
-                  transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s ease-in-out',
+                  transition: 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}>
 
                   {/* Layer C: Move the coordinate system back so absolute paths draw correctly */}
@@ -272,16 +278,16 @@ export default function Turntable({
                         fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
                     </g>
 
-                    {/* Tonearm Wand — sleek cylindrical tube with dark-light-dark edge gradient (absolute chassis coords) */}
-                    <g>
+                    {/* Tonearm Wand — sleek cylindrical tube (absolute chassis coords) */}
+                    <g style={{ filter: armShadow, transition: 'filter 0.3s ease-in-out' }}>
                       <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
                         fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
                       <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
                         fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
                     </g>
 
-                    {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
-                    <g filter="url(#shadow-sm)" transform={`translate(${TPX}, ${TPY + WAND_LEN}) rotate(25)`}>
+                    {/* Headshell & Cartridge — angled inward toward the spindle */}
+                    <g filter="url(#shadow-sm)" style={{ filter: armShadow }} transform={`translate(${TPX}, ${TPY + WAND_LEN}) rotate(25)`}>
                       {/* Matte-black headshell body */}
                       <path d="M -26,-10 L 12,-10 L 24,-5 L 24,8 L 12,12 L -26,10 Z"
                         fill="url(#carbon-black)" stroke="#252830" strokeWidth="0.8" />
