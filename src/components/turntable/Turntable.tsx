@@ -1,63 +1,192 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
 const cos = (deg: number) => Math.cos((deg * Math.PI) / 180);
 const sin = (deg: number) => Math.sin((deg * Math.PI) / 180);
 
-export default function Turntable({ isPlaying = false, className, progress }: { isPlaying?: boolean; className?: string; progress?: number }) {
-  const [internalPlaying, setInternalPlaying] = useState(false);
-  const active = isPlaying ?? internalPlaying;
-  const toggleInternal = () => setInternalPlaying((s) => !s);
-
+export default function Turntable({
+  transportState = 'stopped',
+  className,
+  progress,
+  onTogglePlay,
+  onStop,
+  onNeedleDrop,
+  isPoweredOn = true,
+  onTogglePower,
+  bpm = 0,
+}: {
+  transportState?: 'playing' | 'paused' | 'stopped';
+  className?: string;
+  progress?: number;
+  onTogglePlay?: () => void;
+  onStop?: () => void;
+  /**
+   * Fired at the precise mechanical moment the stylus completes its drop
+   * onto the vinyl. The parent uses this to start the audio engine so that
+   * sound is perfectly synchronised with needle contact — never plays while
+   * the arm is in the air.
+   */
+  onNeedleDrop?: () => void;
+  /** Master ON/OFF. When false, platter is stopped and tonearm is locked at rest. */
+  isPoweredOn?: boolean;
+  /** Toggle the master power state from the deck's Power button. */
+  onTogglePower?: () => void;
+  /** BPM of the loaded track, displayed on the digital BPM screen. */
+  bpm?: number;
+}) {
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0); // -8 to +8 (%)
+
+  const [isLifted, setIsLifted] = useState(false);
   const [isTracking, setIsTracking] = useState(false);
+  const [armAngle, setArmAngle] = useState(0); // mutable target angle
+
+  // Ref-mirror the prop so the orchestrator can read the latest source of truth
+  // without re-rendering on every animation tick. transportMode is now a
+  // DERIVED value of transportState — local useState has been removed so the
+  // visual state of the local Start/Stop button can never drift from the prop.
+  const transportMode: 'stopped' | 'paused' | 'playing' = transportState;
+
+  // Refs to manage timeout chains safely across rapid clicks / prop changes.
+  const timersRef = useRef<NodeJS.Timeout[]>([]);
+  const isMountedRef = useRef(true);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((t) => clearTimeout(t));
+    timersRef.current = [];
+  }, []);
+
+  const schedule = useCallback((fn: () => void, ms: number) => {
+    const t = setTimeout(() => {
+      // Always re-check mount state before running scheduled work.
+      if (isMountedRef.current) fn();
+    }, ms);
+    timersRef.current.push(t);
+    return t;
+  }, []);
+
+  // Cleanup on unmount.
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      clearTimers();
+    };
+  }, [clearTimers]);
 
   const currentProgress = progress ?? 0;
 
-  // Phase 1: Infer the 3 states from active + progress (no parent changes needed)
-  let playState: 'playing' | 'paused' | 'stopped' = 'stopped';
-  if (active) {
-    playState = 'playing';
-  } else if (currentProgress > 0 && currentProgress < 1) {
-    playState = 'paused';
-  } else {
-    playState = 'stopped';
-  }
+  // 3-state playState is a direct alias of the prop-derived transportMode.
+  // Using transportState directly (not local useState) guarantees the local
+  // Start/Stop button visual can never disagree with the parent's intent.
+  const playState: 'playing' | 'paused' | 'stopped' = transportMode;
 
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (playState === 'playing') {
-      timer = setTimeout(() => setIsTracking(true), 600);
-    } else {
-      setIsTracking(false);
-    }
-    return () => clearTimeout(timer);
-  }, [playState]);
-
+  // Derived angle based on progress (used while tracking).
   const PCX = 215; const PCY = 215; const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
   const REST_X = TPX; const REST_Y = TPY + 220; const PARK_ANGLE = 0;
   const PLAY_ANGLE = 55; const INNER_ANGLE = 75;
   const activeAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
 
-  // 3-State Angle Logic
-  let armAngle = PARK_ANGLE;
-  if (playState === 'stopped') {
-    armAngle = PARK_ANGLE;
-  } else if (playState === 'paused') {
-    armAngle = activeAngle; // Hold position exactly where it is!
-  } else if (playState === 'playing') {
-    armAngle = isTracking ? activeAngle : PLAY_ANGLE;
-  }
+  // The displayed angle follows armAngle state (set by the orchestrator),
+  // and is fine-tuned by progress while tracking.
+  const displayAngle = isTracking && transportMode === 'playing' ? activeAngle : armAngle;
 
-  // Z-Axis Logic: Lifted when stopped, paused, or cueing (dropping)
-  const isLifted = playState === 'stopped' || playState === 'paused' || (playState === 'playing' && !isTracking);
+  // Strict tracking-only hook: ONLY updates for groove tracking when needle is down.
+  const trackingAngle = activeAngle;
+  useEffect(() => {
+    if (transportMode === 'playing' && !isLifted && isTracking) {
+      setArmAngle(trackingAngle);
+    }
+  }, [trackingAngle, transportMode, isLifted, isTracking]);
+
+  // === DEDICATED IMPERATIVE SEQUENCE FUNCTIONS ================================
+
+  // 1. PLAY SEQUENCE (from stopped or paused): lift → swing → drop
+  // The needle completes its physical drop at ~900ms; at that exact moment
+  // we fire onNeedleDrop() so the parent can synchronise the audio engine.
+  const runPlaySequence = useCallback(() => {
+    clearTimers();
+    const currentMode = transportState;
+    if (currentMode === 'stopped') {
+      setIsLifted(true);
+      setIsTracking(false);
+      setArmAngle(PARK_ANGLE);
+      schedule(() => setArmAngle(PLAY_ANGLE), 300);
+      // Final drop timer — needle hits vinyl. This is the synchronisation point.
+      schedule(() => {
+        setIsLifted(false);
+        setArmAngle(PLAY_ANGLE); // needle dropped on track start
+        if (onNeedleDrop) onNeedleDrop();
+      }, 900);
+    } else if (currentMode === 'paused') {
+      setIsLifted(false);
+      // When resuming from pause the needle is already on the record,
+      // so we fire the callback immediately to keep audio/state aligned.
+      if (onNeedleDrop) onNeedleDrop();
+    } else {
+      // already playing - no-op
+    }
+  }, [clearTimers, schedule, transportState, onNeedleDrop]);
+
+  // 2. PAUSE SEQUENCE: lift immediately, hold position
+  const runPauseSequence = useCallback(() => {
+    clearTimers();
+    setIsLifted(true);
+    setIsTracking(false);
+  }, [clearTimers]);
+
+  // 3. STOP SEQUENCE: lift → swing to rest → drop into cradle
+  const runStopSequence = useCallback(() => {
+    clearTimers();
+    setIsLifted(true);
+    setIsTracking(false);
+    schedule(() => setArmAngle(PARK_ANGLE), 300);
+    schedule(() => setIsLifted(false), 900);
+  }, [clearTimers, schedule]);
+
+  // === PROP SYNCHRONIZATION (The Missing Link) ================================
+
+  // === PROP SYNCHRONIZATION (explicit 3-state string) =============================
+  // The ONLY driver of mechanical animation. Changes in transportState
+  // (from parent) always trigger the correct sequence.
+  useEffect(() => {
+    if (!isPoweredOn) {
+      clearTimers();
+      setIsLifted(false);
+      setIsTracking(false);
+      setArmAngle(PARK_ANGLE);
+      return;
+    }
+    if (transportState === 'playing') {
+      runPlaySequence();
+    } else if (transportState === 'paused') {
+      runPauseSequence();
+    } else if (transportState === 'stopped') {
+      runStopSequence();
+    }
+    // sequence functions are useCallback-wrapped and stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transportState, isPoweredOn]);
+
+  // Effect to flip isTracking true ~600ms after entering playing (after drop).
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (transportMode === 'playing' && !isTracking && !isLifted) {
+      timer = setTimeout(() => setIsTracking(true), 600);
+    } else if (transportMode !== 'playing') {
+      setIsTracking(false);
+    }
+    return () => clearTimeout(timer);
+  }, [transportMode, isLifted, isTracking]);
+
+  // === LOCAL BUTTON (unidirectional: local click → parent callback → prop change → orchestrator)
+  // handleTransportToggle removed — callbacks are the only local action.
+  // The orchestrator is driven exclusively by the isPlaying prop change.
 
   const liftShadow = isLifted ? 'drop-shadow(8px 12px 10px rgba(0,0,0,0.5))' : 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))';
 
-  const tipRad = (armAngle * Math.PI) / 180;
+  const tipRad = (displayAngle * Math.PI) / 180;
   const tipX = Number((TPX + Math.sin(tipRad) * WAND_LEN).toFixed(3));
   const tipY = Number((TPY + Math.cos(tipRad) * WAND_LEN).toFixed(3));
 
@@ -70,7 +199,7 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
             <style>{`
               @keyframes spin-vinyl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; animation-play-state: ${playState === 'playing' ? "running" : "paused"}; }
+              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; animation-play-state: ${playState === 'playing' && isPoweredOn ? "running" : "paused"}; }
               .tonearm-spin { transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
             `}</style>
             <defs>
@@ -173,7 +302,7 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
                 <circle cx={TPX + 58} cy={TPY - 8} r="9" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.5" />
                 <circle cx={TPX + 58} cy={TPY - 8} r="6.5" fill="url(#antiskate-brass)" stroke="#4a3a18" strokeWidth="0.4" />
                 <line x1={TPX+58} y1={TPY-12} x2={TPX+58} y2={TPY-5} stroke="#1e1410" strokeWidth="1" />
-                <circle cx={TPX+58} cy={TPY-8} r="1.2" fill="#1a1410" />
+                <circle cx={TPX+58} y1={TPY-8} r="1.2" fill="#1a1410" />
                 <text x={TPX+58} y={TPY+9} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
               </g>
 
@@ -196,6 +325,13 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
               transition: 'transform 0.3s ease, filter 0.3s ease',
             }}>
 
+              {/* --- CUEING LIFT BANK (lifts on Z-axis but is X/Y anchored) --- */}
+              {/* Sibling of the Translation Sandwich: scales with isLifted, never rotates. */}
+              <g>
+                <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
+                  fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
+              </g>
+
               {/* --- THE TRANSLATION SANDWICH --- */}
 
               {/* Layer A: Move the coordinate system so 0,0 is exactly at the pivot */}
@@ -203,8 +339,8 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
 
                 {/* Layer B: Pure CSS rotation around 0,0 (Immune to bounding-box squish and offsets) */}
                 <g style={{
-                  transform: `rotate(${armAngle}deg)`,
-                  transition: (playState === 'playing' && isTracking)
+                  transform: `rotate(${displayAngle}deg)`,
+                  transition: (!isLifted && playState === 'playing')
                     ? 'transform 0.1s linear'
                     : 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}>
@@ -212,7 +348,7 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
                   {/* Layer C: Move the coordinate system back so absolute paths draw correctly */}
                   <g transform={`translate(-${TPX}, -${TPY})`}>
 
-                    {/* ALL TONEARM PARTS (Counterweight, Wand, Headshell, etc.) GO HERE */}
+                    {/* ROTATING COMPONENTS ONLY */}
 
                     {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
                     <g filter="url(#shadow-md)">
@@ -247,9 +383,6 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
                         fill="none" stroke="rgba(0,0,0,0.5)" strokeWidth={WAND_W * 2 + 3} strokeLinecap="round" />
                       <path d={`M ${TPX},${TPY} C ${TPX + 14},${TPY + 55} ${TPX + 14},${TPY + 165} ${TPX},${TPY + WAND_LEN}`}
                         fill="none" stroke="url(#tube-cylindrical)" strokeWidth={WAND_W * 2} strokeLinecap="round" />
-                      {/* Tiny curved bar near the base — cueing lift bank (Technics SL-1200 style) */}
-                      <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`}
-                        fill="none" stroke="url(#chrome)" strokeWidth="1.2" strokeLinecap="round" />
                     </g>
 
                     {/* Headshell & Cartridge — angled inward toward the spindle (absolute chassis coords) */}
@@ -316,32 +449,69 @@ export default function Turntable({ isPlaying = false, className, progress }: { 
             </g>
           </svg>
 
-          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
-            <div className="flex flex-col items-center gap-1">
-              <div className="relative">
-                <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                  <button onClick={toggleInternal} aria-label="Power" className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: playState === 'playing' ? "radial-gradient(circle at 35% 30%, #e85858 0%, #a82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)", boxShadow: playState === 'playing' ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)" }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: playState === 'playing' ? "#ff3a3a" : "#3a1010", boxShadow: playState === 'playing' ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
-                  </button>
+          <div className="absolute left-3 right-3 bottom-3 z-30 flex items-end justify-between gap-3 pointer-events-auto">
+            {/* LEFT — Power + Play/Pause grouped together */}
+            <div className="flex items-end gap-3">
+              {/* Power button */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
+                    <button onClick={onTogglePower} aria-label={isPoweredOn ? "Power off" : "Power on"} aria-pressed={isPoweredOn} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
+                      background: isPoweredOn
+                        ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)"
+                        : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
+                      boxShadow: isPoweredOn
+                        ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)"
+                        : "inset 0 1px 2px rgba(255,255,255,0.1)",
+                      filter: isPoweredOn ? 'none' : 'grayscale(0.6) opacity(0.7)',
+                    }}>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{
+                        background: isPoweredOn ? "#ff3a3a" : "#3a1010",
+                        boxShadow: isPoweredOn ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none",
+                      }} />
+                    </button>
+                  </div>
                 </div>
+                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
               </div>
-              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
-            </div>
-            <div className="flex flex-col items-center gap-1">
-              <button onClick={toggleInternal} aria-label={playState === 'playing' ? "Stop" : "Start"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: playState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
-                {playState === 'playing' ? (<div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>) : (<div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />)}
-              </button>
-              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">{playState === 'playing' ? "Stop" : "Start"}</span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <div className="flex gap-1">
-                {[33, 45].map((rpm) => (
-                  <button key={rpm} onClick={() => setSpeed(rpm as 33 | 45)} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500 hover:text-neutral-300"}`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
-                    {rpm}
-                  </button>
-                ))}
+
+              {/* Play/Pause */}
+              <div className="flex flex-col items-center gap-1">
+                <button onClick={(e) => { if (onTogglePlay) { onTogglePlay(); } }} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+                  {transportState === 'playing' ? (
+                    <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
+                  ) : (
+                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
+                  )}
+                </button>
+                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
               </div>
-              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
+            </div>
+
+            {/* RIGHT — RPM + BPM digital screen (under tonearm area) */}
+            <div className="flex items-end gap-3">
+              {/* RPM buttons */}
+              <div className="flex flex-col gap-1 items-center">
+                <div className="flex gap-1">
+                  {[33, 45].map((rpm) => (
+                    <button key={rpm} onClick={() => setSpeed(rpm as 33 | 45)} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
+                      {rpm}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
+              </div>
+
+              {/* BPM Digital Screen — right side, vertically under tonearm */}
+              <div className="flex flex-col items-center gap-1">
+                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1" style={{ background: "linear-gradient(180deg, #02060a 0%, #000000 100%)", boxShadow: "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" }}>
+                  <span className="text-[8px] font-mono text-neutral-500 tracking-[0.25em] uppercase leading-none">BPM</span>
+                  <span className={`text-2xl font-mono leading-none tabular-nums ${bpm > 0 ? "text-green-400" : "text-green-900"}`} style={{ textShadow: bpm > 0 ? "0 0 6px rgba(34,197,94,0.8), 0 0 14px rgba(34,197,94,0.4)" : "none" }}>
+                    {bpm > 0 ? (Math.round(bpm * 10) / 10).toFixed(1) : "--.-"}
+                  </span>
+                </div>
+                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Tempo</span>
+              </div>
             </div>
           </div>
         </div>

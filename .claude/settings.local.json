@@ -90,7 +90,8 @@
       "Bash(grep *)",
       "Bash(timeout 15 sh -c 'npm run dev > /tmp/dev.log 2>&1 & sleep 3; node screenshot.mjs http://localhost:3000 2>/dev/null || echo \"screenshot script not found\"; kill %1 2>/dev/null' 2>&1 | tail -10)",
       "Bash(pkill -f \"next-server\")",
-      "Bash(pkill -9 -f \"next\")"
+      "Bash(pkill -9 -f \"next\")",
+      "Bash(curl *)"
     ]
   }
 }

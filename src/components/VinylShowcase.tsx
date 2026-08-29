@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
@@ -27,10 +27,18 @@ export default function VinylShowcase() {
     setPlaybackRate,
     audioRef,
     playTrack,
+    setIsPlaying,
+    setActiveTrack,
+    pause,
+    ensureAudioContext,
   } = useAudio();
 
   const [pitch, setPitch] = useState<number>(0);
   const [visMode, setVisMode] = useState<VisualizerMode>("bars");
+
+  // Master ON/OFF switch for the turntable. ON by default. When OFF, the
+  // tonearm is locked in its rest position and the platter never spins.
+  const [isPoweredOn, setIsPoweredOn] = useState(true);
 
   // ── Pitch → playbackRate ─────────────────────────────────────────────────
   useEffect(() => {
@@ -76,20 +84,279 @@ export default function VinylShowcase() {
     (activeTrack as any)?.name || (activeTrack as any)?.title || "No track selected";
   const trackArtist = (activeTrack as any)?.gearTag || (activeTrack as any)?.artist || "—";
 
-  // ── Skip handlers that start playback ─────────────────────────────────────
+  // ── Skip handlers — conditional playback (preserve state) ───────────
   const handlePrev = () => {
-    playPrevious();
-    // playPrevious toggles isPlaying=true in the context
+    if (!playlist || playlist.length === 0) return;
+    const curIdx = playlist.findIndex((t: any) => (t as any)?.id === (activeTrack as any)?.id);
+    const nextIdx = (curIdx - 1 + playlist.length) % playlist.length;
+    const track = playlist[nextIdx] as any;
+    const wasPlaying = isEffectivelyPlaying;
+
+    if (audioRef.current) {
+      const rawSrc = track?.url || track?.audioUrl || track?.src;
+      if (rawSrc) {
+        const clean = rawSrc.startsWith("http")
+          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
+        audioRef.current.src = encodeURI(decodeURIComponent(clean));
+        audioRef.current.currentTime = 0;
+        audioRef.current.load();
+      }
+    }
+    setActiveTrack(track);
+
+    if (wasPlaying) {
+      // Music was ON → next track loads and starts immediately.
+      if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+      if (audioRef.current) {
+        audioRef.current.play().catch((err: unknown) => {
+          if ((err as Error)?.name !== 'AbortError') {
+            console.error('[VinylShowcase] Skip play error:', err);
+          }
+        });
+      }
+      setPendingPlay(false);
+      setPausedState(false);
+    } else {
+      // Music was paused/stopped → track loads but does NOT play.
+      setPendingPlay(false);
+      setPausedState(true);
+      if (audioRef.current) audioRef.current.pause();
+    }
   };
 
   const handleNext = () => {
-    playNext();
+    if (!playlist || playlist.length === 0) return;
+    const curIdx = playlist.findIndex((t: any) => (t as any)?.id === (activeTrack as any)?.id);
+    const nextIdx = (curIdx + 1) % playlist.length;
+    const track = playlist[nextIdx] as any;
+    const wasPlaying = isEffectivelyPlaying;
+
+    if (audioRef.current) {
+      const rawSrc = track?.url || track?.audioUrl || track?.src;
+      if (rawSrc) {
+        const clean = rawSrc.startsWith("http")
+          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
+        audioRef.current.src = encodeURI(decodeURIComponent(clean));
+        audioRef.current.currentTime = 0;
+        audioRef.current.load();
+      }
+    }
+    setActiveTrack(track);
+
+    if (wasPlaying) {
+      // Music was ON → next track loads and starts immediately.
+      if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+      if (audioRef.current) {
+        audioRef.current.play().catch((err: unknown) => {
+          if ((err as Error)?.name !== 'AbortError') {
+            console.error('[VinylShowcase] Skip play error:', err);
+          }
+        });
+      }
+      setPendingPlay(false);
+      setPausedState(false);
+    } else {
+      // Music was paused/stopped → track loads but does NOT play.
+      setPendingPlay(false);
+      setPausedState(true);
+      if (audioRef.current) audioRef.current.pause();
+    }
   };
 
-  // ── Stop: halt audio AND reset track progress to 0 ───────────────────────
+  // ── Transport state mapping for Turntable (3-state mechanical sync) ─────────
+  // transportState is a DERIVED value of isPlaying. Single source of truth: audio.
+  // Paused state is tracked separately (we cannot detect "paused" from isPlaying alone).
+  const [pausedState, setPausedState] = useState(false);
+
+  // Fix #1 — Deferred Audio Start: must come before currentTransportState (used there).
+  const [pendingPlay, setPendingPlay] = useState(false);
+
+  // Fix #1 — State Deadlock eliminated: the turntable must receive 'playing'
+  // whenever the system is either playing OR preparing to drop the needle.
+  // Fix #2 — Ghost State Guard + Fix #1 — State Deadlock eliminated:
+  // The turntable must receive 'playing' whenever the system is playing OR
+  // preparing to drop the needle (pendingPlay). A null currentTrack forces 'stopped'.
+  const currentTrack = activeTrack;
+  const currentTransportState: 'playing' | 'paused' | 'stopped' =
+    (isPlaying || pendingPlay) && currentTrack && isPoweredOn
+      ? 'playing'
+      : pausedState
+        ? 'paused'
+        : 'stopped';
+
+  // Unified boolean for all UI icon derivations — single source of truth.
+  const isEffectivelyPlaying = isPlaying || pendingPlay;
+
+  // Detected BPM of the loaded track (0 when nothing is loaded).
+  const bpm = (activeTrack as any)?.bpm ?? 0;
+
+  // When audio stops, clear the paused flag (track ended, user stopped, etc.)
+  useEffect(() => {
+    if (!isPlaying && !pausedState) return;
+    if (!isPlaying && pausedState && currentTime > 0) return; // stay paused
+    if (!isPlaying) setPausedState(false);
+  }, [isPlaying, currentTime, pausedState]);
+
+  // Fix #1 — Deferred Audio Start (Needle-Drop Synchronisation):
+  // When user clicks Play, we set pausedState=false to PROPAGATE the transportState
+  // change down to Turntable — which triggers the mechanical arm animation.
+  // The audio engine is NOT started here. Instead we store a "pending play" flag.
+  // When Turntable fires onNeedleDrop() (needle physically contacts the vinyl),
+  // we call audioRef.current.play() at that exact moment so music is never heard
+  // while the needle is still in the air.
+
+  // Unified play dispatcher used by ALL play triggers (global button,
+  // turntable local button, and playlist track click). Sets pendingPlay=true
+  // for stopped→playing; only audio.pause()/audio.play() via togglePlay for
+  // play↔pause transitions. Audio.start for fresh-play is deferred to
+  // onNeedleDrop, so the tonearm animation always leads the audio engine.
+
+  // Synchronous unlock helper — runs on the user click event:
+  //   1. Resumes the Web Audio AudioContext (must be sync for the gesture to count).
+  //   2. Sets pendingPlay=true to trigger the needle-drop animation.
+  //   3. The actual <audio>.play() inside onNeedleDrop (~1.2s later) is permitted
+  //      by the browser's native 5-second transient user-activation window.
+  // We deliberately do NOT use the play()/pause() hack anymore — it was wiping
+  // the user-gesture token during track-skip src swaps.
+  const unlockAudioAndSetPendingPlay = () => {
+    if (ensureAudioContext) {
+      ensureAudioContext().catch((err: unknown) =>
+        console.error("AudioContext resume failed:", err)
+      );
+    }
+    setPausedState(false);
+    setPendingPlay(true);
+  };
+  const dispatchPlay = () => {
+    if (isPlaying) {
+      setPausedState(true);
+      setPendingPlay(false);
+      togglePlay();
+    } else if (pausedState) {
+      setPausedState(false);
+      setPendingPlay(false);
+      togglePlay();
+    } else {
+      setPausedState(false);
+      setPendingPlay(true);
+    }
+  };
+  // ── Power Toggle (strict master override) ───────────────────────────────
+  const handleTogglePower = () => {
+    if (isPoweredOn) {
+      // Turning OFF: override everything — audio, arms, platter, state.
+      pause();
+      setPendingPlay(false);
+      setPausedState(false);
+      seek(0);
+      setIsPoweredOn(false);
+    } else {
+      // Turning ON: idle state, ready to play.
+      setPendingPlay(false);
+      setPausedState(false);
+      setIsPoweredOn(true);
+    }
+  };
+
+  // ── Bulletproof Play/Pause Toggle ───────────────────────────────────────
+  // Three mutually-exclusive cases; clicking mid-drop cancels the needle drop.
+  const handleTogglePlay = () => {
+    // Guard: if the machine is off, power it back on first.
+    if (!isPoweredOn) {
+      setIsPoweredOn(true);
+      setPendingPlay(true);
+      return;
+    }
+
+    if (isPlaying) {
+      // Case 1 — actively playing → pause immediately.
+      setPausedState(true);
+      setPendingPlay(false);
+      togglePlay();
+    } else if (pendingPlay) {
+      // Case 2 — needle is mid-drop → cancel the drop.
+      setPendingPlay(false);
+    } else {
+      // Case 3 — stopped or paused → initiate fresh needle drop.
+      // Resume AudioContext synchronously; start audio immediately so something
+      // plays even if the needle-drop animation hasn't fired yet.
+      if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+      if (audioRef.current) {
+        audioRef.current.play().catch((err: unknown) => {
+          if ((err as Error)?.name !== 'AbortError') {
+            console.error('[VinylShowcase] Play error:', err);
+          }
+        });
+      }
+      setPausedState(false);
+      setPendingPlay(true);
+    }
+  };
+  // Alias for Turntable prop naming clarity.
+  const handleToggleTurntable = handleTogglePlay;
+
+  // Playlist click → unified flow: load src + activeTrack but DO NOT start audio.
+  // We set audioRef.current.src and currentTime=0 here, and update activeTrack
+  // via setActiveTrack (from context). The turntable animates (transportState
+  // becomes 'playing' due to pendingPlay) and onNeedleDrop finally triggers
+  // audio.play() — identical to the Start button flow.
+  const handlePlaylistSelect = (track: any) => {
+    if (audioRef.current) {
+      const rawSrc = track?.url || track?.audioUrl || track?.src;
+      if (rawSrc) {
+        try {
+          const clean = decodeURIComponent(rawSrc.startsWith("http")
+            ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+            : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`);
+          const encoded = encodeURI(clean);
+          if (audioRef.current.src !== encoded) {
+            audioRef.current.src = encoded;
+          }
+          audioRef.current.currentTime = 0;
+          audioRef.current.load();
+        } catch (e) {
+          console.error("[VinylShowcase] Failed to load track src:", e);
+        }
+      }
+    }
+    // Synchronously resume Web Audio Context; rely on 5-second activation window.
+    if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+    setActiveTrack(track);
+    setPausedState(false);
+    setPendingPlay(true);
+  };
+
+  // onNeedleDrop — the exact moment the turntable's needle completes its drop.
+// This is the ONE place audio is started (or resumed). The Turntable fires this
+// from its runPlaySequence after the arm lands on the vinyl.
+  const handleNeedleDrop = useCallback(() => {
+    // Clear the pending flag; the drop has finished.
+    setPendingPlay(false);
+    setPausedState(false);
+    // Mark the context as playing synchronously so transportState stays
+    // 'playing' throughout the audio start window.
+    setIsPlaying(true);
+    // Explicitly start the audio now that the needle is down.
+    if (audioRef.current) {
+      audioRef.current.play().catch((err: unknown) => {
+        if ((err as Error)?.name !== 'AbortError') {
+          console.error('[VinylShowcase] Needle-drop audio start failed:', err);
+        }
+      });
+    }
+  }, []);
+
+  const handleTurntableStop = () => {
+    setPausedState(false);
+    setPendingPlay(false);
+    handleStop();
+  };
   // Resetting progress to 0 while paused triggers the Turntable's
   // intelligent 'stopped' inference, which returns the tonearm to the rest.
   const handleStop = () => {
+    setPendingPlay(false);
     if (isPlaying) {
       togglePlay();
     }
@@ -120,10 +387,10 @@ export default function VinylShowcase() {
               <SkipBack size={24} />
             </button>
             <button
-              onClick={togglePlay}
+              onClick={() => handleTogglePlay()}
               className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
             >
-              {isPlaying ? <Pause size={24} /> : <Play className="ml-1" size={24} />}
+              {isEffectivelyPlaying ? <Pause size={24} /> : <Play className="ml-1" size={24} />}
             </button>
             <button
               onClick={handleStop}
@@ -212,7 +479,7 @@ export default function VinylShowcase() {
                 return (
                   <div
                     key={track.id}
-                    onClick={() => playTrack(track)}
+                    onClick={() => handlePlaylistSelect(track)}
                     className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
                       isActive ? "bg-[#1a1a1a] border border-blue-900/30" : "hover:bg-gray-800/50"
                     }`}
@@ -304,7 +571,16 @@ export default function VinylShowcase() {
         {/* ── Right Column: Vinyl ────────────────────────────────────────── */}
         <div className="flex flex-col items-center justify-center">
           <div className="w-full max-w-2xl">
-            <Turntable isPlaying={isPlaying} progress={duration > 0 ? (currentTime / duration) : 0} />
+            <Turntable
+              transportState={currentTransportState}
+              progress={duration > 0 ? (currentTime / duration) : 0}
+              onTogglePlay={handleTogglePlay}
+              onStop={handleTurntableStop}
+              onNeedleDrop={handleNeedleDrop}
+              isPoweredOn={isPoweredOn}
+              onTogglePower={handleTogglePower}
+              bpm={bpm}
+            />
           </div>
 
           {/* Current Track Info */}
