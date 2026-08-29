@@ -61,6 +61,10 @@ interface AudioContextType {
    *  Safe to call from multiple visualizer components — uses a WeakMap singleton
    *  under the hood to prevent InvalidStateError from double-createMediaElementSource. */
   getAnalyserNode: () => AnalyserNode | null;
+  /** Initializes the AudioContext and resumes it if suspended. Call this during
+   *  a user gesture (e.g. inside a click handler) to ensure the Web Audio API
+   *  is not blocked by the browser's autoplay policy. */
+  ensureAudioContext: () => Promise<void>;
 }
 
 const AudioContextInstance = createContext<AudioContextType | null>(null);
@@ -309,9 +313,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const rawSrc = (track as any)?.url || (track as any)?.audioUrl || (track as any)?.src;
     if (!rawSrc) return true;
     const clean = buildCleanUrl(rawSrc);
-    // Normalise currentSrc to path-only for comparison (strips origin prefix)
-    const normCurrent = currentSrc.replace(/^https?:\/\/[^/]+/, "");
-    return normCurrent !== clean;
+    // Decode both sides so spaces (%20) match raw spaces in URLs
+    const decodedCurrent = decodeURI(currentSrc.replace(/^https?:\/\/[^/]+/, ""));
+    const decodedClean = decodeURI(clean);
+    return decodedCurrent !== decodedClean;
   };
 
   // ---------------------------------------------------------------------------
@@ -911,6 +916,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           analyserNode, // reactive state version — updated by the single pipeline
           gainNodeRef,
           getAnalyserNode,
+          ensureAudioContext,
         }}
       >
         {children}
