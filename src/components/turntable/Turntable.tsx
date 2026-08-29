@@ -45,7 +45,7 @@ export default function Turntable({
         setIsLeverEngaged(true);
         setIsLifted(true);
         timer1 = setTimeout(() => {
-          setArmAngle(30);
+          setArmAngle(38);
           timer2 = setTimeout(() => setIsLifted(false), 600);
         }, 400);
       } else {
@@ -198,10 +198,10 @@ export default function Turntable({
 
                 {/* Cradle (rest position) */}
                 <g id="tonearm-base-cradle" filter="url(#shadow-md)">
-                  <rect x={REST_X - 32} y={REST_Y - 4} width="64" height="12" rx="3" fill="url(#brushed-al)" stroke="#1e222a" strokeWidth="0.6" />
-                  <ellipse cx={REST_X} cy={REST_Y - 4} rx="20" ry="6" fill="url(#anodized-dark)" stroke="#2c3040" strokeWidth="0.6" />
-                  <rect x={REST_X - 4} y={REST_Y - 28} width="8" height="20" rx="2" fill="url(#precision-chrome)" stroke="#5a6478" strokeWidth="0.4" />
-                  <circle cx={REST_X} cy={REST_Y - 18} r="2.2" fill="#a82828" opacity="0.85" />
+                  <circle cx="490" cy="277" r="14" fill="#2c3040" stroke="#1a1c23" strokeWidth="1" />
+                  <circle cx="490" cy="277" r="9" fill="url(#brushed-al)" stroke="#1a1c23" strokeWidth="0.5" />
+                  <circle cx="490" cy="277" r="4" fill="url(#precision-chrome)" />
+                  <path d="M 487,274 C 484,274 484,280 487,280 L 493,280 C 496,280 496,274 493,274" fill="none" stroke="#111318" strokeWidth="2.5" strokeLinecap="round" />
                 </g>
 
                 {/* Arm base column (plinth mount) */}
@@ -395,52 +395,51 @@ export default function Turntable({
                 {/* Headshell — rigid child of arm. NO independent rotation.
                     Local origin: arm tip (TPX, TPY + WAND_LEN).
                     Cartridge faces forward with natural alignment to record groove. */}
-                <g id="headshell-assembly" transform={`translate(${TPX} ${TPY + WAND_LEN})`}>
-                  <g id="headshell-body">
-                    <path d="M -22,-9 L 10,-9 L 22,-5 L 22,8 L 10,12 L -22,10 Z" fill="url(#anodized-dark)" stroke="#1a1e28" strokeWidth="0.8" />
-                    <path d="M -21,-8 L 9,-8 L 20,-5 L -21,-4 Z" fill="rgba(195,205,225,0.12)" />
-                    <path d="M -21,9 L 9,11 L 20,5 L -21,4 Z" fill="rgba(0,0,0,0.4)" />
-                    <path d="M -21,-8 L -21,10" fill="none" stroke="rgba(195,205,225,0.15)" strokeWidth="0.8" strokeLinecap="round" />
-                  </g>
-                  <g id="headshell-connector">
-                    <ellipse cx="-18" cy="0" rx="6" ry="9" fill="url(#gold)" stroke="#7c6018" strokeWidth="0.6" />
-                    <ellipse cx="-18" cy="0" rx="4" ry="7" fill="rgba(0,0,0,0.3)" />
-                    <ellipse cx="-20" cy="-2" rx="1.5" ry="3" fill="rgba(240,220,100,0.3)" />
-                  </g>
-                  <g id="headshell-finger-lift">
-                    <path d="M -36,-6 C -44,-6 -46,-2 -44,2 C -46,6 -44,9 -36,9 L -30,9 L -30,-6 Z" fill="url(#polished-al)" stroke="#3a3e4c" strokeWidth="0.5" />
-                    <line x1="-43" y1="1.5" x2="-31" y2="1.5" stroke="#1e222a" strokeWidth="0.6" opacity="0.6" />
-                    <path d="M -35,-5 C -42,-5 -44,-2 -42,0" fill="none" stroke="rgba(200,210,230,0.3)" strokeWidth="0.8" strokeLinecap="round" />
-                  </g>
-                  <g id="cartridge-assembly" transform="translate(-1, 0)">
-                    <rect x="-14" y="-9" width="28" height="18" rx="2.5" fill="url(#cart-blue)" stroke="#0c1830" strokeWidth="0.6" />
-                    <rect x="-11" y="-8" width="22" height="4" rx="1.5" fill="rgba(100,160,255,0.15)" />
-                    <rect x="-11" y="2" width="5" height="6" rx="1" fill="#040810" />
-                    <rect x="6" y="2" width="5" height="6" rx="1" fill="#040810" />
-                    <g id="cartridge-screw-left">
-                      <circle cx="-8.5" cy="5" r="1.8" fill="url(#precision-chrome)" stroke="#4a5262" strokeWidth="0.3" />
-                      <line x1="-10" y1="5" x2="-7" y2="5" stroke="#1e222a" strokeWidth="0.5" />
-                      <line x1="-8.5" y1="3.3" x2="-8.5" y2="6.7" stroke="#1e222a" strokeWidth="0.5" />
+                <g id="headshell-assembly" transform="translate(490, 285)">
+                  <g transform="scale(1.4)">
+                    <g id="bayonet-collar">
+                      {/* Plug inserted inside the tube */}
+                      <rect x="-3.5" y="-4" width="7" height="8" fill="#111318" />
+                      {/* Seamless locking collar matching the arm tube diameter */}
+                      <rect x="-4.5" y="3" width="9" height="7" rx="1" fill="url(#precision-chrome)" stroke="#1a1c23" strokeWidth="0.5" />
+                      {/* Subtle grip ridges */}
+                      <line x1="-2" y1="3" x2="-2" y2="10" stroke="#111318" strokeWidth="0.5" />
+                      <line x1="0" y1="3" x2="0" y2="10" stroke="#111318" strokeWidth="0.5" />
+                      <line x1="2" y1="3" x2="2" y2="10" stroke="#111318" strokeWidth="0.5" />
+                      {/* Base flange connecting to the headshell body */}
+                      <path d="M -4.5,10 L 4.5,10 L 5,14 L -5,14 Z" fill="#2c3040" />
                     </g>
-                    <g id="cartridge-screw-right">
-                      <circle cx="8.5" cy="5" r="1.8" fill="url(#precision-chrome)" stroke="#4a5262" strokeWidth="0.3" />
-                      <line x1="7" y1="5" x2="10" y2="5" stroke="#1e222a" strokeWidth="0.5" />
-                      <line x1="8.5" y1="3.3" x2="8.5" y2="6.7" stroke="#1e222a" strokeWidth="0.5" />
+                    <g transform="rotate(23 0 8.5)">
+                      {/* CARTRIDGE & STYLUS (renders underneath headshell) */}
+                      <g id="cartridge-assembly">
+                        <rect x="-4.5" y="12" width="9" height="20" fill="#b89947" rx="1" />
+                        <rect x="-3" y="15" width="6" height="15" fill="#111318" />
+                        <path d="M -1,32 L 1,32 L 0.5,37 L -0.5,37 Z" fill="#e5e7eb" />
+                        <circle cx="0" cy="36.5" r="0.8" fill="#ff3333" />
+                      </g>
+                      {/* HEADSHELL BODY */}
+                      <g id="headshell-body">
+                        <path d="M -5,8.5 L 5,8.5 L 7.5,14 L 7.5,33 C 7.5,34 6.5,35 0,35 C -6.5,35 -7.5,34 -7.5,33 L -7.5,14 Z" fill="#2c3040" stroke="#1a1c23" strokeWidth="0.5" />
+                        <rect x="-4.5" y="15" width="2" height="12" rx="1" fill="#1a1c23" />
+                        <rect x="2.5" y="15" width="2" height="12" rx="1" fill="#1a1c23" />
+                        <circle cx="-3.5" cy="22" r="1.8" fill="url(#precision-chrome)" />
+                        <line x1="-4.5" y1="22" x2="-2.5" y2="22" stroke="#222" strokeWidth="0.5" transform="rotate(45 -3.5 22)" />
+                        <circle cx="3.5" cy="22" r="1.8" fill="url(#precision-chrome)" />
+                        <line x1="2.5" y1="22" x2="4.5" y2="22" stroke="#222" strokeWidth="0.5" transform="rotate(-15 3.5 22)" />
+                        <circle cx="0" cy="28" r="1.5" fill="#1a1c23" opacity="0.5" />
+                      </g>
+                      {/* MACHINED FINGER LIFT */}
+                      <g id="headshell-finger-lift">
+                        <path d="M 7.5,18 L 13,18 A 1.5 1.5 0 0 0 14.5,16.5 L 14.5,14" fill="none" stroke="url(#precision-chrome)" strokeWidth="1.2" strokeLinecap="round" />
+                      </g>
                     </g>
-                    <g id="stylus-assembly">
-                      <line id="cantilever" x1="13" y1="0" x2="26" y2="3.5" stroke="url(#cantilever-grad)" strokeWidth="0.8" strokeLinecap="round" />
-                      <circle id="stylus-tip" cx="26" cy="3.5" r="1.5" fill="url(#precision-chrome)" stroke="#6a7888" strokeWidth="0.3" />
-                      <circle cx="25.4" cy="3.1" r="0.5" fill="rgba(255,255,255,0.7)" />
                     </g>
-                  </g>
                 </g>
               </g>
-              {/* End #tonearm-assembly */}
-              </g>
               {/* End #tonearm-lift-wrapper */}
-
             </g>
             {/* End #tonearm-system */}
+          </g>
 
             {/* PITCH FADER */}
             <g id="pitch-fader">
