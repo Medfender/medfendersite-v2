@@ -183,24 +183,13 @@ export default function Turntable({
               </g>
 
               {/* Gimbal / Pivot Base — heavily machined bearing housing at (TPX, TPY) */}
+              {/* ONLY the outer housing ring (r=34/30) and its tick marks are static.
+                  The inner bearing hub (r=24/20/16/9, screws, highlight) is part of the
+                  rotating arm assembly and lives inside the rotation group below. */}
               <g filter="url(#shadow-md)">
                 <circle cx={TPX} cy={TPY} r="34" fill="url(#matte-blk)" stroke="#1e222a" strokeWidth="0.8" />
                 <circle cx={TPX} cy={TPY} r="30" fill="none" stroke="url(#gimbal-metal)" strokeWidth="6" />
                 {Array.from({ length: 24 }, (_, i) => { const a=(i*360)/24; const rad=(a*Math.PI)/180; const x1=+(TPX+Math.cos(rad)*27).toFixed(3); const y1=+(TPY+Math.sin(rad)*27).toFixed(3); const x2=+(TPX+Math.cos(rad)*33).toFixed(3); const y2=+(TPY+Math.sin(rad)*33).toFixed(3); return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#1e222a" strokeWidth="0.5" opacity="0.7"/>; })}
-                <circle cx={TPX} cy={TPY} r="24" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
-                <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#silver-deep)" strokeWidth="2.4" />
-                <circle cx={TPX} cy={TPY} r="16" fill="url(#gimbal-metal)" stroke="#3a3e4c" strokeWidth="0.5" />
-                <circle cx={TPX} cy={TPY} r="9" fill="url(#matte-blk)" stroke="#0c0d12" strokeWidth="0.4" />
-                <ellipse cx={TPX-3} cy={TPY-3} rx="5" ry="3" fill="rgba(225,235,248,0.4)" transform={`rotate(-35, ${TPX-3}, ${TPY-3})`} />
-                {[ [TPX+28,TPY,0],[TPX,TPY+28,90],[TPX-28,TPY,180],[TPX,TPY-28,270] ].map(([sx,sy,deg],i)=> (
-                  <g key={i}>
-                    <circle cx={sx} cy={sy} r="2.4" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4"/>
-                    {deg===0 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
-                    {deg===90 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
-                    {deg===180 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
-                    {deg===270 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
-                  </g>
-                ))}
               </g>
 
               {/* Anti-Skate Dial — smaller textured dial to the right of gimbal */}
@@ -250,6 +239,27 @@ export default function Turntable({
                   <g transform={`translate(-${TPX}, -${TPY})`}>
 
                     {/* ROTATING COMPONENTS ONLY */}
+
+                    {/* Inner gimbal bearing hub — rotates with the arm as one rigid assembly.
+                        Outer housing ring (r=34/30) stays static in base. */}
+                    <g filter="url(#shadow-sm)">
+                      <circle cx={TPX} cy={TPY} r="24" fill="url(#matte-blk)" stroke="#252830" strokeWidth="0.6" />
+                      <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#silver-deep)" strokeWidth="2.4" />
+                      <circle cx={TPX} cy={TPY} r="16" fill="url(#gimbal-metal)" stroke="#3a3e4c" strokeWidth="0.5" />
+                      <circle cx={TPX} cy={TPY} r="9" fill="url(#matte-blk)" stroke="#0c0d12" strokeWidth="0.4" />
+                      {/* Chrome highlight — glints at top-left of the inner hub */}
+                      <ellipse cx={TPX-3} cy={TPY-3} rx="5" ry="3" fill="rgba(225,235,248,0.4)" transform={`rotate(-35, ${TPX-3}, ${TPY-3})`} />
+                      {/* Gimbal mounting screws at N/E/S/W */}
+                      {[ [TPX+28,TPY,0],[TPX,TPY+28,90],[TPX-28,TPY,180],[TPX,TPY-28,270] ].map(([sx,sy,deg],i)=> (
+                        <g key={i}>
+                          <circle cx={sx} cy={sy} r="2.4" fill="url(#chrome)" stroke="#4a5262" strokeWidth="0.4"/>
+                          {deg===0 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
+                          {deg===90 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
+                          {deg===180 && <line x1={sx-2} y1={sy} x2={sx+2} y2={sy} stroke="#252830" strokeWidth="0.8"/>}
+                          {deg===270 && <line x1={sx} y1={sy-2} x2={sx} y2={sy+2} stroke="#252830" strokeWidth="0.8"/>}
+                        </g>
+                      ))}
+                    </g>
 
                     {/* Counterweight — thick metallic cylinder extending above the pivot (absolute chassis coords) */}
                     <g filter="url(#shadow-md)">
