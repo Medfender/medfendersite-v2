@@ -198,10 +198,10 @@ export default function Turntable({
 
                 {/* Cradle (rest position) */}
                 <g id="tonearm-base-cradle" filter="url(#shadow-md)">
-                  <circle cx="490" cy="277" r="14" fill="#2c3040" stroke="#1a1c23" strokeWidth="1" />
-                  <circle cx="490" cy="277" r="9" fill="url(#brushed-al)" stroke="#1a1c23" strokeWidth="0.5" />
-                  <circle cx="490" cy="277" r="4" fill="url(#precision-chrome)" />
-                  <path d="M 487,274 C 484,274 484,280 487,280 L 493,280 C 496,280 496,274 493,274" fill="none" stroke="#111318" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="490" cy="292" r="14" fill="#2c3040" stroke="#1a1c23" strokeWidth="1" />
+                  <circle cx="490" cy="292" r="9" fill="url(#brushed-al)" stroke="#1a1c23" strokeWidth="0.5" />
+                  <circle cx="490" cy="292" r="4" fill="url(#precision-chrome)" />
+                  <path d="M 487,289 C 484,289 484,295 487,295 L 493,295 C 496,295 496,289 493,289" fill="none" stroke="#111318" strokeWidth="2.5" strokeLinecap="round" />
                 </g>
 
                 {/* Arm base column (plinth mount) */}
