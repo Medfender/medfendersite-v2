@@ -128,6 +128,7 @@ export default function Turntable({
   else displayAngle = frozenAngleRef.current;
 
   const PITCH_X = 660; const PITCH_Y = 130; const PITCH_LEN = 230;
+  const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (
     <div className={`relative w-full max-w-[820px] mx-auto ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
@@ -350,24 +351,9 @@ export default function Turntable({
               </g>
 
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
-              <g
-                id="tonearm-lift-wrapper"
-                style={{
-                  transformOrigin: '490px 75px',
-                  transform: isLifted ? 'scale(1.03)' : 'scale(1)',
-                  filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))',
-                  transition: 'transform 0.4s ease-in-out, filter 0.4s ease-in-out',
-                }}
-              >
+              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: 'transform 0.4s ease-in-out, filter 0.4s ease-in-out' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g
-                  id="tonearm-assembly"
-                  style={{
-                    transform: `rotate(${armAngle}deg)`,
-                    transformOrigin: '490px 75px',
-                    transition: 'transform 0.6s cubic-bezier(0.34, 1.1, 0.64, 1)',
-                  }}
-                >
+                <g id="tonearm-assembly" style={{ transform: `rotate(${armAngle}deg)`, transformOrigin: '490px 75px', transition: 'transform 0.6s cubic-bezier(0.34, 1.1, 0.64, 1)' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">
@@ -492,6 +478,7 @@ export default function Turntable({
                     </g>
                     </g>
                 </g>
+                </g>
               </g>
               {/* End #tonearm-lift-wrapper */}
             </g>
@@ -509,7 +496,7 @@ export default function Turntable({
               <text x={PITCH_X + 17} y={PITCH_Y + 3} fontSize="6" fill="#7a8598" fontFamily="monospace">+8%</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN / 2 + 2} fontSize="6" fill="#7a8598" fontFamily="monospace">0</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN + 4} fontSize="6" fill="#7a8598" fontFamily="monospace">-8%</text>
-              <g style={{ transform: 'translateX(660px) translateY(' + (PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)) + 'px)', transition: "transform 0.15s ease-out" }}>
+              <g style={{ transform: `translateX(${PITCH_X}px) translateY(${sliderY}px)`, transition: "transform 0.15s ease-out" }}>
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="rgba(0,0,0,0.6)" opacity="0.5" filter="url(#shadow-sm)" />
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="url(#precision-chrome)" stroke="#3a3e4c" strokeWidth="0.5" />
                 <line x1={-6} y1={0} x2={6} y2={0} stroke="#1a1d24" strokeWidth="1.2" />
@@ -542,7 +529,7 @@ export default function Turntable({
                   {transportState === 'playing' ? (
                     <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                   ) : (
-                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }}></div>
+                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
                   )}
                 </button>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
