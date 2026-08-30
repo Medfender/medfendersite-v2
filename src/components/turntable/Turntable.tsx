@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useAudio } from "@/context/AudioContext";
 
 export default function Turntable({
   transportState = 'stopped',
@@ -10,8 +11,8 @@ export default function Turntable({
   onTogglePlay,
   onStop,
   onNeedleDrop,
-  isPoweredOn = true,
-  onTogglePower,
+  onPlay,
+  onPause,
   bpm = 0,
 }: {
   transportState?: 'playing' | 'paused' | 'stopped';
@@ -21,15 +22,37 @@ export default function Turntable({
   onTogglePlay?: () => void;
   onStop?: () => void;
   onNeedleDrop?: () => void;
-  isPoweredOn?: boolean;
-  onTogglePower?: () => void;
+  onPlay?: () => void;
+  onPause?: () => void;
   bpm?: number | 'CAL';
 }) {
+  // Global audio context — single source of truth for power state
+  const { isPowered, togglePower, setIsPowered } = useAudio();
+
+  const handleCueSwitchToggle = useCallback(() => {
+    // Brute-force remote control: unconditionally toggle power and audio.
+    // No conditional checks against global isPlaying — pure remote-control logic.
+    if (!isPowered) {
+      // Use setIsPowered(true) directly — do NOT call togglePower() here.
+      // togglePower() would flip power back OFF when onNeedleDrop fires later.
+      setIsPowered(true);
+      if (onPlay) onPlay();
+      // Fire needle drop after the arm drop animation completes (~600ms).
+      // The audio start is deferred here so the sound only begins after
+      // the arm has physically landed on the record.
+      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
+    } else {
+      // Power is ON — toggle off (kill switch path).
+      togglePower();
+      if (onPause) onPause();
+    }
+  }, [isPowered, togglePower, setIsPowered, onPlay, onPause, onNeedleDrop]);
+
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
 
   const isPlaying = transportState === 'playing' || isPendingPlay;
-  const vinylSpinning = transportState === 'playing' && isPoweredOn;
+  const vinylSpinning = transportState === 'playing' && isPowered;
 
   const [isLifted, setIsLifted] = useState(false);
   const [armAngle, setArmAngle] = useState(0);
@@ -282,7 +305,7 @@ export default function Turntable({
                   <path d="M 454,106 L 474,94 L 474,80 L 446,80 A 12 12 0 0,0 446,103 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
 
                   {/* 2. Static Lever Pivot Base */}
-                  <circle cx="454" cy="92" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                  <circle cx="454" cy="92" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" onClick={handleCueSwitchToggle} style={{ cursor: 'pointer' }} />
                   <circle cx="454" cy="92" r="4" fill="#111" />
 
                   {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
@@ -292,7 +315,7 @@ export default function Turntable({
                     transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}>
                      {/* Shorter, thinner metal shaft */}
-                     <rect x="452.75" y="78" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                     <rect x="452.75" y="78" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" onClick={handleCueSwitchToggle} style={{ cursor: 'pointer' }} />
                      {/* Vibrant accent cue lever tip */}
                      <circle cx="454" cy="77" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
                   </g>
@@ -513,19 +536,19 @@ export default function Turntable({
               <div className="flex flex-col items-center gap-1">
                 <div className="relative">
                   <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                    <button onClick={onTogglePower} aria-label={isPoweredOn ? "Power off" : "Power on"} aria-pressed={isPoweredOn} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
-                      background: isPoweredOn ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
-                      boxShadow: isPoweredOn ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
-                      filter: isPoweredOn ? 'none' : 'grayscale(0.6) opacity(0.7)',
+                    <button onClick={togglePower} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
+                      background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
+                      boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
+                      filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',
                     }}>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isPoweredOn ? "#ff3a3a" : "#3a1010", boxShadow: isPoweredOn ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isPowered ? "#ff3a3a" : "#3a1010", boxShadow: isPowered ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
                     </button>
                   </div>
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
               </div>
-              <div className={`flex flex-col items-center gap-1 ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <button onClick={isPoweredOn ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+              <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+                <button onClick={isPowered ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
                   {transportState === 'playing' ? (
                     <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                   ) : (
@@ -537,24 +560,24 @@ export default function Turntable({
             </div>
 
             <div className="flex items-end gap-3">
-              <div className={`flex flex-col gap-1 items-center ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+              <div className={`flex flex-col gap-1 items-center ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
                 <div className="flex gap-1">
                   {[33, 45].map((rpm) => (
-                    <button key={rpm} onClick={isPoweredOn ? () => setSpeed(rpm as 33 | 45) : undefined} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
+                    <button key={rpm} onClick={isPowered ? () => setSpeed(rpm as 33 | 45) : undefined} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
                       {rpm}
                     </button>
                   ))}
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
               </div>
-              <div className={`flex flex-col items-center gap-1 ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPoweredOn ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPoweredOn ? "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" : "inset 0 0 6px rgba(0,0,0,0.5)" }}>
-                  <span className={`text-[8px] font-mono tracking-[0.25em] uppercase leading-none ${isPoweredOn ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
-                  <span className={`text-xs font-mono leading-none tabular-nums tracking-tight transition-all duration-300 flex items-center justify-center whitespace-nowrap overflow-hidden ${isPoweredOn ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPoweredOn && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
+              <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" : "inset 0 0 6px rgba(0,0,0,0.5)" }}>
+                  <span className={`text-[8px] font-mono tracking-[0.25em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
+                  <span className={`text-xs font-mono leading-none tabular-nums tracking-tight transition-all duration-300 flex items-center justify-center whitespace-nowrap overflow-hidden ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
                     {bpm === 'CAL' ? 'CAL' : (Number(bpm) > 0 ? Number(bpm).toFixed(2) : '--')}
                   </span>
                 </div>
-                <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPoweredOn ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
+                <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
               </div>
             </div>
           </div>
