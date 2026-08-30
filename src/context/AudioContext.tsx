@@ -18,6 +18,9 @@ interface AudioContextType {
   isVisualizerActive: boolean;
   setIsVisualizerActive: (val: boolean) => void;
   setVisualizerActive: (val: boolean) => void;
+  isStopped: boolean;
+  setIsStopped: (val: boolean) => void;
+  stopPlayback: () => void;
   connectAudioElement: (audioEl: HTMLAudioElement) => void;
   connectSourceToAnalyser: () => void;
   setActiveAudioElement: (audioEl: HTMLAudioElement | null) => void;
@@ -116,6 +119,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPowered, setIsPowered] = useState(false);
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+  // Explicit stop state — distinct from pause. When true the tonearm returns to rest.
+  const [isStopped, setIsStopped] = useState(false);
 
   // Belt-and-suspenders: isPowered always tracks audio playback.
   // External play paths call setIsPowered(true) explicitly, but this
@@ -666,9 +671,31 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setIsPlaying(false);
     setCurrentTime(0);
-    setIsPowered(false);         // Stop kills the deck — turntable power off + arm return
     setIsVisualizerActive(false);
+    setIsStopped(true);         // Stop sets explicit resting tonearm state
   };
+
+  // Explicit stop — only called by dedicated Stop buttons. Sets isStopped and
+  // resets tonearm to rest independently of power/pause state.
+  const stopPlayback = useCallback(() => {
+    if (audioRef.current) {
+      if (playPromiseRef.current) {
+        playPromiseRef.current
+          .then(() => {
+            try { audioRef.current?.pause(); } catch { /* ignore */ }
+            if (audioRef.current) audioRef.current.currentTime = 0;
+          })
+          .catch(() => {});
+      } else {
+        try { audioRef.current.pause(); } catch { /* ignore */ }
+        try { audioRef.current.currentTime = 0; } catch { /* ignore */ }
+      }
+    }
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setIsStopped(true);
+    setIsVisualizerActive(false);
+  }, []);
 
   const seek = (time: number) => {
     if (audioRef.current) {
@@ -994,6 +1021,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           isPowered,
           setIsPowered,
           togglePower,
+          isStopped,
+          setIsStopped,
+          stopPlayback,
           isVisualizerActive,
           setIsVisualizerActive,
           setVisualizerActive: setIsVisualizerActive,

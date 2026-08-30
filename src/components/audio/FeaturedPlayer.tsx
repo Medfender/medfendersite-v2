@@ -22,7 +22,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
   const {
     activeTrack, currentTrack, isPlaying, volume, setVolume,
     isMuted, toggleMute, togglePlay, seek, currentTime, duration,
-    analyserNode, playNext, playPrevious, stop, playlist,
+    analyserNode, playNext, playPrevious, stopPlayback, playlist,
   } = useAudio();
 
   // ── Track metadata ────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
           {/* Stop — immediately before the interactive Mini Visualizer */}
           <button
-            onClick={stop}
+            onClick={stopPlayback}
             title="Stop"
             aria-label="Stop"
             className="w-7 h-7 rounded-full text-neutral-500 hover:text-cyan-400 hover:bg-white/5 transition-colors shrink-0 flex items-center justify-center"

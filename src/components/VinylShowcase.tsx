@@ -14,6 +14,8 @@ export default function VinylShowcase() {
     togglePlay,
     isPowered,
     setIsPowered,
+    isStopped,
+    setIsStopped,
     playNext,
     playPrevious,
     seek,
@@ -197,6 +199,15 @@ export default function VinylShowcase() {
   // Paused state is tracked separately (we cannot detect "paused" from isPlaying alone).
   const [pausedState, setPausedState] = useState(false);
 
+  // Auto-clear isStopped whenever playback resumes (isPlaying becomes true).
+  // This makes Pause/Play/Stop behave like a real deck: Pause → tonearm stays
+  // on record; Stop → tonearm returns to rest; Play from any state → resume.
+  useEffect(() => {
+    if (isPlaying && isStopped) {
+      setIsStopped(false);
+    }
+  }, [isPlaying, isStopped, setIsStopped]);
+
   // Fix #1 — Deferred Audio Start: must come before currentTransportState (used there).
   const [pendingPlay, setPendingPlay] = useState(false);
 
@@ -212,6 +223,11 @@ export default function VinylShowcase() {
       : pausedState
         ? 'paused'
         : 'stopped';
+
+  // isStopped from context is the authoritative "tonearm returns to rest" signal.
+  // Use it to force 'stopped' even while isPowered may still be true.
+  const effectiveTransportState: 'playing' | 'paused' | 'stopped' =
+    isStopped ? 'stopped' : currentTransportState;
 
   // Unified boolean for all UI icon derivations — single source of truth.
   const isEffectivelyPlaying = isPlaying || pendingPlay;
@@ -664,7 +680,7 @@ export default function VinylShowcase() {
         <div className="flex flex-col items-center justify-center">
           <div className="w-full max-w-2xl">
             <Turntable
-              transportState={currentTransportState}
+              transportState={effectiveTransportState}
               isPendingPlay={pendingPlay}
               progress={duration > 0 ? (currentTime / duration) : 0}
               onTogglePlay={handleTogglePlay}
