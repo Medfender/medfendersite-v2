@@ -445,12 +445,26 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (audioRef.current) {
       const cleanPath = decodeURIComponent(audioSrc);
       const encodedSrc = encodeURI(cleanPath);
-      if (audioRef.current.src !== encodedSrc) {
+      // Normalize both sides to relative paths before comparing.
+      // audioRef.current.src returns a full URL; encodedSrc is relative.
+      // Without stripping the origin, the comparison always fails for the same track.
+      const currentOrigin = audioRef.current.src
+        ? new URL(audioRef.current.src).pathname
+        : "";
+      if (currentOrigin && currentOrigin !== encodedSrc) {
+        // Track changed — reload src and reset to beginning.
+        audioRef.current.src = encodedSrc;
+        audioRef.current.load();
+        audioRef.current.currentTime = 0;
+        setDuration(0);
+      } else if (!currentOrigin) {
+        // No src set — assign and load for first track.
         audioRef.current.src = encodedSrc;
         audioRef.current.load();
         audioRef.current.currentTime = 0;
         setDuration(0);
       }
+      // Same track (currentOrigin === encodedSrc): src unchanged, time preserved.
     }
 
     // Step 4 — sync activeTrack state SYNCHRONOUSLY so the player UI updates
