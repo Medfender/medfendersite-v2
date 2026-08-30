@@ -272,7 +272,9 @@ export default function VinylShowcase() {
   };
 
   // ── Bulletproof Play/Pause Toggle ───────────────────────────────────────
-  // Three mutually-exclusive cases; clicking mid-drop cancels the needle drop.
+  // Pause is ABSOLUTE: clicking pause must always evaluate to 'paused' state,
+  // never 'stopped'. Uses intent (wasPlaying snapshot) instead of transient
+  // isPlaying/currentTime/loading flags.
   const handleTogglePlay = () => {
     // Guard: if the machine is off, power it back on first.
     if (!isPoweredOn) {
@@ -281,18 +283,24 @@ export default function VinylShowcase() {
       return;
     }
 
-    if (isPlaying) {
-      // Case 1 — actively playing → pause immediately.
+    // Snapshot pre-click intent — immune to transient audio/loading flicker
+    // caused by playlist select / skip.
+    const wasPlayingOrPreparing = isPlaying || pendingPlay;
+
+    if (wasPlayingOrPreparing) {
+      // ── PAUSE: absolute lift, never reset. Ignores isPlaying false-positives
+      // from src-swap, currentTime === 0, or any other transient state.
       setPausedState(true);
       setPendingPlay(false);
-      togglePlay();
-    } else if (pendingPlay) {
-      // Case 2 — needle is mid-drop → cancel the drop.
-      setPendingPlay(false);
+      if (isPlaying) {
+        togglePlay();
+      } else if (audioRef.current) {
+        // Audio is mid-load (e.g. just after playlist select); pause defensively.
+        try { audioRef.current.pause(); } catch {}
+      }
     } else {
-      // Case 3 — stopped or paused → initiate fresh needle drop.
-      // Resume AudioContext synchronously; start audio immediately so something
-      // plays even if the needle-drop animation hasn't fired yet.
+      // ── PLAY: fresh needle drop from stopped/paused state.
+      // Resume AudioContext synchronously; start audio immediately.
       if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
       if (audioRef.current) {
         audioRef.current.play().catch((err: unknown) => {
@@ -335,7 +343,8 @@ export default function VinylShowcase() {
     // Synchronously resume Web Audio Context; rely on 5-second activation window.
     if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
     setActiveTrack(track);
-    setPausedState(false);
+    // Do NOT change pausedState — preserve any freeze/paused condition from
+    // previous playback. Only manage the needle-drop pending flag.
     setPendingPlay(true);
   };
 
