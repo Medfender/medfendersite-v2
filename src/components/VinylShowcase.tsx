@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
@@ -193,6 +193,30 @@ export default function VinylShowcase() {
       setPendingPlay(true);
     }
   };
+
+  // First-play guard so the initialize effect only runs after a real play interaction
+  const hasStartedRef = useRef(false);
+
+  // ── Sync pausedState from context play/pause events ─────────────────────────────────────────
+  // Root cause fix: when user clicks Pause (isPlaying → false), we must set
+  // pausedState = true BEFORE the transport derivation fires, otherwise
+  // currentTransportState evaluates to 'stopped' and the tonearm goes home.
+  // hasStartedRef prevents this from firing on first mount (no track loaded).
+  useEffect(() => {
+    if (!hasStartedRef.current) {
+      // First mount — mark that a play interaction is pending
+      hasStartedRef.current = true;
+      return;
+    }
+    if (isPlaying) {
+      // Play started — clear pausedState so transport = 'playing'
+      setPausedState(false);
+    } else {
+      // isPlaying just became false — this is a Pause click.
+      // Set pausedState=true so currentTransportState = 'paused', NOT 'stopped'.
+      setPausedState(true);
+    }
+  }, [isPlaying]);
 
   // ── Transport state mapping for Turntable (3-state mechanical sync) ─────────
   // transportState is a DERIVED value of isPlaying. Single source of truth: audio.
