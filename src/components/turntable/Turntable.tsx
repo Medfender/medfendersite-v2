@@ -256,11 +256,13 @@ export default function Turntable({
       }
     }
     else if (transportState === 'paused') {
+      console.log("Tonearm State Update ->", { transportState, isStopped: false, isPowered, armAngle, action: 'paused-on-record' });
       // 3. Paused: Tonearm STAYS on the record at its current position.
       //    Only the platter stops spinning. No arm swing, no lift.
       //    This is the "vinyl player pause" behavior: needle down, deck stopped.
     }
     else if (transportState === 'stopped') {
+      console.log("Tonearm State Update ->", { transportState, isStopped: true, isPowered, armAngle, action: 'resting' });
       // 4. Stopped: Disengage lever, lift arm, swing back, drop
       setIsLeverEngaged(false);
       setIsLifted(true);
