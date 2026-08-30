@@ -509,7 +509,7 @@ export default function Turntable({
             <g
               className="vinyl-spin"
               style={{
-                transformOrigin: '50% 50%',
+                transformOrigin: `${PCX}px ${PCY}px`,
                 transform: `rotate(${displayRotation}deg)`,
                 animation: "none",
                 willChange: 'transform',

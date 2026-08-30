@@ -100,7 +100,8 @@
       "Bash(chromium --version)",
       "Bash(google-chrome --version)",
       "Bash(npx --yes @babel/parser --plugins jsx --sourceType module src/components/turntable/Turntable.tsx)",
-      "Bash(git diff-tree *)"
+      "Bash(git diff-tree *)",
+      "Bash(git reset *)"
     ]
   }
 }
