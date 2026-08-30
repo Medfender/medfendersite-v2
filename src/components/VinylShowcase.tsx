@@ -202,10 +202,27 @@ export default function VinylShowcase() {
   // Display activates only when turntable is powered on and actively playing.
   const bpm = (isPowered && isPlaying) ? (currentBpm ?? 0) : 0;
 
-  // Audio-end listener: only set paused=true if currentTime > 0 (i.e., real
-  // track completion). Never nuke pausedState on transient isPlaying=false
-  // (network stall, src swap, skip), as that would leak into transportState
-  // and force tonearm return-to-rest.
+  // BPM display must activate whenever the turntable is powered ON and
+  // actively playing, regardless of whether playback was triggered by the
+  // featured player or the turntable's local cue/play button.
+  useEffect(() => {
+    if (isPowered && isPlaying && activeTrack) {
+      // Trigger BPM analysis if not already in progress (currentBpm is null
+      // or the track URL changed). The centralized context handles it.
+      const rawSrc = (activeTrack as any)?.url || (activeTrack as any)?.audioUrl || (activeTrack as any)?.src;
+      if (rawSrc) {
+        const clean = rawSrc.startsWith("http")
+          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
+        const audioSrc = encodeURI(decodeURIComponent(clean));
+        analyzeTrackBpm(audioSrc);
+      }
+    } else if (!isPowered || !isPlaying) {
+      // Turntable is off or not playing — BPM tempo display is idle.
+      // The display is already driven by `bpm = isPowered && isPlaying ? currentBpm ?? 0 : 0`
+      // which naturally resets the screen to 0 / off when inactive.
+    }
+  }, [isPowered, isPlaying, activeTrack, analyzeTrackBpm]);
   useEffect(() => {
     if (isPlaying) return;
     if (!pausedState && currentTime > 0) {
@@ -346,11 +363,17 @@ export default function VinylShowcase() {
             ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
             : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`);
           const encoded = encodeURI(clean);
-          if (audioRef.current.src !== encoded) {
+          // Compare relative paths — currentSrc is full URL, encoded is relative.
+          const currentPath = audioRef.current.src
+            ? new URL(audioRef.current.src).pathname
+            : "";
+          if (currentPath !== encoded) {
+            // Different track — set src + reset.
             audioRef.current.src = encoded;
+            audioRef.current.currentTime = 0;
+            audioRef.current.load();
           }
-          audioRef.current.currentTime = 0;
-          audioRef.current.load();
+          // Same track: src unchanged, time preserved.
         } catch (e) {
           console.error("[VinylShowcase] Failed to load track src:", e);
         }
@@ -387,20 +410,11 @@ export default function VinylShowcase() {
 // from its runPlaySequence after the arm lands on the vinyl.
   const handleNeedleDrop = useCallback(() => {
     // Clear the pending flag; the drop has finished.
+    // Audio was already started by onPlay -> playTrack() before this fired.
     setPendingPlay(false);
     setPausedState(false);
-    // Mark the context as playing synchronously so transportState stays
-    // 'playing' throughout the audio start window.
     setIsPlaying(true);
-    setIsPowered(true); // Needle drop: power must be on for audio
-    // Explicitly start the audio now that the needle is down.
-    if (audioRef.current) {
-      audioRef.current.play().catch((err: unknown) => {
-        if ((err as Error)?.name !== 'AbortError') {
-          console.error('[VinylShowcase] Needle-drop audio start failed:', err);
-        }
-      });
-    }
+    setIsPowered(true);
   }, []);
 
   const handleTurntableStop = () => {
