@@ -11,6 +11,10 @@ interface AudioContextType {
   audioCtx: AudioContext | null;
   isPlaying: boolean;
   setIsPlaying: (val: boolean) => void;
+  // Global turntable power state. Default off; auto-flips true on any play.
+  isPowered: boolean;
+  setIsPowered: (val: boolean) => void;
+  togglePower: () => void;
   isVisualizerActive: boolean;
   setIsVisualizerActive: (val: boolean) => void;
   setVisualizerActive: (val: boolean) => void;
@@ -110,6 +114,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const isNavigatingRef = useRef<boolean>(false);
 
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPowered, setIsPowered] = useState(false);
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
   const [activeTrack, setActiveTrackState] = useState<TrackInfo | null>(null);
   // Ref to avoid stale-closure issues in async playTrack / togglePlay
@@ -126,6 +131,34 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [, setAnalyserTick] = useState(0);
   // Shared reactive analyser node — updated synchronously when wired.
   const [analyserNode, setAnalyserNode] = useState<AnalyserNode | null>(null);
+
+  // Master kill switch — when going from ON to OFF, fully reset audio + state.
+  // When going from OFF to ON, simply power on (idle; no auto-play).
+  const togglePower = useCallback(() => {
+    setIsPowered((prev) => {
+      const next = !prev;
+      if (!next) {
+        // Powering OFF — kill audio, reset transport, return tonearm to rest
+        if (audioRef.current) {
+          try { audioRef.current.pause(); } catch { /* ignore */ }
+          try { audioRef.current.currentTime = 0; } catch { /* ignore */ }
+        }
+        if (playPromiseRef.current) {
+          playPromiseRef.current.then(() => {
+            try { audioRef.current?.pause(); } catch { /* ignore */ }
+            if (audioRef.current) audioRef.current.currentTime = 0;
+          }).catch(() => {});
+        }
+        setIsPlaying(false);
+        setIsVisualizerActive(false);
+        setCurrentTime(0);
+        setDuration(0);
+        setCurrentBpm(null);
+        isNavigatingRef.current = false;
+      }
+      return next;
+    });
+  }, []);
 
   // Public setter that keeps the ref and state in sync
   const setActiveTrack = useCallback((track: TrackInfo | null) => {
@@ -453,6 +486,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
 
       setIsPlaying(true);
+      setIsPowered(true); // Global play → turntable powers on
       setIsVisualizerActive(true);
 
       // The JSX <audio onPlay={initWebAudio}> handles Web Audio wiring.
@@ -524,6 +558,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         await audioRef.current.play();
         setIsPlaying(true);
+        setIsPowered(true); // Global play → turntable powers on
         setIsVisualizerActive(true);
         initWebAudioRef.current(); // Ensure pipeline is wired before first rAF frame
       } catch (err: any) {
@@ -671,6 +706,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     currentIndexRef.current = safeIndex;
     setActiveTrack(targetTrack);
     setIsPlaying(true);
+    setIsPowered(true); // Global play → turntable powers on
     setCurrentBpm(null);
     void analyzeTrackBpm(targetUrl);
 
@@ -897,6 +933,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }}
         onPlay={() => {
           setIsPlaying(true);
+          setIsPowered(true); // Native play event → turntable powers on
           setIsVisualizerActive(true);
           initWebAudioRef.current(); // Wire Web Audio pipeline the moment user gesture unlocks it
         }}
@@ -930,6 +967,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           audioCtx: audioCtxRef.current,
           isPlaying,
           setIsPlaying,
+          isPowered,
+          setIsPowered,
+          togglePower,
           isVisualizerActive,
           setIsVisualizerActive,
           setVisualizerActive: setIsVisualizerActive,

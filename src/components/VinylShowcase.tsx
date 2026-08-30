@@ -12,6 +12,8 @@ export default function VinylShowcase() {
   const {
     isPlaying,
     togglePlay,
+    isPowered,
+    setIsPowered,
     playNext,
     playPrevious,
     seek,
@@ -41,7 +43,7 @@ export default function VinylShowcase() {
 
   // Master ON/OFF switch for the turntable. ON by default. When OFF, the
   // tonearm is locked in its rest position and the platter never spins.
-  const [isPoweredOn, setIsPoweredOn] = useState(true);
+  // Power state now lives in AudioContext — no local copy.
 
   // ── Pitch → playbackRate ─────────────────────────────────────────────────
   useEffect(() => {
@@ -187,7 +189,7 @@ export default function VinylShowcase() {
   // preparing to drop the needle (pendingPlay). A null currentTrack forces 'stopped'.
   const currentTrack = activeTrack;
   const currentTransportState: 'playing' | 'paused' | 'stopped' =
-    (isPlaying || pendingPlay) && currentTrack && isPoweredOn
+    (isPlaying || pendingPlay) && currentTrack && isPowered
       ? 'playing'
       : pausedState
         ? 'paused'
@@ -196,8 +198,9 @@ export default function VinylShowcase() {
   // Unified boolean for all UI icon derivations — single source of truth.
   const isEffectivelyPlaying = isPlaying || pendingPlay;
 
-  // Real-time BPM analyzed offline when each new track loads (not from live audio stream).
-  const bpm = currentBpm ?? 0;
+  // Real-time BPM analyzed offline when each new track loads.
+  // Display activates only when turntable is powered on and actively playing.
+  const bpm = (isPowered && isPlaying) ? (currentBpm ?? 0) : 0;
 
   // Audio-end listener: only set paused=true if currentTime > 0 (i.e., real
   // track completion). Never nuke pausedState on transient isPlaying=false
@@ -259,18 +262,18 @@ export default function VinylShowcase() {
   };
   // ── Power Toggle (strict master override) ───────────────────────────────
   const handleTogglePower = () => {
-    if (isPoweredOn) {
+    if (isPowered) {
       // Turning OFF: override everything — audio, arms, platter, state.
       pause();
       setPendingPlay(false);
       setPausedState(false);
       seek(0);
-      setIsPoweredOn(false);
+      setIsPowered(false);
     } else {
       // Turning ON: idle state, ready to play.
       setPendingPlay(false);
       setPausedState(false);
-      setIsPoweredOn(true);
+      setIsPowered(true);
     }
   };
 
@@ -279,11 +282,10 @@ export default function VinylShowcase() {
   // never 'stopped'. Uses intent (wasPlaying snapshot) instead of transient
   // isPlaying/currentTime/loading flags.
   const handleTogglePlay = () => {
-    // Guard: if the machine is off, power it back on first.
-    if (!isPoweredOn) {
-      setIsPoweredOn(true);
-      setPendingPlay(true);
-      return;
+    // When powered off, clicking play turns the table ON and starts playback.
+    if (!isPowered) {
+      setIsPowered(true);
+      // Fall through to PLAY logic (not return) — first click powers + plays.
     }
 
     // Snapshot pre-click intent — immune to transient audio/loading flicker
@@ -303,15 +305,25 @@ export default function VinylShowcase() {
       }
     } else {
       // ── PLAY: fresh needle drop from stopped/paused state.
-      // Resume AudioContext synchronously; start audio immediately.
-      if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
-      if (audioRef.current) {
+      // Delegate to centralized context play — handles .play(), resume(),
+      // setIsPlaying(true), setIsPowered(true), BPM analysis.
+      if (activeTrack) {
+        playTrack(activeTrack);
+      } else if (playlist && playlist.length > 0) {
+        // Nothing selected yet — start with first track, then play.
+        const firstTrack = playlist[0];
+        setActiveTrack(firstTrack); // sync UI / context
+        playTrack(firstTrack as any);
+      } else if (audioRef.current && audioRef.current.src) {
+        // Fallback: any pre-loaded src
+        if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
         audioRef.current.play().catch((err: unknown) => {
           if ((err as Error)?.name !== 'AbortError') {
             console.error('[VinylShowcase] Play error:', err);
           }
         });
       }
+      // Local UI state for the needle-drop animation only
       setPausedState(false);
       setPendingPlay(true);
     }
@@ -380,6 +392,7 @@ export default function VinylShowcase() {
     // Mark the context as playing synchronously so transportState stays
     // 'playing' throughout the audio start window.
     setIsPlaying(true);
+    setIsPowered(true); // Needle drop: power must be on for audio
     // Explicitly start the audio now that the needle is down.
     if (audioRef.current) {
       audioRef.current.play().catch((err: unknown) => {
@@ -623,8 +636,10 @@ export default function VinylShowcase() {
               onTogglePlay={handleTogglePlay}
               onStop={handleTurntableStop}
               onNeedleDrop={handleNeedleDrop}
-              isPoweredOn={isPoweredOn}
-              onTogglePower={handleTogglePower}
+              onPlay={() => {
+                if (activeTrack) playTrack(activeTrack);
+              }}
+              onPause={() => pause()}
               bpm={bpm}
             />
           </div>
