@@ -36,6 +36,7 @@ export default function VinylShowcase() {
     currentBpm,
     setCurrentBpm,
     analyzeTrackBpm,
+    stop: ctxStop,
   } = useAudio();
 
   const [pitch, setPitch] = useState<number>(0);
@@ -89,12 +90,20 @@ export default function VinylShowcase() {
     (activeTrack as any)?.name || (activeTrack as any)?.title || "No track selected";
   const trackArtist = (activeTrack as any)?.gearTag || (activeTrack as any)?.artist || "—";
 
-  // ── Skip handlers — conditional playback (preserve state) ───────────
+  // ── Prev handler — spec: if currentTime > 3s → seek to 0, else → previous track ─
   const handlePrev = () => {
     if (!playlist || playlist.length === 0) return;
+
+    if (currentTime > 3) {
+      // Spec: seek back to 0:00 of current track.
+      seek(0);
+      return;
+    }
+
+    // Spec: currentTime ≤ 3s → navigate to previous track in playlist queue.
     const curIdx = playlist.findIndex((t: any) => (t as any)?.id === (activeTrack as any)?.id);
-    const nextIdx = (curIdx - 1 + playlist.length) % playlist.length;
-    const track = playlist[nextIdx] as any;
+    const prevIdx = (curIdx - 1 + playlist.length) % playlist.length;
+    const track = playlist[prevIdx] as any;
     const wasPlaying = isEffectivelyPlaying;
 
     if (audioRef.current) {
@@ -109,6 +118,8 @@ export default function VinylShowcase() {
       }
     }
     setActiveTrack(track);
+    // Spec: always ensure power is on when starting playback via Prev.
+    setIsPowered(true);
 
     if (wasPlaying) {
       // Music was ON → keep 'playing' transport state through the src swap by
@@ -119,14 +130,13 @@ export default function VinylShowcase() {
       if (audioRef.current) {
         audioRef.current.play().catch((err: unknown) => {
           if ((err as Error)?.name !== 'AbortError') {
-            console.error('[VinylShowcase] Skip play error:', err);
+            console.error('[VinylShowcase] Prev play error:', err);
           }
         });
       }
       setPendingPlay(true); // hold playing state — cleared by onNeedleDrop
     } else {
       // Music was paused/stopped → track loads silently, no transport state change.
-      // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
       setPendingPlay(false);
       if (audioRef.current) audioRef.current.pause();
     }
@@ -151,6 +161,8 @@ export default function VinylShowcase() {
       }
     }
     setActiveTrack(track);
+    // Spec: Next always ensures power is on and starts playback immediately.
+    setIsPowered(true);
 
     if (wasPlaying) {
       // Music was ON → keep 'playing' transport state through the src swap by
@@ -167,10 +179,16 @@ export default function VinylShowcase() {
       }
       setPendingPlay(true); // hold playing state — cleared by onNeedleDrop
     } else {
-      // Music was paused/stopped → track loads silently, no transport state change.
-      // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
-      setPendingPlay(false);
-      if (audioRef.current) audioRef.current.pause();
+      // Spec: if was paused, still start the new track immediately.
+      if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+      if (audioRef.current) {
+        audioRef.current.play().catch((err: unknown) => {
+          if ((err as Error)?.name !== 'AbortError') {
+            console.error('[VinylShowcase] Skip play error:', err);
+          }
+        });
+      }
+      setPendingPlay(true);
     }
   };
 
@@ -280,12 +298,11 @@ export default function VinylShowcase() {
   // ── Power Toggle (strict master override) ───────────────────────────────
   const handleTogglePower = () => {
     if (isPowered) {
-      // Turning OFF: override everything — audio, arms, platter, state.
-      pause();
+      // Turning OFF: use centralized AudioContext stop so all controllers sync.
+      ctxStop();                  // kills audio, resets time, isPowered=false, arm return
       setPendingPlay(false);
       setPausedState(false);
       seek(0);
-      setIsPowered(false);
     } else {
       // Turning ON: idle state, ready to play.
       setPendingPlay(false);
@@ -301,8 +318,7 @@ export default function VinylShowcase() {
   const handleTogglePlay = () => {
     // When powered off, clicking play turns the table ON and starts playback.
     if (!isPowered) {
-      setIsPowered(true);
-      // Fall through to PLAY logic (not return) — first click powers + plays.
+      setIsPowered(true); // Spec: external play must propagate power on
     }
 
     // Snapshot pre-click intent — immune to transient audio/loading flicker
@@ -324,6 +340,8 @@ export default function VinylShowcase() {
       // ── PLAY: fresh needle drop from stopped/paused state.
       // Delegate to centralized context play — handles .play(), resume(),
       // setIsPlaying(true), setIsPowered(true), BPM analysis.
+      // Spec: always ensure power is propagated when external play starts.
+      setIsPowered(true);
       if (activeTrack) {
         playTrack(activeTrack);
       } else if (playlist && playlist.length > 0) {
@@ -426,13 +444,15 @@ export default function VinylShowcase() {
   // intelligent 'stopped' inference, which returns the tonearm to the rest.
   const handleStop = () => {
     // Stop is the ONLY path that triggers the full return-to-rest sequence.
-    // Force transportState='stopped' by clearing pausedState and pendingPlay.
+    // Force transportState='stopped' by clearing pausedState and pendingPlay,
+    // then invoke the centralized AudioContext stop so every controller syncs.
     setPendingPlay(false);
     setPausedState(false);
     if (isPlaying) {
       togglePlay();
     }
     seek(0);
+    ctxStop(); // kills audio, resets time, sets isPowered=false, triggers arm return
   };
 
   return (
