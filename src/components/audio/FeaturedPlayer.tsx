@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause, SkipBack, SkipForward, Square, Volume2, VolumeX } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import MiniVisualizer from "./MiniVisualizer";
+import TrackThumbnailCard from "@/components/player/TrackThumbnailCard";
 import type { VisualizerMode } from "@/lib/visualizer/useAudioVisualizer";
 
 interface FeaturedPlayerProps {
@@ -81,8 +82,8 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 p-2 sm:px-4 md:px-6 w-full min-h-[60px]">
 
-        {/* ── Left: transport + track info ──────────────────────────────────── */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* ── Left: transport + thumbnail + track info ───────────────────────── */}
+        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
           {/* Transport buttons */}
           <div className="flex items-center gap-1.5 shrink-0">
             <button
@@ -115,7 +116,12 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             </button>
           </div>
 
-          {/* Track info — title + artist, no numerotation badge, perfectly centered with transport controls */}
+          {/* Floating thumbnail card — small, elegant, beside track text */}
+          <div className="shrink-0">
+            <TrackThumbnailCard />
+          </div>
+
+          {/* Track info — title + artist */}
           <div className="flex flex-col justify-center min-w-0 h-10 hidden sm:flex">
             <h4 className="text-sm font-bold text-white truncate leading-tight">{trackName}</h4>
             <p className="text-[10px] text-neutral-500 truncate font-mono leading-tight mt-0.5">{trackArtist}</p>
