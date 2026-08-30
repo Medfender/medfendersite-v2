@@ -106,7 +106,10 @@ export default function VinylShowcase() {
     setActiveTrack(track);
 
     if (wasPlaying) {
-      // Music was ON → next track loads and starts immediately.
+      // Music was ON → keep 'playing' transport state through the src swap by
+      // holding pendingPlay=true. This prevents a brief 'stopped' fallthrough
+      // between isPlaying flipping and play() resolving that would trigger the
+      // tonearm return-to-rest animation.
       if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
       if (audioRef.current) {
         audioRef.current.play().catch((err: unknown) => {
@@ -115,7 +118,7 @@ export default function VinylShowcase() {
           }
         });
       }
-      setPendingPlay(false);
+      setPendingPlay(true); // hold playing state — cleared by onNeedleDrop
     } else {
       // Music was paused/stopped → track loads silently, no transport state change.
       // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
@@ -145,7 +148,10 @@ export default function VinylShowcase() {
     setActiveTrack(track);
 
     if (wasPlaying) {
-      // Music was ON → next track loads and starts immediately.
+      // Music was ON → keep 'playing' transport state through the src swap by
+      // holding pendingPlay=true. This prevents a brief 'stopped' fallthrough
+      // between isPlaying flipping and play() resolving that would trigger the
+      // tonearm return-to-rest animation.
       if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
       if (audioRef.current) {
         audioRef.current.play().catch((err: unknown) => {
@@ -154,7 +160,7 @@ export default function VinylShowcase() {
           }
         });
       }
-      setPendingPlay(false);
+      setPendingPlay(true); // hold playing state — cleared by onNeedleDrop
     } else {
       // Music was paused/stopped → track loads silently, no transport state change.
       // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
@@ -190,11 +196,18 @@ export default function VinylShowcase() {
   // Detected BPM of the loaded track (0 when nothing is loaded).
   const bpm = (activeTrack as any)?.bpm ?? 0;
 
-  // When audio stops, clear the paused flag (track ended, user stopped, etc.)
+  // Audio-end listener: only set paused=true if currentTime > 0 (i.e., real
+  // track completion). Never nuke pausedState on transient isPlaying=false
+  // (network stall, src swap, skip), as that would leak into transportState
+  // and force tonearm return-to-rest.
   useEffect(() => {
-    if (!isPlaying && !pausedState) return;
-    if (!isPlaying && pausedState && currentTime > 0) return; // stay paused
-    if (!isPlaying) setPausedState(false);
+    if (isPlaying) return;
+    if (!pausedState && currentTime > 0) {
+      // Track finished naturally — treat as stopped, allow tonearm reset.
+      setPausedState(false);
+    }
+    // Otherwise: stay paused (do nothing). Skip/pause/track-end are now
+    // fully isolated from arm rest coordinate logic.
   }, [isPlaying, currentTime, pausedState]);
 
   // Fix #1 — Deferred Audio Start (Needle-Drop Synchronisation):
