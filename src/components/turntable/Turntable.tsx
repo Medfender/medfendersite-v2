@@ -27,31 +27,22 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, togglePower, setIsPowered } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered } = useAudio();
 
   const handleCueSwitchToggle = useCallback(() => {
-    // Brute-force remote control: unconditionally toggle power and audio.
-    // No conditional checks against global isPlaying — pure remote-control logic.
+    // Pure electrical toggle — decoupled from playback and arm animation.
+    // Off → setIsPowered(true): LED on, platter spins, audio stays paused.
+    // On  → togglePower(): kill switch (audio stops, tonearm to rest, LED off).
     if (!isPowered) {
-      // Use setIsPowered(true) directly — do NOT call togglePower() here.
-      // togglePower() would flip power back OFF when onNeedleDrop fires later.
       setIsPowered(true);
-      if (onPlay) onPlay();
-      // Fire needle drop after the arm drop animation completes (~600ms).
-      // The audio start is deferred here so the sound only begins after
-      // the arm has physically landed on the record.
-      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
     } else {
-      // Power is ON — toggle off (kill switch path).
       togglePower();
-      if (onPause) onPause();
     }
-  }, [isPowered, togglePower, setIsPowered, onPlay, onPause, onNeedleDrop]);
+  }, [isPowered, setIsPowered, togglePower]);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
 
-  const isPlaying = transportState === 'playing' || isPendingPlay;
   const vinylSpinning = transportState === 'playing' && isPowered;
 
   const [isLifted, setIsLifted] = useState(false);
