@@ -54,9 +54,9 @@ export default function Turntable({
       }
     }
     else if (transportState === 'paused') {
-      // 3. Paused: FREEZE — no arm lift, no lever change, no movement.
-      // Vinyl stops spinning via vinylSpinning flag; displayAngle holds
-      // position via frozenAngleRef. Arm stays exactly where it is.
+      // 3. Paused: Lift arm off the record (lever engaged, needle raised)
+      setIsLeverEngaged(true);
+      setIsLifted(true);
     }
     else if (transportState === 'stopped') {
       // 4. Stopped: Disengage lever, lift arm, swing back, drop
@@ -243,7 +243,7 @@ export default function Turntable({
                 </g>
 
                 {/* Cue system base — deck-mounted, does NOT rotate */}
-                <g id="cueing-system" transform="translateY(-4)">
+                <g id="cueing-system" transform="translate(0, -10)">
                   {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
                   <path d="M 456,108 L 476,96 L 476,82 L 448,82 A 12 12 0 0,0 448,105 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
 
@@ -310,7 +310,7 @@ export default function Turntable({
                 <circle cx={TPX} cy={TPY} r="24" fill="url(#dark-alloy)" stroke="#252830" strokeWidth="0.6" />
                 <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#precision-chrome)" strokeWidth="2.4" />
                 {[
-                  [TPX + 28, TPY, 0], [TPX, TPY + 28, 90], [TPX - 28, TPY, 180], [TPX, TPY - 28, 270],
+                  [TPX + 28, TPY, 0], [TPX, TPY + 28, 90], [TPX, TPY - 28, 270],
                 ].map(([sx, sy], i) => (
                   <circle key={i} cx={sx as number} cy={sy as number} r="2.4" fill="url(#precision-chrome)" stroke="#4a5262" strokeWidth="0.4" />
                 ))}
