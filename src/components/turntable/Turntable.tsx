@@ -198,10 +198,10 @@ export default function Turntable({
 
                 {/* Cradle (rest position) */}
                 <g id="tonearm-base-cradle" filter="url(#shadow-md)">
-                  <circle cx="490" cy="292" r="14" fill="#2c3040" stroke="#1a1c23" strokeWidth="1" />
-                  <circle cx="490" cy="292" r="9" fill="url(#brushed-al)" stroke="#1a1c23" strokeWidth="0.5" />
-                  <circle cx="490" cy="292" r="4" fill="url(#precision-chrome)" />
-                  <path d="M 487,289 C 484,289 484,295 487,295 L 493,295 C 496,295 496,289 493,289" fill="none" stroke="#111318" strokeWidth="2.5" strokeLinecap="round" />
+                  <circle cx="490" cy="300" r="14" fill="#2c3040" stroke="#1a1c23" strokeWidth="1" />
+                  <circle cx="490" cy="300" r="9" fill="url(#brushed-al)" stroke="#1a1c23" strokeWidth="0.5" />
+                  <circle cx="490" cy="300" r="4" fill="url(#precision-chrome)" />
+                  <path d="M 487,297 C 484,297 484,303 487,303 L 493,303 C 496,303 496,297 493,297" fill="none" stroke="#111318" strokeWidth="2.5" strokeLinecap="round" />
                 </g>
 
                 {/* Arm base column (plinth mount) */}
@@ -395,17 +395,23 @@ export default function Turntable({
                 {/* Headshell — rigid child of arm. NO independent rotation.
                     Local origin: arm tip (TPX, TPY + WAND_LEN).
                     Cartridge faces forward with natural alignment to record groove. */}
-                <g id="headshell-assembly" transform="translate(490, 285)">
+                <g id="headshell-assembly" transform="translate(490, 282)">
                   <g transform="scale(1.4)">
                     <g id="bayonet-collar">
                       {/* Plug inserted inside the tube */}
                       <rect x="-3.5" y="-4" width="7" height="8" fill="#111318" />
-                      {/* Seamless locking collar matching the arm tube diameter */}
-                      <rect x="-4.5" y="3" width="9" height="7" rx="1" fill="url(#precision-chrome)" stroke="#1a1c23" strokeWidth="0.5" />
-                      {/* Subtle grip ridges */}
-                      <line x1="-2" y1="3" x2="-2" y2="10" stroke="#111318" strokeWidth="0.5" />
-                      <line x1="0" y1="3" x2="0" y2="10" stroke="#111318" strokeWidth="0.5" />
-                      <line x1="2" y1="3" x2="2" y2="10" stroke="#111318" strokeWidth="0.5" />
+                      {/* Well-rounded locking collar matching the arm tube diameter */}
+                      <rect x="-4.5" y="3" width="9" height="7" rx="1.5" fill="url(#precision-chrome)" stroke="#1a1c23" strokeWidth="0.5" />
+                      {/* Tighter, more realistic knurled grip lines */}
+                      <line x1="-3.2" y1="3" x2="-3.2" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="-2.4" y1="3" x2="-2.4" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="-1.6" y1="3" x2="-1.6" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="-0.8" y1="3" x2="-0.8" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="0" y1="3" x2="0" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="0.8" y1="3" x2="0.8" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="1.6" y1="3" x2="1.6" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="2.4" y1="3" x2="2.4" y2="10" stroke="#111318" strokeWidth="0.4" />
+                      <line x1="3.2" y1="3" x2="3.2" y2="10" stroke="#111318" strokeWidth="0.4" />
                       {/* Base flange connecting to the headshell body */}
                       <path d="M -4.5,10 L 4.5,10 L 5,14 L -5,14 Z" fill="#2c3040" />
                     </g>
