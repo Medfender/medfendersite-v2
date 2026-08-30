@@ -243,9 +243,7 @@ export default function Turntable({
                 </g>
 
                 {/* Cue system base — deck-mounted, does NOT rotate */}
-                <g id="cueing-system">
-                {/* Wrapper: shifts the entire cueing assembly up by 4px */}
-                <g transform="translateY(-4)">
+                <g id="cueing-system" transform="translateY(-4)">
                   {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
                   <path d="M 456,108 L 476,96 L 476,82 L 448,82 A 12 12 0 0,0 448,105 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
 
@@ -265,7 +263,6 @@ export default function Turntable({
                      <circle cx="456" cy="79" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
                   </g>
                 </g>
-              </g>
 
                 {/* Static cue arc (lift path indicator) */}
                 <g id="cueing-arc">
