@@ -75,6 +75,10 @@ export default function Turntable({
 
   const PCX = 215; const PCY = 215; const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
+  // Top-down center of the counterweight puck. Offset slightly downward
+  // from the original back-of-arm anchor so the scale tick numbers fit
+  // cleanly above the dial ring inside the SVG viewBox.
+  const CW_CX = TPX; const CW_CY = TPY - CW_LEN + 8;
   const REST_X = TPX; const REST_Y = TPY + 220; const PARK_ANGLE = 0;
   const PLAY_ANGLE = 55; const INNER_ANGLE = 75;
 
@@ -338,28 +342,33 @@ export default function Turntable({
                   <ellipse cx={TPX - 3} cy={TPY - 3} rx="5" ry="3" fill="rgba(220,228,248,0.5)" />
                 </g>
 
-                {/* Counterweight assembly */}
+                {/* Counterweight assembly — main tubular sleeve viewed from overhead */}
                 <g id="counterweight-assembly" filter="url(#shadow-md)">
-                  <g id="counterweight-shaft">
-                    <rect x={TPX - WAND_W} y={TPY - CW_LEN} width={WAND_W * 2} height={CW_LEN} rx={WAND_W} fill="url(#polished-al)" stroke="#1e222a" strokeWidth="0.8" />
-                    <rect x={TPX - WAND_W + 2} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45} fill="rgba(195,205,225,0.22)" />
-                    <rect x={TPX + WAND_W * 0.1} y={TPY - CW_LEN + 2} width={WAND_W * 0.45} height={CW_LEN - 4} rx={WAND_W * 0.45} fill="rgba(0,0,0,0.3)" />
+                  {/* Main cylindrical weight barrel viewed from top */}
+                  <rect x={TPX - 9} y={TPY - CW_LEN} width={18} height={CW_LEN} rx="3" fill="url(#precision-chrome)" stroke="#1a1c23" strokeWidth="0.8" />
+
+                  {/* Knurled adjustment grip section in the middle */}
+                  <rect x={TPX - 8} y={TPY - CW_LEN + 22} width={16} height="20" fill="#2c3040" />
+                  {/* Fine knurling lines */}
+                  <line x1={TPX - 7.5} y1={TPY - CW_LEN + 22} x2={TPX - 7.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX - 5.5} y1={TPY - CW_LEN + 22} x2={TPX - 5.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX - 3.5} y1={TPY - CW_LEN + 22} x2={TPX - 3.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX - 1.5} y1={TPY - CW_LEN + 22} x2={TPX - 1.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX + 0.5} y1={TPY - CW_LEN + 22} x2={TPX + 0.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX + 2.5} y1={TPY - CW_LEN + 22} x2={TPX + 2.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX + 4.5} y1={TPY - CW_LEN + 22} x2={TPX + 4.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+                  <line x1={TPX + 6.5} y1={TPY - CW_LEN + 22} x2={TPX + 6.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
+
+                  {/* Number markings and scale ring */}
+                  <g id="counterweight-scale" opacity="0.85">
+                    <line x1={TPX - 9} y1={TPY - CW_LEN + 12} x2={TPX - 7} y2={TPY - CW_LEN + 12} stroke="#ffffff" strokeWidth="0.5" />
+                    <line x1={TPX - 9} y1={TPY - CW_LEN + 14} x2={TPX - 7.5} y2={TPY - CW_LEN + 14} stroke="#ffffff" strokeWidth="0.4" />
+                    <line x1={TPX - 9} y1={TPY - CW_LEN + 16} x2={TPX - 7} y2={TPY - CW_LEN + 16} stroke="#ffffff" strokeWidth="0.5" />
                   </g>
-                  <g id="counterweight-knurl">
-                    {Array.from({ length: 6 }, (_, k) => {
-                      const kx = TPX - WAND_W + 2 + k * 2.2;
-                      return <line key={k} x1={kx} y1={TPY - CW_LEN + 4} x2={kx} y2={TPY - 4} stroke="#0c0d12" strokeWidth="0.6" opacity="0.55" />;
-                    })}
-                  </g>
-                  <g id="counterweight-lock">
-                  </g>
+
+                  {/* Rear end cap */}
                   <g id="counterweight-end-cap">
-                    <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.95} ry={WAND_W * 0.6} fill="url(#polished-al)" stroke="#252830" strokeWidth="0.6" />
-                    <ellipse cx={TPX - WAND_W * 0.3} cy={TPY - CW_LEN - 1} rx={WAND_W * 0.5} ry={WAND_W * 0.22} fill="rgba(225,235,248,0.4)" />
-                  </g>
-                  <g id="counterweight-scale">
-                    <text x={TPX - WAND_W - 4} y={TPY - CW_LEN / 2} textAnchor="end" fontSize="4.5" fill="#7a8598" fontFamily="monospace">-5</text>
-                    <text x={TPX + WAND_W + 4} y={TPY - CW_LEN / 2} textAnchor="start" fontSize="4.5" fill="#7a8598" fontFamily="monospace">+5</text>
+                    <rect x={TPX - 8.5} y={TPY - CW_LEN + 2} width="17" height="4" rx="2" fill="#111318" stroke="#333" strokeWidth="0.5" />
                   </g>
                 </g>
 
