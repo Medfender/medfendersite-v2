@@ -509,7 +509,7 @@ export default function Turntable({
               <text x={PITCH_X + 17} y={PITCH_Y + 3} fontSize="6" fill="#7a8598" fontFamily="monospace">+8%</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN / 2 + 2} fontSize="6" fill="#7a8598" fontFamily="monospace">0</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN + 4} fontSize="6" fill="#7a8598" fontFamily="monospace">-8%</text>
-              <g style={{ transform: `translateX(${PITCH_X}px) translateY(${PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)}px)`, transition: "transform 0.15s ease-out" }}>
+              <g style={{ transform: 'translateX(660px) translateY(' + (PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)) + 'px)', transition: "transform 0.15s ease-out" }}>
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="rgba(0,0,0,0.6)" opacity="0.5" filter="url(#shadow-sm)" />
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="url(#precision-chrome)" stroke="#3a3e4c" strokeWidth="0.5" />
                 <line x1={-6} y1={0} x2={6} y2={0} stroke="#1a1d24" strokeWidth="1.2" />
