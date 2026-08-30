@@ -376,8 +376,10 @@ export default function VinylShowcase() {
   // Resetting progress to 0 while paused triggers the Turntable's
   // intelligent 'stopped' inference, which returns the tonearm to the rest.
   const handleStop = () => {
+    // Stop is the ONLY path that triggers the full return-to-rest sequence.
+    // Force transportState='stopped' by clearing pausedState and pendingPlay.
     setPendingPlay(false);
-    setPausedState(true);
+    setPausedState(false);
     if (isPlaying) {
       togglePlay();
     }
