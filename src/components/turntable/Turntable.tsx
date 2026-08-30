@@ -253,7 +253,7 @@ export default function Turntable({
 
                 {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
                 <g style={{
-                  transform: `rotateX(${isLeverEngaged ? 180 : 0}deg)`,
+                  transform: `translateY(-4px) rotateX(${isLeverEngaged ? 180 : 0}deg)`,
                   transformOrigin: '456px 94px',
                   transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}>
