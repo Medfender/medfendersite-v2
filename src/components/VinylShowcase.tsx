@@ -616,28 +616,6 @@ export default function VinylShowcase() {
             </p>
           </div>
 
-          {/* Pitch Control */}
-          <div className="w-full max-w-sm bg-[#1a1a1a] p-4 rounded-xl border border-gray-800">
-            <div className="flex justify-between items-center mb-3">
-              <span className="text-xs tracking-widest text-gray-500 font-semibold uppercase">Pitch Control</span>
-              <span className="text-xs font-mono text-blue-400 bg-blue-900/20 px-2 py-1 rounded">
-                {pitch > 0 ? "+" : ""}
-                {pitch}%
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-mono text-gray-600">-8%</span>
-              <input
-                type="range"
-                min="-8"
-                max="8"
-                value={pitch}
-                onChange={(e) => setPitch(Number(e.target.value))}
-                className="flex-1 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-              />
-              <span className="text-xs font-mono text-gray-600">+8%</span>
-            </div>
-          </div>
         </div>
       </div>
     </section>

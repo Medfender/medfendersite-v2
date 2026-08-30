@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 
 export default function Turntable({
   transportState = 'stopped',
@@ -34,6 +34,37 @@ export default function Turntable({
   const [isLifted, setIsLifted] = useState(false);
   const [armAngle, setArmAngle] = useState(0);
   const [isLeverEngaged, setIsLeverEngaged] = useState(false);
+  const [antiSkateAngle, setAntiSkateAngle] = useState(0);
+
+  const handleAntiSkateMouseDown = useCallback((e: React.MouseEvent<SVGGElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const target = e.currentTarget;
+    const svgEl = target.closest('svg');
+    if (!svgEl) return;
+    const cx = TPX + 36;
+    const cy = TPY - 4;
+    const handleMove = (ev: MouseEvent) => {
+      const pt = (svgEl as SVGSVGElement).createSVGPoint();
+      pt.x = ev.clientX;
+      pt.y = ev.clientY;
+      const ctm = (svgEl as SVGSVGElement).getScreenCTM();
+      if (!ctm) return;
+      const svgPt = pt.matrixTransform(ctm.inverse());
+      const dx = svgPt.x - cx;
+      const dy = svgPt.y - cy;
+      const deg = Math.atan2(dy, dx) * 180 / Math.PI + 90;
+      const norm = ((deg % 360) + 360) % 360;
+      const val = Math.max(0, Math.min(300, Math.round(norm)));
+      setAntiSkateAngle(val);
+    };
+    const handleUp = () => {
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
+    };
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
+  }, []);
 
   useEffect(() => {
     let timer1: ReturnType<typeof setTimeout>;
@@ -176,8 +207,6 @@ export default function Turntable({
               <circle cx={PCX} cy={PCY} r={LABEL_R} fill="#0a0c14" />
               <circle cx={PCX} cy={PCY} r={LABEL_R - 2} fill="none" stroke="url(#gold)" strokeWidth="5" />
               <circle cx={PCX} cy={PCY} r={LABEL_R - 14} fill="none" stroke="url(#gold)" strokeWidth="2" opacity="0.6" />
-              <text x={PCX} y={PCY - 4} textAnchor="middle" fontSize="9" fontWeight="bold" fill="#c8a838" letterSpacing="3" fontFamily="sans-serif">GOLDEN SOUND</text>
-              <text x={PCX} y={PCY + 8} textAnchor="middle" fontSize="5" fill="#8a7860" letterSpacing="2" fontFamily="monospace">180g • 33⅓ RPM</text>
             </g>
             <circle cx={PCX} cy={PCY} r={VINYL_R} fill="none" stroke="#8898aa" strokeWidth="1" opacity="0.3" />
 
@@ -234,11 +263,15 @@ export default function Turntable({
                 {/* Anti-skate control — deck-mounted, never rotates */}
                 <g id="anti-skate-system">
                   <g id="anti-skate-control" filter="url(#shadow-sm)">
-                    <circle cx={TPX + 58} cy={TPY - 8} r="9" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.5" />
-                    <circle cx={TPX + 58} cy={TPY - 8} r="6.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
-                    <line x1={TPX + 58} y1={TPY - 12} x2={TPX + 58} y2={TPY - 5} stroke="#1e1410" strokeWidth="1" />
-                    <circle cx={TPX + 58} cy={TPY - 8} r="1.2" fill="#1a1410" />
-                    <text x={TPX + 58} y={TPY + 9} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
+                    <g id="a-skate-dial" style={{ cursor: 'grab', touchAction: 'none' }}
+                    onMouseDown={handleAntiSkateMouseDown}>
+                    <circle cx={TPX + 36} cy={TPY - 4} r="9" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.5" />
+                    <circle cx={TPX + 36} cy={TPY - 4} r="6.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
+                    <g transform={`rotate(${antiSkateAngle} ${TPX + 36} ${TPY - 4})`}>
+                      <line x1={TPX + 36} y1={TPY - 8} x2={TPX + 36} y2={TPY - 1} stroke="#1e1410" strokeWidth="1" />
+                    </g>
+                    <circle cx={TPX + 36} cy={TPY - 4} r="1.2" fill="#1a1410" />
+                    <text x={TPX + 36} y={TPY + 5} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
                   </g>
                 </g>
 
@@ -476,7 +509,7 @@ export default function Turntable({
               <text x={PITCH_X + 17} y={PITCH_Y + 3} fontSize="6" fill="#7a8598" fontFamily="monospace">+8%</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN / 2 + 2} fontSize="6" fill="#7a8598" fontFamily="monospace">0</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN + 4} fontSize="6" fill="#7a8598" fontFamily="monospace">-8%</text>
-              <g style={{ transform: `translate(${PITCH_X}px, ${PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)}px)`, transition: "transform 0.15s ease-out" }}>
+              <g style={{ transform: `translateX(${PITCH_X}px) translateY(${PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16)}px)`, transition: "transform 0.15s ease-out" }}>
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="rgba(0,0,0,0.6)" opacity="0.5" filter="url(#shadow-sm)" />
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="url(#precision-chrome)" stroke="#3a3e4c" strokeWidth="0.5" />
                 <line x1={-6} y1={0} x2={6} y2={0} stroke="#1a1d24" strokeWidth="1.2" />
@@ -530,8 +563,8 @@ export default function Turntable({
               <div className="flex flex-col items-center gap-1">
                 <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1" style={{ background: "linear-gradient(180deg, #02060a 0%, #000000 100%)", boxShadow: "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" }}>
                   <span className="text-[8px] font-mono text-neutral-500 tracking-[0.25em] uppercase leading-none">BPM</span>
-                  <span className={`text-2xl font-mono leading-none tabular-nums ${bpm > 0 ? "text-green-400" : "text-green-900"}`} style={{ textShadow: bpm > 0 ? "0 0 6px rgba(34,197,94,0.8), 0 0 14px rgba(34,197,94,0.4)" : "none" }}>
-                    {bpm > 0 ? (Math.round(bpm * 10) / 10).toFixed(1) : "--.-"}
+                  <span className={`text-2xl font-mono leading-none tabular-nums transition-all duration-300 ${bpm > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900'}`} style={{ textShadow: bpm > 0 && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
+                    {bpm > 0 ? bpm.toFixed(1) : '--.-'}
                   </span>
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Tempo</span>
