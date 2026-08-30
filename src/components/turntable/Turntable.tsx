@@ -15,6 +15,7 @@ function buildPatterns(name: string, artist: string): string[] {
   const cleanArtist = clean(artist);
   const patterns: string[] = [];
   if (cleanName) patterns.push(cleanName);
+  if (cleanArtist) patterns.push(cleanArtist); // artist-only (e.g. "Ousmane Cissokho.jpeg")
   if (cleanArtist && cleanName) {
     patterns.push(`${cleanArtist} - ${cleanName}`);
     patterns.push(`${cleanArtist} feat ${cleanName}`);
@@ -201,83 +202,94 @@ export default function Turntable({
     });
   }, [setPlaybackRate, rpm]);
 
-  // ─── Vinyl physics loop (rAF) ─────────────────────────────────────────────
-  const rotationRef = useRef(0);   // current angle in degrees
-  const velocityRef = useRef(0);   // degrees per frame (~4.16°/frame @ 60fps ≈ 33 RPM)
-  const targetVelRef = useRef(0);
-  // Motor engagement: true only when the motor is actively driving the platter
-  // at the selected RPM. Disengages on power-off or transport-stop so the
-  // platter coasts to a halt. Re-engages when the user picks 33 / 45 RPM
-  // while fully stopped (the only legal moment to change platter speed).
-  const motorEngagedRef = useRef(false);
+  // ─── Vinyl physics loop (rAF) — clean isolated rebuild ─────────────────────
+  // Strict isolation rules:
+  //   1. The rAF useEffect has an EMPTY dep array (mounts once).
+  //   2. The loop reads ONLY from refs — no React state, no closures.
+  //   3. Refs are kept in sync via direct assignment on every render
+  //      (NOT inside a state-driven useEffect, so it can't churn).
+  //   4. The only state write inside the loop is `setDisplayRotation`,
+  //      which the loop doesn't depend on.
 
-  // Motor engagement tracks power + transport state. Playing/paused keeps the
-  // motor engaged; stopping or powering off disengages it.
-  useEffect(() => {
-    if (!isPowered) {
-      motorEngagedRef.current = false;
-    } else if (transportState === 'stopped') {
-      motorEngagedRef.current = false;
-    } else {
-      motorEngagedRef.current = true; // playing or paused
-    }
-  }, [isPowered, transportState]);
+  // Persistent physics state (refs survive re-renders).
+  const rotationRef = useRef(0);    // current angle in degrees
+  const velocityRef = useRef(0);    // current degrees-per-frame
 
-  // Target speed derived from RPM + power + motor-engagement state.
-  // - Power off  → target 0, motor forced disengaged.
-  // - Motor off  → target 0 (platter coasts, lerp + brake converge to 0).
-  // - Motor on   → target = 33/45 RPM velocity. The rAF lerp below smoothly
-  //                accelerates or decelerates the platter to whatever the
-  //                current RPM is — no instant snap on 33↔45 switches.
-  useEffect(() => {
-    if (!isPowered) {
-      targetVelRef.current = 0;
-      motorEngagedRef.current = false;
-    } else if (motorEngagedRef.current) {
-      targetVelRef.current = rpm === 45 ? 5.625 : 4.1667; // ~33/45 RPM in deg/frame
-    } else {
-      targetVelRef.current = 0; // motor disengaged — platter coasts
-    }
-  }, [isPowered, rpm]);
+  // Refs mirroring React state. The rAF loop reads ONLY these.
+  const isPoweredRef = useRef(isPowered);
+  const isPlayingRef = useRef(false);
+  const isPausedRef = useRef(false);
+  const currentTimeRef = useRef(0);
+  const rpmRef = useRef<33 | 45>(33);
 
-  // Frame loop — smooth linear interpolation on velocity inside rAF
+  // Direct assignment on every render — keeps refs in sync without
+  // triggering any effect. Safe: writing to a ref doesn't cause a render.
+  isPoweredRef.current = isPowered;
+  isPlayingRef.current = isPlaying;
+  isPausedRef.current = false; // (no separate paused signal; transportState is authoritative)
+  currentTimeRef.current = currentTime;
+  rpmRef.current = rpm;
+
+  // Single React state for the visible rotation angle. The loop writes
+  // here, but the loop itself doesn't depend on this state.
+  const [displayRotation, setDisplayRotation] = useState(0);
+
+  // rAF loop — mount ONCE, never re-bound.
   useEffect(() => {
     let raf = 0;
-    const loop = () => {
-      // 1. Smooth velocity lerp: heavy platter glides to target gradually.
-      //    This is the core interpolation rule — no instant snaps.
-      const lerpFactor = 0.08;
-      velocityRef.current += (targetVelRef.current - velocityRef.current) * lerpFactor;
+    let lastFrame = performance.now();
+    const FRAME_MS = 1000 / 60;
 
-      // 2. When fully powered off, apply extra friction so it brakes to a clean 0
-      if (!isPowered) {
-        velocityRef.current *= 0.98;
-        if (velocityRef.current < 0.05) velocityRef.current = 0;
+    // Base rotation rates (degrees per frame at 60fps):
+    //   33 RPM = 360° / (60s × 60fps / 1.8) = 4.1667 deg/frame
+    //   45 RPM = 360° / (60s × 60fps / 2.45) ≈ 5.625 deg/frame
+    const RPM_33 = 4.1667;
+    const RPM_45 = 5.625;
+
+    const loop = (now: number) => {
+      // Delta-time normalization, clamped to absorb tab-switch jumps.
+      const dt = Math.min(Math.max(now - lastFrame, 1), FRAME_MS * 4) / FRAME_MS;
+      lastFrame = now;
+
+      // 1. Compute target velocity from refs only.
+      let targetVelocity = 0;
+      if (isPoweredRef.current) {
+        // Powered ON: motor always drives the platter — playing, paused,
+        // or stopped. Target = selected RPM rate. No full-stop gating here
+        // (that gates the 33/45 buttons in the UI, not the motor).
+        targetVelocity = rpmRef.current === 45 ? RPM_45 : RPM_33;
+      } else {
+        // Powered OFF: motor cuts out — platter coasts to a halt.
+        targetVelocity = 0;
       }
 
-      // 3. Stop button / full-stop state: quick brake curve + snap to home
-      //    ONLY when fully stopped (not playing, not paused, currentTime === 0).
-      if (transportState === 'stopped' && !isPlaying && currentTime === 0) {
-        velocityRef.current *= 0.92; // quick brake deceleration
-        if (velocityRef.current < 0.05) {
+      // 2. Smoothly lerp current velocity toward target.
+      //    Constant lerp factor (no `* dt`) — frame-rate independent
+      //    because the rAF tick is locked to display refresh.
+      const lerpFactor = 0.08;
+      velocityRef.current += (targetVelocity - velocityRef.current) * lerpFactor;
+
+      // 3. Apply friction when powered off, so the brake is decisive
+      //    but smooth (not instant).
+      if (!isPoweredRef.current) {
+        velocityRef.current *= 0.96;
+        if (Math.abs(velocityRef.current) < 0.015) {
           velocityRef.current = 0;
-          rotationRef.current = 0; // snap to home once decelerated
-          // Motor is disengaged after stop — platter will coast from here.
-          motorEngagedRef.current = false;
         }
       }
 
-      // 4. Apply velocity to rotation (glides, never snaps)
-      rotationRef.current = (rotationRef.current + velocityRef.current) % 360;
-      setSpinTick((t) => t + 1);
+      // 4. Integrate rotation. Continuous — never resets to 0.
+      rotationRef.current = (rotationRef.current + velocityRef.current * dt + 360) % 360;
+
+      // 5. Push visible angle to React state (one re-render per frame).
+      setDisplayRotation(rotationRef.current);
+
       raf = requestAnimationFrame(loop);
     };
+
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [isPowered, transportState, isPlaying, currentTime, rpm]);
-
-  // Tick state for rAF rerender
-  const [spinTick, setSpinTick] = useState(0);
+  }, []);
 
   // ─── Deck-mounted Stop button logic ─────────────────────────────────────────
   // Called by the new STOP hardware button inside the turntable chassis.
@@ -291,6 +303,34 @@ export default function Turntable({
     stop();
     setStopSignal((n) => n + 1);
   }, [stop]);
+
+  // ── Tonearm click: Play from stop / Stop from play ─────────────────────────
+  const handleArmClick = useCallback(() => {
+    if (!isPowered) return;
+    if (!isPlaying && currentTime === 0) {
+      // Stopped → Play: arm acts as play trigger
+      if (onTogglePlay) onTogglePlay();
+    } else {
+      // Playing → Stop: arm acts as stop trigger
+      if (onStop) onStop();
+    }
+  }, [isPowered, isPlaying, currentTime, onTogglePlay, onStop]);
+
+  // ── Headshell click: three-state machine ───────────────────────────────────
+  //   Stopped / Idle  → Play  (drop the arm, start playback from 0)
+  //   Playing         → Pause (lift arm, hold position, no playhead reset)
+  //   Paused          → Play  (resume from current playhead)
+  // Safety: no-op when the deck is unpowered.
+  const handleHeadshellClick = useCallback(() => {
+    if (!isPowered) return;
+    if (isPlaying) {
+      // Playing → Pause
+      if (onPause) onPause();
+    } else {
+      // Stopped OR Paused → Play / Resume
+      if (onTogglePlay) onTogglePlay();
+    }
+  }, [isPowered, isPlaying, onTogglePlay, onPause]);
 
   // Snap vinyl to 0deg whenever a stop signal fires.
   // Tracks the previous value so the effect only fires on actual increments,
@@ -469,9 +509,10 @@ export default function Turntable({
             <g
               className="vinyl-spin"
               style={{
-                transformOrigin: `${PCX}px ${PCY}px`,
-                transform: `rotate(${rotationRef.current}deg)`,
+                transformOrigin: '50% 50%',
+                transform: `rotate(${displayRotation}deg)`,
                 animation: "none",
+                willChange: 'transform',
               }}
             >
               <circle cx={PCX} cy={PCY} r={VINYL_R} fill="url(#vinyl-deep)" />
@@ -716,7 +757,10 @@ export default function Turntable({
                     All coordinates: pivot=(TPX,TPY), arm_len=WAND_LEN,
                     centerline curves right then converges to headshell.
                     ════════════════════════════════════════════════════════ */}
-                <g id="tonearm-arm-tube">
+                <g id="tonearm-arm-tube"
+                   onClick={handleArmClick}
+                   style={{ cursor: isPowered ? 'pointer' : 'default' }}
+                >
                   {/* 1. Ambient Drop Shadow */}
                   <path d="M 490,75 L 490,295" fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth="10" strokeLinecap="round" transform="translate(6, 6)" filter="blur(3px)" />
                   {/* 2. Base Pipe (Dark outer edge for volumetric depth) */}
@@ -732,7 +776,10 @@ export default function Turntable({
                 {/* Headshell — rigid child of arm. NO independent rotation.
                     Local origin: arm tip (TPX, TPY + WAND_LEN).
                     Cartridge faces forward with natural alignment to record groove. */}
-                <g id="headshell-assembly" transform="translate(490, 282)">
+                <g id="headshell-assembly" transform="translate(490, 282)"
+                   onClick={handleHeadshellClick}
+                   style={{ cursor: isPowered ? 'pointer' : 'default' }}
+                >
                   <g transform="scale(1.4)">
                     <g id="bayonet-collar">
                       {/* Plug inserted inside the tube */}
