@@ -47,7 +47,7 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, currentTime } = useAudio();
 
   // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
   const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
@@ -201,6 +201,32 @@ export default function Turntable({
 
   const vinylSpinning = transportState === 'playing' && isPowered;
 
+  // ─── Deck-mounted Stop button logic ─────────────────────────────────────────
+  // Called by the new STOP hardware button inside the turntable chassis.
+  // Uses `stop()` from AudioContext so all subscribers (transportState, visualizer,
+  // tonearm) react uniformly, then snaps the vinyl rotation back to 0deg.
+  const { stop } = useAudio();
+  const [stopSignal, setStopSignal] = useState(0);
+  const [spinLocked, setSpinLocked] = useState(false);
+
+  const handleDeckStop = useCallback(() => {
+    stop();
+    setStopSignal((n) => n + 1);
+  }, [stop]);
+
+  // Snap vinyl to 0deg whenever a stop signal fires.
+  // Tracks the previous value so the effect only fires on actual increments,
+  // not on the initial mount (when prevRef === current === 0).
+  const prevStopSignalRef = useRef(0);
+  useEffect(() => {
+    if (prevStopSignalRef.current === stopSignal) return;
+    prevStopSignalRef.current = stopSignal;
+    if (stopSignal === 0) return;
+    setSpinLocked(true);
+    const t = setTimeout(() => setSpinLocked(false), 50);
+    return () => clearTimeout(t);
+  }, [stopSignal]);
+
   const [isLifted, setIsLifted] = useState(false);
   const [armAngle, setArmAngle] = useState(0);
   const [isLeverEngaged, setIsLeverEngaged] = useState(false);
@@ -310,7 +336,8 @@ export default function Turntable({
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
             <style>{`
               @keyframes spin-vinyl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; animation-play-state: ${vinylSpinning ? "running" : "paused"}; }
+              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; }
+              .spin-stopped { animation: none !important; }
             `}</style>
 
             <defs>
@@ -367,7 +394,10 @@ export default function Turntable({
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 11} fill="none" stroke="url(#brushed-al)" strokeWidth="8" />
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 22} fill="none" stroke="#0a0c12" strokeWidth="6" />
             </g>
-            <g className="vinyl-spin" style={{ transformOrigin: `${PCX}px ${PCY}px` }}>
+            <g
+              className={`vinyl-spin ${spinLocked ? "spin-stopped" : ""}`}
+              style={{ transformOrigin: `${PCX}px ${PCY}px` }}
+            >
               <circle cx={PCX} cy={PCY} r={VINYL_R} fill="url(#vinyl-deep)" />
               {Array.from({ length: 24 }, (_, j) => {
                 const bandR = VINYL_R - j * 5.8;
@@ -739,59 +769,81 @@ export default function Turntable({
             </g>
           </svg>
 
-          <div className="absolute left-3 right-3 bottom-3 z-30 flex items-end justify-between gap-3 pointer-events-auto">
-            <div className="flex items-end gap-3">
-              <div className="flex flex-col items-center gap-1">
-                <div className="relative">
-                  <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                    <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
-                      background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
-                      boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
-                      filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',
-                    }}>
-                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: isPowered ? "#ff3a3a" : "#3a1010", boxShadow: isPowered ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
-                    </button>
-                  </div>
+          {/* Bottom-left: Power + Play + Stop transport */}
+          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
+            <div className="flex flex-col items-center gap-1">
+              <div className="relative">
+                <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
+                  <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
+                    background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
+                    boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
+                    filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',
+                  }}>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: isPowered ? "#ff3a3a" : "#3a1010", boxShadow: isPowered ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
+                  </button>
                 </div>
-                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
               </div>
-              <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <button onClick={isPowered ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
-                  {transportState === 'playing' ? (
-                    <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
-                  ) : (
-                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
-                  )}
-                </button>
-                <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
-              </div>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
             </div>
-
-            <div className="flex items-end gap-3">
-              <div className={`flex flex-col gap-1 items-center ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <div className="flex gap-1">
-                  {[33, 45].map((rpm) => (
-                    <button key={rpm} onClick={isPowered ? () => setSpeed(rpm as 33 | 45) : undefined} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
-                      {rpm}
-                    </button>
-                  ))}
-                </div>
-                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
-              </div>
-              <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <div className="w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
-                  <span className={`text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
-                  <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
-                    {liveBpmDisplay}
-                  </span>
-                  <span className={`text-[9px] font-mono leading-none tabular-nums ${isPowered ? (pitch === 0 ? 'text-cyan-300' : pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30'}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
-                    {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
-                  </span>
-                </div>
-                <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
-              </div>
+            <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+              <button onClick={isPowered ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+                {transportState === 'playing' ? (
+                  <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
+                ) : (
+                  <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
+                )}
+              </button>
+              <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
+            </div>
+            <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+              <button
+                onClick={isPowered ? handleDeckStop : undefined}
+                aria-label="Stop"
+                className="w-11 h-11 rounded-md border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+                style={{
+                  background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
+                  boxShadow: !isPlaying
+                    ? "inset 0 0 10px rgba(239,68,68,0.3), 0 0 8px rgba(239,68,68,0.25), 0 3px 8px rgba(0,0,0,0.5)"
+                    : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)",
+                }}
+              >
+                <div
+                  className={`w-4 h-4 rounded-[2px] transition-all duration-200 ${
+                    !isPowered
+                      ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
+                      : (isPlaying || currentTime > 0)
+                        ? "bg-red-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"
+                        : "bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)]"
+                  }`}
+                />
+              </button>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
             </div>
           </div>
+
+          {/* Bottom-right: BPM/Tempo */}
+          <div className={`absolute right-3 bottom-3 z-30 flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+            <div className="w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+              <span className={`text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
+              <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
+                {liveBpmDisplay}
+              </span>
+              <span className={`text-[9px] font-mono leading-none tabular-nums ${isPowered ? (pitch === 0 ? 'text-cyan-300' : pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30'}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
+                {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
+              </span>
+            </div>
+            <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
+          </div>
+
+          {/* RPM — top-right of chassis */}
+          <div className={`absolute top-6 right-6 z-30 flex gap-4 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+            {[33, 45].map((rpm) => (
+              <button key={rpm} onClick={() => isPowered && setSpeed(rpm as 33 | 45)} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
+                {rpm}
+              </button>
+            ))}
+          </div>
+
         </div>
       </div>
       <div className={`absolute left-3 bottom-3 right-3 top-3 w-2 h-2 rounded-full border border-white/[0.05] shadow-[0_2px_4px_rgba(0,0,0,0.6)]`} style={{ background: "radial-gradient(circle, #2a3038 0%, #0a0c10 100%)" }} />
