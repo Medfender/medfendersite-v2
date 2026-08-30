@@ -47,7 +47,7 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, isStopped } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack } = useAudio();
 
   // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
   const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
@@ -157,20 +157,19 @@ export default function Turntable({
   const liftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
-    if (prevPoweredRef.current && !isPowered) {
-      // Power just went OFF — trigger the arm return sequence directly.
-      setIsLeverEngaged(false);
-      setIsLifted(true);
-      if (liftTimerRef.current) clearTimeout(liftTimerRef.current);
-      if (dropTimerRef.current) clearTimeout(dropTimerRef.current);
-      liftTimerRef.current = setTimeout(() => {
-        setArmAngle(0); // swing arm back to rest cradle
-        dropTimerRef.current = setTimeout(() => {
-          setIsLifted(false);
-        }, 600);
-      }, 400);
+    const prev = prevPoweredRef.current;
+    const curr = isPowered;
+    // Edge-triggered only: fire exclusively on true state boundary changes
+    if (prev !== curr) {
+      if (prev && !curr) {
+        // ON → OFF: master kill — cut power, kill audio, reset transport
+        // Tonearm return handled by AudioContext togglePower / stop
+      } else if (!prev && curr) {
+        // OFF → ON: restore idle / ready state — no forced playback, no arm interference
+      }
     }
-    prevPoweredRef.current = isPowered;
+    // Update boundary tracker only after evaluating the transition
+    prevPoweredRef.current = curr;
   }, [isPowered]);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
@@ -257,9 +256,10 @@ export default function Turntable({
     }
     else if (transportState === 'paused') {
       console.log("Tonearm State Update ->", { transportState, isStopped: false, isPowered, armAngle, action: 'paused-on-record' });
-      // 3. Paused: Tonearm STAYS on the record at its current position.
-      //    Only the platter stops spinning. No arm swing, no lift.
-      //    The rotation is frozen by the hard-wired logic above (isStopped false -> keeps armAngle).
+      // 3. Paused: Tonearm freezes at current angle (does NOT return to park)
+      //    and lifts off the record. Lever is left UNDISTURBED — pause does
+      //    not flip the cue switcher. Lever only resets on stop / power off.
+      setIsLifted(true);
     }
     else if (transportState === 'stopped') {
       console.log("Tonearm State Update ->", { transportState, isStopped: true, isPowered, armAngle, action: 'resting' });
@@ -557,7 +557,7 @@ export default function Turntable({
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
               <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: 'transform 0.4s ease-in-out, filter 0.4s ease-in-out' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g id="tonearm-assembly" style={{ transform: `rotate(${isStopped || !isPowered ? 0 : armAngle}deg)`, transformOrigin: '490px 75px', transition: 'transform 0.6s cubic-bezier(0.34, 1.1, 0.64, 1)' }}>
+                <g id="tonearm-assembly" style={{ transform: `rotate(${transportState === 'stopped' ? 0 : armAngle}deg)`, transformOrigin: '490px 75px', transition: 'transform 0.6s cubic-bezier(0.34, 1.1, 0.64, 1)' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">
