@@ -352,8 +352,6 @@ export default function Turntable({
                     })}
                   </g>
                   <g id="counterweight-lock">
-                    <rect x={TPX - WAND_W - 0.5} y={TPY - 10} width={WAND_W * 2 + 1} height="4" rx="1" fill="url(#precision-chrome)" stroke="#3a3e4c" strokeWidth="0.4" />
-                    <rect x={TPX - WAND_W} y={TPY - 9} width={WAND_W * 0.3} height="2" rx="0.5" fill="rgba(255,255,255,0.35)" />
                   </g>
                   <g id="counterweight-end-cap">
                     <ellipse cx={TPX} cy={TPY - CW_LEN} rx={WAND_W * 0.95} ry={WAND_W * 0.6} fill="url(#polished-al)" stroke="#252830" strokeWidth="0.6" />
