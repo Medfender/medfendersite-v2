@@ -524,37 +524,37 @@ export default function Turntable({
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <button onClick={(e) => { if (onTogglePlay) { onTogglePlay(); } }} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+              <div className={`flex flex-col items-center gap-1 ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+                <button onClick={isPoweredOn ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
                   {transportState === 'playing' ? (
                     <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                   ) : (
                     <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
                   )}
                 </button>
-                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
+                <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
               </div>
             </div>
 
             <div className="flex items-end gap-3">
-              <div className="flex flex-col gap-1 items-center">
+              <div className={`flex flex-col gap-1 items-center ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
                 <div className="flex gap-1">
                   {[33, 45].map((rpm) => (
-                    <button key={rpm} onClick={() => setSpeed(rpm as 33 | 45)} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
+                    <button key={rpm} onClick={isPoweredOn ? () => setSpeed(rpm as 33 | 45) : undefined} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
                       {rpm}
                     </button>
                   ))}
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: "linear-gradient(180deg, #02060a 0%, #000000 100%)", boxShadow: "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" }}>
-                  <span className="text-[8px] font-mono text-neutral-500 tracking-[0.25em] uppercase leading-none">BPM</span>
-                  <span className={`text-xs font-mono leading-none tabular-nums tracking-tight transition-all duration-300 flex items-center justify-center whitespace-nowrap overflow-hidden ${bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')}`} style={{ textShadow: (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
+              <div className={`flex flex-col items-center gap-1 ${isPoweredOn ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPoweredOn ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPoweredOn ? "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" : "inset 0 0 6px rgba(0,0,0,0.5)" }}>
+                  <span className={`text-[8px] font-mono tracking-[0.25em] uppercase leading-none ${isPoweredOn ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
+                  <span className={`text-xs font-mono leading-none tabular-nums tracking-tight transition-all duration-300 flex items-center justify-center whitespace-nowrap overflow-hidden ${isPoweredOn ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPoweredOn && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
                     {bpm === 'CAL' ? 'CAL' : (Number(bpm) > 0 ? Number(bpm).toFixed(2) : '--')}
                   </span>
                 </div>
-                <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Tempo</span>
+                <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPoweredOn ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
               </div>
             </div>
           </div>
