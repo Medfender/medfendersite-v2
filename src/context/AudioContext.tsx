@@ -537,6 +537,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setIsPlaying(false);
     setIsVisualizerActive(false);
+    setIsStopped(false); // Force: pause is never "stopped"
   };
 
   const stopTrack = () => {
@@ -574,6 +575,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.pause();
       setIsPlaying(false);
       setIsVisualizerActive(false);
+      setIsStopped(false); // Explicit: pause must NOT be the "stopped" state
     } else {
       // Resume audio (if context is suspended, resume it first)
       if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
@@ -588,6 +590,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsPlaying(true);
         setIsPowered(true); // Global play → turntable powers on
         setIsVisualizerActive(true);
+        setIsStopped(false); // Explicit: resuming play must clear "stopped" state
         initWebAudioRef.current(); // Ensure pipeline is wired before first rAF frame
       } catch (err: any) {
         if (err.name !== "AbortError") {
