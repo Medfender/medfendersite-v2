@@ -31,6 +31,9 @@ export default function VinylShowcase() {
     setActiveTrack,
     pause,
     ensureAudioContext,
+    currentBpm,
+    setCurrentBpm,
+    analyzeTrackBpm,
   } = useAudio();
 
   const [pitch, setPitch] = useState<number>(0);
@@ -193,8 +196,8 @@ export default function VinylShowcase() {
   // Unified boolean for all UI icon derivations — single source of truth.
   const isEffectivelyPlaying = isPlaying || pendingPlay;
 
-  // Detected BPM of the loaded track (0 when nothing is loaded).
-  const bpm = (activeTrack as any)?.bpm ?? 0;
+  // Real-time BPM analyzed offline when each new track loads (not from live audio stream).
+  const bpm = currentBpm ?? 0;
 
   // Audio-end listener: only set paused=true if currentTime > 0 (i.e., real
   // track completion). Never nuke pausedState on transient isPlaying=false
@@ -320,10 +323,11 @@ export default function VinylShowcase() {
   // We set audioRef.current.src and currentTime=0 here, and update activeTrack
   // via setActiveTrack (from context). The turntable animates (transportState
   // becomes 'playing' due to pendingPlay) and onNeedleDrop finally triggers
-  // audio.play() — identical to the Start button flow.
+  // Manual playlist selection — plays immediately, triggers BPM analysis,
+  // and ensures audio starts without waiting for the needle-drop animation.
   const handlePlaylistSelect = (track: any) => {
+    const rawSrc = track?.url || track?.audioUrl || track?.src;
     if (audioRef.current) {
-      const rawSrc = track?.url || track?.audioUrl || track?.src;
       if (rawSrc) {
         try {
           const clean = decodeURIComponent(rawSrc.startsWith("http")
@@ -342,10 +346,28 @@ export default function VinylShowcase() {
     }
     // Synchronously resume Web Audio Context; rely on 5-second activation window.
     if (ensureAudioContext) { ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err)); }
+
+    // Immediately start playback and update playing state
+    if (audioRef.current) {
+      audioRef.current.play().catch((err: unknown) => {
+        if ((err as Error)?.name !== 'AbortError') {
+          console.error("[VinylShowcase] Playlist selection play error:", err);
+        }
+      });
+    }
+    setIsPlaying(true);
     setActiveTrack(track);
-    // Do NOT change pausedState — preserve any freeze/paused condition from
-    // previous playback. Only manage the needle-drop pending flag.
-    setPendingPlay(true);
+    setPendingPlay(false); // track is playing, not pending drop
+
+    // Trigger offline BPM analysis for the selected track (non-blocking)
+    if (rawSrc) {
+      const clean = rawSrc.startsWith("http")
+        ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+        : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
+      const audioSrc = encodeURI(decodeURIComponent(clean));
+      setCurrentBpm(null); // reset BPM display while analyzing
+      analyzeTrackBpm(audioSrc); // fire-and-forget; never awaits
+    }
   };
 
   // onNeedleDrop — the exact moment the turntable's needle completes its drop.

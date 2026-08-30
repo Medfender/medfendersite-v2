@@ -98,7 +98,8 @@
       "Bash(npx --yes playwright --version)",
       "Bash(npm install *)",
       "Bash(chromium --version)",
-      "Bash(google-chrome --version)"
+      "Bash(google-chrome --version)",
+      "Bash(npx --yes @babel/parser --plugins jsx --sourceType module src/components/turntable/Turntable.tsx)"
     ]
   }
 }

@@ -17,6 +17,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.22.1",
+    "web-audio-beat-detector": "^8.2.39",
     "zod": "^4.4.3"
   },
   "devDependencies": {
