@@ -542,7 +542,7 @@ export default function Turntable({
                   {transportState === 'playing' ? (
                     <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                   ) : (
-                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
+                    <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }}></div>
                   )}
                 </button>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
