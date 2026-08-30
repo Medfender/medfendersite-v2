@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useAudio } from "@/context/AudioContext";
 
 export default function Turntable({
@@ -27,7 +27,7 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate } = useAudio();
 
   // Reconcile turntable power when external playback triggers it
   // (e.g. vinyl player play button). Keeps physical button in sync.
@@ -85,6 +85,30 @@ export default function Turntable({
 
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
+  const liveBpmDisplay = useMemo(() => {
+    if (bpm === 'CAL' || !isPowered) return bpm === 'CAL' ? 'CAL' : '--';
+    const base = Number(bpm) || 0;
+    if (base <= 0) return '--';
+    const rate = 1 + pitch / 100;
+    return (base * rate).toFixed(2);
+  }, [bpm, pitch, isPowered]);
+  // Auto-reset pitch on every power transition (on or off) — first mount skipped.
+  const initialMountRef = useRef(true);
+  useEffect(() => {
+    if (initialMountRef.current) { initialMountRef.current = false; return; }
+    setPitch(0);
+    if (setPlaybackRate) setPlaybackRate(1); // neutral playback rate
+  }, [isPowered, setPlaybackRate]);
+  // Pitch fader change -> propagate to AudioContext playbackRate in real time
+  const handlePitchChange = useCallback((delta: number) => {
+    setPitch((prev) => {
+      const next = Math.max(-8, Math.min(8, prev + delta));
+      // Map pitch % to playback rate (center 0 = 1.0, +/-8% = 0.92 / 1.08)
+      const rate = 1 + next / 100;
+      if (setPlaybackRate) setPlaybackRate(rate);
+      return next;
+    });
+  }, [setPlaybackRate]);
 
   const vinylSpinning = transportState === 'playing' && isPowered;
 
@@ -553,7 +577,34 @@ export default function Turntable({
               <text x={PITCH_X + 17} y={PITCH_Y + 3} fontSize="6" fill="#7a8598" fontFamily="monospace">+8%</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN / 2 + 2} fontSize="6" fill="#7a8598" fontFamily="monospace">0</text>
               <text x={PITCH_X + 17} y={PITCH_Y + PITCH_LEN + 4} fontSize="6" fill="#7a8598" fontFamily="monospace">-8%</text>
-              <g style={{ transform: `translateX(${PITCH_X}px) translateY(${sliderY}px)`, transition: "transform 0.15s ease-out" }}>
+              {/* Clickable drag handle on pitch slider */}
+              <g
+                style={{ transform: `translateX(${PITCH_X}px) translateY(${sliderY}px)`, transition: "transform 0.15s ease-out", cursor: "pointer" }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const svgEl = (e.currentTarget as SVGGElement).closest("svg") as SVGSVGElement | null;
+                  if (!svgEl) return;
+                  const onMove = (ev: MouseEvent) => {
+                    const pt = (svgEl as SVGSVGElement).createSVGPoint();
+                    pt.x = ev.clientX; pt.y = ev.clientY;
+                    const ctm = (svgEl as SVGSVGElement).getScreenCTM();
+                    if (!ctm) return;
+                    const spt = pt.matrixTransform(ctm.inverse());
+                    const dy = spt.y - (PITCH_Y + PITCH_LEN / 2);
+                    const pct = Math.round(-(dy / (PITCH_LEN / 2)) * 8);
+                    const next = Math.max(-8, Math.min(8, pct));
+                    setPitch(next);
+                    if (setPlaybackRate) setPlaybackRate(1 + next / 100);
+                  };
+                  const onUp = () => {
+                    window.removeEventListener("mousemove", onMove);
+                    window.removeEventListener("mouseup", onUp);
+                  };
+                  window.addEventListener("mousemove", onMove);
+                  window.addEventListener("mouseup", onUp);
+                }}
+              >
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="rgba(0,0,0,0.6)" opacity="0.5" filter="url(#shadow-sm)" />
                 <rect x={-9} y={-7} width="18" height="14" rx="2.5" fill="url(#precision-chrome)" stroke="#3a3e4c" strokeWidth="0.5" />
                 <line x1={-6} y1={0} x2={6} y2={0} stroke="#1a1d24" strokeWidth="1.2" />
@@ -605,10 +656,13 @@ export default function Turntable({
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase text-center">RPM</span>
               </div>
               <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-                <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" : "inset 0 0 6px rgba(0,0,0,0.5)" }}>
-                  <span className={`text-[8px] font-mono tracking-[0.25em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
-                  <span className={`text-xs font-mono leading-none tabular-nums tracking-tight transition-all duration-300 flex items-center justify-center whitespace-nowrap overflow-hidden ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
-                    {bpm === 'CAL' ? 'CAL' : (Number(bpm) > 0 ? Number(bpm).toFixed(2) : '--')}
+                <div className="w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+                  <span className={`text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
+                  <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
+                    {liveBpmDisplay}
+                  </span>
+                  <span className={`text-[9px] font-mono leading-none tabular-nums ${isPowered ? (pitch === 0 ? 'text-cyan-300' : pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30'}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
+                    {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
                   </span>
                 </div>
                 <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
