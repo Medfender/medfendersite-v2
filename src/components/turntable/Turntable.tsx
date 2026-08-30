@@ -29,16 +29,59 @@ export default function Turntable({
   // Global audio context — single source of truth for power state
   const { isPowered, isPlaying, togglePower, setIsPowered } = useAudio();
 
-  const handleCueSwitchToggle = useCallback(() => {
-    // Pure electrical toggle — decoupled from playback and arm animation.
-    // Off → setIsPowered(true): LED on, platter spins, audio stays paused.
-    // On  → togglePower(): kill switch (audio stops, tonearm to rest, LED off).
+  // Reconcile turntable power when external playback triggers it
+  // (e.g. vinyl player play button). Keeps physical button in sync.
+  useEffect(() => {
+    if (isPlaying && !isPowered) {
+      setIsPowered(true);
+    }
+  }, [isPlaying, isPowered, setIsPowered]);
+
+  // Power button — purely electrical toggle. No audio, no arm animation, no needle drop.
+  // Acts as the master kill switch when the table is already powered on.
+  const handlePowerButton = useCallback(() => {
     if (!isPowered) {
       setIsPowered(true);
     } else {
       togglePower();
     }
   }, [isPowered, setIsPowered, togglePower]);
+
+  // Cue switch — full interactive behavior: starts music + drops needle from stop,
+  // kill switch when active.
+  const handleCueSwitchToggle = useCallback(() => {
+    if (!isPowered) {
+      setIsPowered(true);
+      if (onPlay) onPlay();
+      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
+    } else {
+      togglePower();
+    }
+  }, [isPowered, setIsPowered, togglePower, onPlay, onNeedleDrop]);
+
+  // Power-off guard: whenever the table loses electrical power, immediately
+  // return the tonearm to its resting cradle so it never stays stranded.
+  // This fires the lift → swing-back → drop animation sequence locally,
+  // independent of the parent's transportState derivation.
+  const prevPoweredRef = useRef(isPowered);
+  const liftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (prevPoweredRef.current && !isPowered) {
+      // Power just went OFF — trigger the arm return sequence directly.
+      setIsLeverEngaged(false);
+      setIsLifted(true);
+      if (liftTimerRef.current) clearTimeout(liftTimerRef.current);
+      if (dropTimerRef.current) clearTimeout(dropTimerRef.current);
+      liftTimerRef.current = setTimeout(() => {
+        setArmAngle(0); // swing arm back to rest cradle
+        dropTimerRef.current = setTimeout(() => {
+          setIsLifted(false);
+        }, 600);
+      }, 400);
+    }
+    prevPoweredRef.current = isPowered;
+  }, [isPowered]);
 
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
@@ -527,7 +570,7 @@ export default function Turntable({
               <div className="flex flex-col items-center gap-1">
                 <div className="relative">
                   <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                    <button onClick={togglePower} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
+                    <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
                       background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
                       boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
                       filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',

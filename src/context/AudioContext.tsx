@@ -116,6 +116,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPowered, setIsPowered] = useState(false);
   const [isVisualizerActive, setIsVisualizerActive] = useState(false);
+
+  // Belt-and-suspenders: isPowered always tracks audio playback.
+  // External play paths call setIsPowered(true) explicitly, but this
+  // effect catches any gap so the physical power button never desyncs.
+  useEffect(() => {
+    if (isPlaying && !isPowered) {
+      setIsPowered(true);
+    }
+  }, [isPlaying, isPowered, setIsPowered]);
   const [activeTrack, setActiveTrackState] = useState<TrackInfo | null>(null);
   // Ref to avoid stale-closure issues in async playTrack / togglePlay
   const activeTrackRef = useRef<TrackInfo | null>(null);
@@ -657,6 +666,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     setIsPlaying(false);
     setCurrentTime(0);
+    setIsPowered(false);         // Stop kills the deck — turntable power off + arm return
     setIsVisualizerActive(false);
   };
 
