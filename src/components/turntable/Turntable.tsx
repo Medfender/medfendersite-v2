@@ -42,8 +42,8 @@ export default function Turntable({
     const target = e.currentTarget;
     const svgEl = target.closest('svg');
     if (!svgEl) return;
-    const cx = TPX + 36;
-    const cy = TPY - 4;
+    const cx = TPX + 45;
+    const cy = TPY + 50;
     const handleMove = (ev: MouseEvent) => {
       const pt = (svgEl as SVGSVGElement).createSVGPoint();
       pt.x = ev.clientX;
@@ -266,35 +266,35 @@ export default function Turntable({
                   <g id="anti-skate-control" filter="url(#shadow-sm)">
                     <g id="a-skate-dial" style={{ cursor: 'grab', touchAction: 'none' }}
                     onMouseDown={handleAntiSkateMouseDown}>
-                    <circle cx={TPX + 36} cy={TPY - 4} r="9" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.5" />
-                    <circle cx={TPX + 36} cy={TPY - 4} r="6.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
-                    <g transform={`rotate(${antiSkateAngle} ${TPX + 36} ${TPY - 4})`}>
-                      <line x1={TPX + 36} y1={TPY - 8} x2={TPX + 36} y2={TPY - 1} stroke="#1e1410" strokeWidth="1" />
+                    <circle cx={TPX + 45} cy={TPY + 50} r="9" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.5" />
+                    <circle cx={TPX + 45} cy={TPY + 50} r="6.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
+                    <g transform={`rotate(${antiSkateAngle} ${TPX + 45} ${TPY + 50})`}>
+                      <line x1={TPX + 45} y1={TPY + 46} x2={TPX + 45} y2={TPY + 53} stroke="#1e1410" strokeWidth="1" />
                     </g>
-                    <circle cx={TPX + 36} cy={TPY - 4} r="1.2" fill="#1a1410" />
-                    <text x={TPX + 36} y={TPY + 5} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
+                    <circle cx={TPX + 45} cy={TPY + 50} r="1.2" fill="#1a1410" />
+                    <text x={TPX + 45} y={TPY + 65} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
                   </g>
                 </g>
 
                 {/* Cue system base — deck-mounted, does NOT rotate */}
                 <g id="cueing-system" transform="translate(0, -10)">
                   {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
-                  <path d="M 456,108 L 476,96 L 476,82 L 448,82 A 12 12 0 0,0 448,105 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
+                  <path d="M 454,106 L 474,94 L 474,80 L 446,80 A 12 12 0 0,0 446,103 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
 
                   {/* 2. Static Lever Pivot Base */}
-                  <circle cx="456" cy="94" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
-                  <circle cx="456" cy="94" r="4" fill="#111" />
+                  <circle cx="454" cy="92" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                  <circle cx="454" cy="92" r="4" fill="#111" />
 
                   {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
                   <g style={{
                     transform: `rotateX(${isLeverEngaged ? 180 : 0}deg)`,
-                    transformOrigin: '456px 94px',
+                    transformOrigin: '454px 92px',
                     transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                   }}>
                      {/* Shorter, thinner metal shaft */}
-                     <rect x="454.75" y="80" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                     <rect x="452.75" y="78" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
                      {/* Vibrant accent cue lever tip */}
-                     <circle cx="456" cy="79" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
+                     <circle cx="454" cy="77" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
                   </g>
                 </g>
 
