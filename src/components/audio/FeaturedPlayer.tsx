@@ -95,7 +95,10 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             </button>
 
             <button
-              onClick={togglePlay}
+              onClick={() => {
+                console.log("[FeaturedPlayer] PLAY BUTTON CLICK — togglePlay called", { playingState: isPlaying, track: (currentTrack as any)?.name || (currentTrack as any)?.title || null });
+                togglePlay();
+              }}
               className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(0,216,246,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0 overflow-hidden"
               aria-label={isPlaying ? "Pause" : "Play"}
               style={{ aspectRatio: "1 / 1" }}

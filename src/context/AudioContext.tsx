@@ -569,16 +569,41 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const currentTrack = activeTrack;
 
   const togglePlay = useCallback(async () => {
+    console.log("[AudioContext] togglePlay START", {
+      isPlaying,
+      isStopped,
+      isPowered,
+      currentTrack: activeTrack ? ((activeTrack as any)?.name || (activeTrack as any)?.title) : null,
+      audioRefNull: audioRef.current === null,
+      audioSrc: audioRef.current?.src || "(no element)",
+    });
     setIsStopped(false); // Synchronous: first click must never be interpreted as stop
-    if (!audioRef.current) return;
+    if (!audioRef.current) {
+      console.log("[AudioContext] togglePlay: audioRef.current is null — returning");
+      return;
+    }
 
     if (isPlaying) {
+      console.log("[AudioContext] togglePlay: PAUSE branch — calling audio.pause()");
       // Pause without resetting currentTime or clearing src
       audioRef.current.pause();
+      console.log("[AudioContext] togglePlay: after pause —", {
+        audioPaused: audioRef.current.paused,
+        audioCurrentTime: audioRef.current.currentTime,
+      });
       setIsPlaying(false);
       setIsVisualizerActive(false);
       setIsStopped(false); // Explicit: pause must NOT be the "stopped" state
+      console.log("[AudioContext] togglePlay: PAUSE complete — state set to isPlaying=false, isStopped=false");
     } else {
+      console.log("[AudioContext] togglePlay: PLAY branch — calling audio.play()", {
+        beforePlay: {
+          audioPaused: audioRef.current.paused,
+          audioCurrentTime: audioRef.current.currentTime,
+          audioSrc: audioRef.current.src,
+          audioReadyState: audioRef.current.readyState,
+        },
+      });
       // Resume audio (if context is suspended, resume it first)
       if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
         try {
@@ -588,13 +613,21 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
       try {
-        await audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        console.log("[AudioContext] togglePlay: audio.play() called — awaiting");
+        await playPromise;
+        console.log("[AudioContext] togglePlay: audio.play() resolved —", {
+          audioPaused: audioRef.current.paused,
+          audioCurrentTime: audioRef.current.currentTime,
+        });
         setIsPlaying(true);
         setIsPowered(true); // Global play → turntable powers on
         setIsVisualizerActive(true);
         setIsStopped(false); // Explicit: resuming play must clear "stopped" state
         initWebAudioRef.current(); // Ensure pipeline is wired before first rAF frame
+        console.log("[AudioContext] togglePlay: PLAY complete — state set to isPlaying=true, isPowered=true, isStopped=false");
       } catch (err: any) {
+        console.error("[AudioContext] togglePlay: audio.play() REJECTED with error:", err);
         if (err.name !== "AbortError") {
           console.error("Play error:", err);
         }
