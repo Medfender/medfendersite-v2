@@ -10,11 +10,21 @@ export interface FrameData {
   timeDomain: Float32Array;
 }
 
+/**
+ * LERP rate for smoothing frequency data towards audio FFT updates.
+ * Calibrated for 60Hz as 1.0 (per second of "60% of distance closed").
+ * The actual per-frame rate is `LERP_SPEED * deltaTime` so physics remains
+ * identical at 60Hz, 144Hz, and 240Hz.
+ */
+const LERP_SPEED = 22.0; // higher = snappier; tuned for musical transients
+
 export class AudioPhysicsEngine {
   private smoothed: Float32Array;
   private peaks: Float32Array;
   private peakDecay: Float32Array;
+  private timeDomain: Float32Array; // pre-allocated, reused per frame
   private numBins: number;
+  private timeBufLen: number = 0;
   private idlePhase: number = 0;
 
   constructor(numBins: number = 128) {
@@ -22,6 +32,7 @@ export class AudioPhysicsEngine {
     this.smoothed = new Float32Array(numBins);
     this.peaks = new Float32Array(numBins);
     this.peakDecay = new Float32Array(numBins);
+    this.timeDomain = new Float32Array(1024); // grows on demand up to analyser fftSize
   }
 
   public process(
@@ -32,6 +43,10 @@ export class AudioPhysicsEngine {
   ): FrameData {
     this.idlePhase += dt * 1.5;
 
+    // Per-frame LERP factor: closes (1 - e^(-LERP_SPEED*dt)) of the distance
+    // every second. dt-normalized so visual response is refresh-rate independent.
+    const lerpAlpha = 1 - Math.exp(-LERP_SPEED * dt);
+
     for (let i = 0; i < this.numBins; i++) {
       let targetAmp = 0;
 
@@ -41,8 +56,6 @@ export class AudioPhysicsEngine {
         const bin = Math.min(Math.floor(normIndex * dataLength), dataLength - 1);
         const rawVal = freqData[bin] || 0;
         const normalized = rawVal / 255.0;
-// Floor cutoff at -24 dB: anything quieter reads as silence (0 amplitude).
-// With analyser minDecibels=-90 / maxDecibels=0, -24 dB ≈ 0.267 of the 0..255 range.
         // Floor cutoff at -60 dB: with minDecibels=-90 / maxDecibels=0,
         // the -60 dB point maps to ~0.08 of the 0..255 range.
         const FLOOR = 0.08;
@@ -56,16 +69,18 @@ export class AudioPhysicsEngine {
         targetAmp = Math.max(0.015, 0.04 + wave1 + wave2);
       }
 
-      // Ballistics: Instant attack, fast exponential release
+      // LERP: explicit linear interpolation of smoothed toward target.
+      // Ballistics: instant attack (asymmetric), fast exponential release.
       const current = this.smoothed[i];
       if (targetAmp > current) {
+        // Attack — close most of the gap in a single frame for snappy transients
         this.smoothed[i] = current + (targetAmp - current) * Math.min(1, dt * 55);
       } else {
-        const decay = Math.exp(-dt * 6.5);
-        this.smoothed[i] = current * decay + targetAmp * (1 - decay);
+        // Release — use the LERP factor so motion is refresh-rate independent
+        this.smoothed[i] = current + (targetAmp - current) * lerpAlpha;
       }
 
-      // Peak-Hold Decay
+      // Peak-Hold Decay (dt-normalized)
       if (this.smoothed[i] > this.peaks[i]) {
         this.peaks[i] = this.smoothed[i];
         this.peakDecay[i] = 0;
@@ -75,16 +90,21 @@ export class AudioPhysicsEngine {
       }
     }
 
-    // Oscilloscope Time-Domain Processing
-    const timeNorm = new Float32Array(timeData.length);
-    for (let i = 0; i < timeData.length; i++) {
-      timeNorm[i] = (timeData[i] - 128) / 128.0;
+    // Oscilloscope Time-Domain Processing — reuse pre-allocated buffer
+    // (grow once if fftSize exceeds initial size; never per-frame).
+    const tLen = timeData.length;
+    if (tLen > this.timeBufLen) {
+      this.timeDomain = new Float32Array(tLen);
+      this.timeBufLen = tLen;
+    }
+    for (let i = 0; i < tLen; i++) {
+      this.timeDomain[i] = (timeData[i] - 128) / 128.0;
     }
 
     return {
       smoothed: this.smoothed,
       peaks: this.peaks,
-      timeDomain: timeNorm,
+      timeDomain: this.timeDomain,
     };
   }
 }

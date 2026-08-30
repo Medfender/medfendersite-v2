@@ -38,10 +38,15 @@ export const SpectrumCanvas: React.FC<SpectrumCanvasProps> = ({
       if (analyserNode && isPlaying) {
         analyserNode.getByteFrequencyData(freqBuf);
         analyserNode.getByteTimeDomainData(timeBuf);
-        // FFT signal verification log — confirm data is flowing, not zeroed
+        // FFT signal verification — zero-allocation peak check (re-uses freqBuf reference)
+        // Silenced to prevent console pollution during playback loops.
         if (Math.random() < 0.005) {
-          const maxVal = Math.max(...Array.from(freqBuf));
-          console.log('Live Audio Signal Peak:', maxVal);
+          let maxVal = 0;
+          for (let k = 0; k < freqBuf.length; k++) {
+            const v = freqBuf[k];
+            if (v > maxVal) maxVal = v;
+          }
+          // console.log('Live Audio Signal Peak:', maxVal);
         }
       } else if (analyserNode && !isPlaying) {
         // When paused, physics engine handles idle sine; just zero the buffers
