@@ -529,6 +529,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const pauseTrack = () => {
+    setIsStopped(false); // Synchronous: must clear before any async pause
     if (!audioRef.current) return;
     if (playPromiseRef.current) {
       playPromiseRef.current.then(() => audioRef.current?.pause()).catch(() => {});
@@ -568,6 +569,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const currentTrack = activeTrack;
 
   const togglePlay = useCallback(async () => {
+    setIsStopped(false); // Synchronous: first click must never be interpreted as stop
     if (!audioRef.current) return;
 
     if (isPlaying) {
