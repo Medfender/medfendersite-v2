@@ -244,23 +244,26 @@ export default function Turntable({
 
                 {/* Cue system base — deck-mounted, does NOT rotate */}
                 <g id="cueing-system">
-                {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
-                <path d="M 456,108 L 476,96 L 476,82 L 448,82 A 12 12 0 0,0 448,105 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
+                {/* Wrapper: shifts the entire cueing assembly up by 4px */}
+                <g transform="translateY(-4)">
+                  {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
+                  <path d="M 456,108 L 476,96 L 476,82 L 448,82 A 12 12 0 0,0 448,105 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
 
-                {/* 2. Static Lever Pivot Base */}
-                <circle cx="456" cy="94" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
-                <circle cx="456" cy="94" r="4" fill="#111" />
+                  {/* 2. Static Lever Pivot Base */}
+                  <circle cx="456" cy="94" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                  <circle cx="456" cy="94" r="4" fill="#111" />
 
-                {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
-                <g style={{
-                  transform: `translateY(-4px) rotateX(${isLeverEngaged ? 180 : 0}deg)`,
-                  transformOrigin: '456px 94px',
-                  transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                }}>
-                   {/* Shorter, thinner metal shaft */}
-                   <rect x="454.75" y="80" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
-                   {/* Vibrant accent cue lever tip */}
-                   <circle cx="456" cy="79" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
+                  {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
+                  <g style={{
+                    transform: `rotateX(${isLeverEngaged ? 180 : 0}deg)`,
+                    transformOrigin: '456px 94px',
+                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                  }}>
+                     {/* Shorter, thinner metal shaft */}
+                     <rect x="454.75" y="80" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+                     {/* Vibrant accent cue lever tip */}
+                     <circle cx="456" cy="79" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
+                  </g>
                 </g>
               </g>
 
