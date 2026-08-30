@@ -2,6 +2,26 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useAudio } from "@/context/AudioContext";
+import { Disc3 } from "lucide-react";
+
+const EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
+
+function clean(name: string): string {
+  return (name || "").trim();
+}
+
+function buildPatterns(name: string, artist: string): string[] {
+  const cleanName = clean(name);
+  const cleanArtist = clean(artist);
+  const patterns: string[] = [];
+  if (cleanName) patterns.push(cleanName);
+  if (cleanArtist && cleanName) {
+    patterns.push(`${cleanArtist} - ${cleanName}`);
+    patterns.push(`${cleanArtist} feat ${cleanName}`);
+    patterns.push(`${cleanArtist} - ${cleanName} feat ${cleanArtist}`);
+  }
+  return Array.from(new Set(patterns));
+}
 
 export default function Turntable({
   transportState = 'stopped',
@@ -27,7 +47,77 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack } = useAudio();
+
+  // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
+  const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
+  const rawArtist =
+    (currentTrack as any)?.artist || (currentTrack as any)?.gearTag || (currentTrack as any)?.author || "";
+  const trackName = clean(rawName);
+
+  const [resolvedLabelSrc, setResolvedLabelSrc] = useState<string | null>(null);
+  const [labelFailed, setLabelFailed] = useState(false);
+  const cancelLabelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
+
+  useEffect(() => {
+    if (!rawName && !rawArtist) {
+      setResolvedLabelSrc(null);
+      setLabelFailed(false);
+      return;
+    }
+
+    // Cancel any in-flight preloader from the previous track
+    cancelLabelRef.current.cancelled = true;
+    const session = { cancelled: false };
+    cancelLabelRef.current = session;
+
+    setLabelFailed(false);
+    setResolvedLabelSrc(null);
+
+    const patterns = buildPatterns(rawName, rawArtist);
+    console.log("[VinylLabel] Trying patterns:", patterns);
+
+    let patternIdx = 0;
+    let extIdx = 0;
+
+    const tryNext = () => {
+      if (session.cancelled) return;
+      if (patternIdx >= patterns.length) {
+        console.log("[VinylLabel] All combinations exhausted — fallback");
+        setLabelFailed(true);
+        setResolvedLabelSrc(null);
+        return;
+      }
+      const pattern = patterns[patternIdx];
+      const ext = EXTS[extIdx];
+      const url = `/images/Thumbnails/${encodeURIComponent(pattern)}.${ext}`;
+
+      const img = new Image();
+      img.onload = () => {
+        if (session.cancelled) return;
+        console.log("[VinylLabel] ✓ Found:", url);
+        setResolvedLabelSrc(url);
+        setLabelFailed(false);
+      };
+      img.onerror = () => {
+        if (session.cancelled) return;
+        extIdx++;
+        if (extIdx >= EXTS.length) {
+          patternIdx++;
+          extIdx = 0;
+        }
+        setTimeout(tryNext, 0);
+      };
+      console.log("[VinylLabel] Attempting:", url);
+      img.src = url;
+    };
+
+    tryNext();
+
+    return () => {
+      session.cancelled = true;
+    };
+  }, [rawName, rawArtist]);
 
   // Reconcile turntable power when external playback triggers it
   // (e.g. vinyl player play button). Keeps physical button in sync.
@@ -287,8 +377,39 @@ export default function Turntable({
                 <line key={g} x1={PCX} y1={PCY - VINYL_R} x2={PCX} y2={PCY + VINYL_R} stroke="#d8dce4" strokeWidth="0.4" transform={`rotate(${g * 3}, ${PCX}, ${PCY})`} />
               ))}</g>
               <circle cx={PCX} cy={PCY} r={LABEL_R} fill="#0a0c14" />
-              <circle cx={PCX} cy={PCY} r={LABEL_R - 2} fill="none" stroke="url(#gold)" strokeWidth="5" />
-              <circle cx={PCX} cy={PCY} r={LABEL_R - 14} fill="none" stroke="url(#gold)" strokeWidth="2" opacity="0.6" />
+              {/* Label artwork — image inside the spinning vinyl group, clipped to circle */}
+              {labelFailed || !resolvedLabelSrc ? (
+                <>
+                  <circle cx={PCX} cy={PCY} r={LABEL_R - 2} fill="none" stroke="url(#gold)" strokeWidth="5" />
+                  <circle cx={PCX} cy={PCY} r={LABEL_R - 14} fill="none" stroke="url(#gold)" strokeWidth="2" opacity="0.6" />
+                  {/* Fallback: show icon centered on label */}
+                  <foreignObject x={PCX - (LABEL_R - 4)} y={PCY - (LABEL_R - 4)} width={LABEL_R * 2 - 8} height={LABEL_R * 2 - 8} style={{ overflow: "visible" }}>
+                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      <Disc3 size={LABEL_R - 4} className="text-amber-500/50" strokeWidth={1} />
+                    </div>
+                  </foreignObject>
+                </>
+              ) : (
+                <>
+                  <clipPath id="label-clip">
+                    <circle cx={PCX} cy={PCY} r={LABEL_R - 3} />
+                  </clipPath>
+                  <image
+                    href={resolvedLabelSrc}
+                    x={PCX - (LABEL_R - 3)}
+                    y={PCY - (LABEL_R - 3)}
+                    width={(LABEL_R - 3) * 2}
+                    height={(LABEL_R - 3) * 2}
+                    clipPath="url(#label-clip)"
+                    preserveAspectRatio="xMidYMid slice"
+                  />
+                  <circle cx={PCX} cy={PCY} r={LABEL_R - 2} fill="none" stroke="url(#gold)" strokeWidth="4" opacity="0.85" />
+                  <circle cx={PCX} cy={PCY} r={LABEL_R - 14} fill="none" stroke="url(#gold)" strokeWidth="1.5" opacity="0.5" />
+                </>
+              )}
+
+              {/* Spindle hole — dark ring around the chrome spindle, rotates with the vinyl */}
+              <circle cx={PCX} cy={PCY} r="9" fill="#0a0a0a" />
             </g>
             <circle cx={PCX} cy={PCY} r={VINYL_R} fill="none" stroke="#8898aa" strokeWidth="1" opacity="0.3" />
 
