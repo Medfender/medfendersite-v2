@@ -258,6 +258,7 @@ export default function VinylShowcase() {
     }
   }, [isPowered, isPlaying, activeTrack, analyzeTrackBpm]);
   useEffect(() => {
+    console.log("VinylShowcase transport ->", { isPlaying, pausedState, isStopped, isPowered, effectiveTransportState });
     if (isPlaying) return;
     if (!pausedState && currentTime > 0) {
       // Track finished naturally — treat as stopped, allow tonearm reset.
@@ -265,7 +266,7 @@ export default function VinylShowcase() {
     }
     // Otherwise: stay paused (do nothing). Skip/pause/track-end are now
     // fully isolated from arm rest coordinate logic.
-  }, [isPlaying, currentTime, pausedState]);
+  }, [isPlaying, currentTime, pausedState, isStopped, isPowered, effectiveTransportState]);
 
   // Fix #1 — Deferred Audio Start (Needle-Drop Synchronisation):
   // When user clicks Play, we set pausedState=false to PROPAGATE the transportState
