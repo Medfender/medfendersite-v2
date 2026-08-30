@@ -11,13 +11,13 @@ interface Props {
 
 const EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
-function sanitizeName(name: string): string {
-  return (name || "").trim().replace(/\s+/g, " ").replace(/[&]/g, "and");
+function clean(name: string): string {
+  return (name || "").trim();
 }
 
 function buildPatterns(name: string, artist: string): string[] {
-  const cleanName = sanitizeName(name);
-  const cleanArtist = sanitizeName(artist);
+  const cleanName = clean(name);
+  const cleanArtist = clean(artist);
   const patterns: string[] = [];
   if (cleanName) patterns.push(cleanName);
   if (cleanArtist && cleanName) {
@@ -34,7 +34,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
   const rawName = (activeTrack as any)?.name || (activeTrack as any)?.title || "";
   const rawArtist =
     (activeTrack as any)?.artist || (activeTrack as any)?.gearTag || (activeTrack as any)?.author || "";
-  const trackName = sanitizeName(rawName);
+  const trackName = clean(rawName);
 
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
@@ -73,8 +73,8 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
       }
       const pattern = patterns[patternIdx];
       const ext = EXTS[extIdx];
-      const url = `/images/Thumbnails/${encodeURI(pattern)}.${ext}`;
-      console.log("[TrackThumbnail] Testing:", url);
+      const url = `/images/Thumbnails/${encodeURIComponent(pattern)}.${ext}`;
+      console.log("Attempting:", url);
 
       const img = new Image();
       img.onload = () => {
@@ -93,6 +93,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
         // micro-defer to avoid potential stack/RAF starvation
         setTimeout(tryNext, 0);
       };
+      console.log("Attempting:", url);
       img.src = url;
     };
 
