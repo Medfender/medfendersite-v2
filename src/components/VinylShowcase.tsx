@@ -116,11 +116,10 @@ export default function VinylShowcase() {
         });
       }
       setPendingPlay(false);
-      setPausedState(false);
     } else {
-      // Music was paused/stopped → track loads but does NOT play.
+      // Music was paused/stopped → track loads silently, no transport state change.
+      // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
       setPendingPlay(false);
-      setPausedState(true);
       if (audioRef.current) audioRef.current.pause();
     }
   };
@@ -156,11 +155,10 @@ export default function VinylShowcase() {
         });
       }
       setPendingPlay(false);
-      setPausedState(false);
     } else {
-      // Music was paused/stopped → track loads but does NOT play.
+      // Music was paused/stopped → track loads silently, no transport state change.
+      // pausedState is intentionally NOT set here — avoids triggering turntable pause/lift.
       setPendingPlay(false);
-      setPausedState(true);
       if (audioRef.current) audioRef.current.pause();
     }
   };
@@ -357,6 +355,7 @@ export default function VinylShowcase() {
   // intelligent 'stopped' inference, which returns the tonearm to the rest.
   const handleStop = () => {
     setPendingPlay(false);
+    setPausedState(true);
     if (isPlaying) {
       togglePlay();
     }
