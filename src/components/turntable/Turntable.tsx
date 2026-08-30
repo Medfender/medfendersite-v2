@@ -259,8 +259,8 @@ export default function Turntable({
                 }}>
                    {/* Shorter, thinner metal shaft */}
                    <rect x="454.75" y="80" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
-                   {/* Smaller rubber grip tip */}
-                   <circle cx="456" cy="79" r="3" fill="#111318" />
+                   {/* Vibrant accent cue lever tip */}
+                   <circle cx="456" cy="79" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
                 </g>
               </g>
 
