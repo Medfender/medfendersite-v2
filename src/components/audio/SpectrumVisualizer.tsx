@@ -22,6 +22,9 @@ export default function SpectrumVisualizer({
   const SMOOTHING = 0.15;
   const binIndicesRef = useRef<number[]>([]);
   const smoothedDataRef = useRef<Float32Array>(new Float32Array(LOG_BINS).fill(0));
+  // Pre-allocated frequency buffer and scratch array to eliminate per-frame GC
+  const freqBufferRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+  const scratchDataRef = useRef<Float32Array>(new Float32Array(LOG_BINS).fill(0));
 
   if (binIndicesRef.current.length === 0) {
     // fftSize=128 → frequencyBinCount = 64
@@ -56,20 +59,27 @@ export default function SpectrumVisualizer({
     const totalWidth = LOG_BINS * (barWidth + barGap);
     const startX = (width - totalWidth) / 2;
 
-    const rawValues: number[] = [];
+    // Pre-allocated frequency buffer — reused each frame; no GC allocations
+    let freqData: Uint8Array<ArrayBuffer>;
+    if (freqBufferRef.current) {
+      freqData = freqBufferRef.current;
+    } else {
+      freqBufferRef.current = new Uint8Array(analyserNode ? analyserNode.frequencyBinCount : 512);
+      freqData = freqBufferRef.current;
+    }
+
     if (analyserNode && isPlaying) {
-      const freqData = new Uint8Array(analyserNode.frequencyBinCount);
       analyserNode.getByteFrequencyData(freqData);
       for (let i = 0; i < LOG_BINS; i++) {
         const binIdx = binIndicesRef.current[i];
-        rawValues.push(freqData[binIdx] / 255);
+        scratchDataRef.current[i] = freqData[binIdx] / 255;
       }
     } else {
-      for (let i = 0; i < LOG_BINS; i++) rawValues.push(0);
+      for (let i = 0; i < LOG_BINS; i++) scratchDataRef.current[i] = 0;
     }
 
     for (let i = 0; i < LOG_BINS; i++) {
-      smoothedDataRef.current[i] = smoothedDataRef.current[i] * SMOOTHING + rawValues[i] * (1 - SMOOTHING);
+      smoothedDataRef.current[i] = smoothedDataRef.current[i] * SMOOTHING + scratchDataRef.current[i] * (1 - SMOOTHING);
     }
 
     for (let i = 0; i < LOG_BINS; i++) {

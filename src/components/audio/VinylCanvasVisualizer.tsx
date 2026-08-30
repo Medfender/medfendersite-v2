@@ -78,6 +78,8 @@ export default function VinylCanvasVisualizer({ isPlaying, isCurrentTrackActive 
 
   const smoothed = useRef<Float32Array>(new Float32Array(TOTAL_BARS));
   const peakHold = useRef<Float32Array>(new Float32Array(TOTAL_BARS));
+  // Pre-allocated target buffer — reused per frame, eliminates per-frame GC allocations
+  const targetBuf = useRef<Float32Array>(new Float32Array(TOTAL_BARS));
   const proceduralPhase = useRef(0);
   const { getActiveFrequencyData } = useAudio();
 
@@ -186,7 +188,9 @@ export default function VinylCanvasVisualizer({ isPlaying, isCurrentTrackActive 
       });
 
       // --- Compute amplitudes (logarithmic bins) ---
-      const target = new Float32Array(TOTAL_BARS);
+      // Reuse pre-allocated target buffer; zero-allocation per frame.
+      const target = targetBuf.current;
+      target.fill(0); // reset for this frame
       let usingFallback = true;
 
       if (active) {

@@ -49,9 +49,9 @@ interface AudioContextType {
   duration: number;
   seek: (time: number) => void;
   stop: () => void;
-  // Real-time analyzed BPM for the currently loaded track (null while loading)
-  currentBpm: number | null;
-  setCurrentBpm: (bpm: number | null) => void;
+  // Real-time analyzed BPM. Holds a number (e.g., 143.34), 'CAL' (analyzing), or null (idle).
+  currentBpm: number | 'CAL' | null;
+  setCurrentBpm: (bpm: number | 'CAL' | null) => void;
   // Offline BPM analysis trigger (fire-and-forget; never awaits)
   analyzeTrackBpm: (audioSrc: string) => void;
   // Global media coordination
@@ -91,6 +91,9 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // WeakMap singleton — prevents InvalidStateError: "HTMLMediaElement already connected"
   // when the same <audio> element re-enters the connect path.
   const sourceNodesMap = useRef<WeakMap<HTMLAudioElement, MediaElementAudioSourceNode>>(new WeakMap());
+  // In-memory BPM cache — keys are audio URLs, values are precise BPMs.
+  // Stored in a ref so cache writes never trigger React re-renders.
+  const bpmCache = useRef<Record<string, number>>({});
 
   const getOrCreateSourceNode = (ctx: AudioContext, audioEl: HTMLAudioElement): MediaElementAudioSourceNode => {
     const map = sourceNodesMap.current;
@@ -116,7 +119,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [currentBpm, setCurrentBpm] = useState<number | null>(null);
+  const [currentBpm, setCurrentBpm] = useState<number | 'CAL' | null>(null);
   // Tick state once per rAF frame so consumers re-render when the analyser
   // node is created. Without this, components that read `analyserNode` from
   // the context never see updates created inside callbacks.
@@ -139,6 +142,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
    *  never interferes with live playback or the visualizer's AnalyserNode.
    *  Decodes the audio buffer offline and passes it to the beat detector. */
   const analyzeTrackBpm = async (audioSrc: string) => {
+    // Step 1: Cache check — return instantly if BPM is already known for this URL.
+    if (bpmCache.current[audioSrc]) {
+      const cachedBpm = bpmCache.current[audioSrc];
+      setCurrentBpm(cachedBpm);
+      return;
+    }
+
+    // Step 2: Cache miss — show 3-letter "CAL" while analyzing, then update to precise value.
+    setCurrentBpm('CAL');
+
     try {
       const response = await fetch(audioSrc);
       if (!response.ok) {
@@ -153,7 +166,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer.slice(0));
         const bpm = await analyze(audioBuffer);
-        setCurrentBpm(Math.round(bpm));
+        // Step 4: Format to exactly two decimal places and save to both cache and state.
+        const preciseBpm = Number(bpm.toFixed(2));
+        bpmCache.current[audioSrc] = preciseBpm;
+        setCurrentBpm(preciseBpm);
       } finally {
         // Release the temporary decoder context immediately
         try { await tempCtx.close(); } catch { /* ignore */ }

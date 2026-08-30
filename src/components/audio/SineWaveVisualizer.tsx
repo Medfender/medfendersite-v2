@@ -38,12 +38,8 @@ export default function SineWaveVisualizer() {
       const freqData = audioEl ? getFrequencyData(audioEl) : null;
 
       if (isPlaying && freqData) {
+        // Reuse the freqData buffer returned by getFrequencyData() — no copy.
         const bufferLength = freqData.length;
-        const dataArray = new Uint8Array(bufferLength);
-        // Use frequency data for a more musical visualization
-        for (let i = 0; i < bufferLength; i++) {
-          dataArray[i] = freqData[i];
-        }
 
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = "#00d8f6";
@@ -58,13 +54,13 @@ export default function SineWaveVisualizer() {
         let x = 0;
 
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 255.0;
+          const v = freqData[i] / 255.0;
           const y = h - v * h * 0.6; // Invert and scale
 
           if (i === 0) {
             ctx.moveTo(x, y);
           } else {
-            const prevV = dataArray[i - 1] / 255.0;
+            const prevV = freqData[i - 1] / 255.0;
             const prevY = h - prevV * h * 0.6;
             const cpX = x - sliceWidth / 2;
             const cpY = (prevY + y) / 2;
@@ -85,13 +81,13 @@ export default function SineWaveVisualizer() {
 
         x = 0;
         for (let i = 0; i < bufferLength; i++) {
-          const v = dataArray[i] / 255.0;
+          const v = freqData[i] / 255.0;
           const y = v * h * 0.4; // Mirror below
 
           if (i === 0) {
             ctx.moveTo(x, y);
           } else {
-            const prevV = dataArray[i - 1] / 255.0;
+            const prevV = freqData[i - 1] / 255.0;
             const prevY = prevV * h * 0.4;
             const cpX = x - sliceWidth / 2;
             const cpY = (prevY + y) / 2;
