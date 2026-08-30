@@ -38,6 +38,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
 
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const cancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
   const trackNameRef = useRef(trackName);
 
@@ -136,7 +137,17 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.92 }}
               transition={{ duration: 0.3 }}
-              className="w-full h-full object-cover"
+              role="button"
+              tabIndex={0}
+              aria-label={`Open preview of ${trackName}`}
+              onClick={() => setIsPreviewOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setIsPreviewOpen(true);
+                }
+              }}
+              className="w-full h-full object-cover cursor-pointer transition-transform hover:scale-110"
             />
           )}
         </AnimatePresence>
@@ -148,6 +159,34 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
           <p className="text-[9px] text-amber-300/70 font-mono tracking-widest">NOW PLAYING</p>
         </div>
       )}
+
+      {/* ─── Aperçu (Preview Lightbox) ─────────────────────────────────────── */}
+      <AnimatePresence>
+        {isPreviewOpen && resolvedSrc && (
+          <motion.div
+            key="preview-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
+            onClick={() => setIsPreviewOpen(false)}
+          >
+            {/* Enlarged image — stop propagation so clicking the image doesn't close */}
+            <motion.img
+              key={resolvedSrc}
+              src={resolvedSrc}
+              alt={`Preview of ${trackName}`}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 280, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="max-w-md w-full aspect-square object-cover rounded-md border border-amber-700/50 shadow-[0_0_40px_rgba(217,119,6,0.3)]"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
