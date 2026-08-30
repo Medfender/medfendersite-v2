@@ -596,6 +596,32 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsStopped(false); // Explicit: pause must NOT be the "stopped" state
       console.log("[AudioContext] togglePlay: PAUSE complete — state set to isPlaying=false, isStopped=false");
     } else {
+      // ── Ensure a track is loaded before any audio.play() call.
+      //    DOMException on a fresh page load = audio.play() with empty src.
+      //    activeTrack is null on first page load → we must pick a default.
+      if (!activeTrackRef.current || !audioRef.current.src || audioRef.current.src === window.location.href) {
+        console.log("[AudioContext] togglePlay: no track loaded — attempting to load default", {
+          activeTrackNull: activeTrackRef.current === null,
+          audioSrcEmpty: !audioRef.current.src,
+          playlistLength: playlist.length,
+        });
+        // Try playlist first
+        if (playlist && playlist.length > 0) {
+          const firstTrack = playlist[0];
+          console.log("[AudioContext] togglePlay: delegating to playTrack(playlist[0])", (firstTrack as any)?.name || (firstTrack as any)?.title);
+          playTrack(firstTrack);
+          return;
+        }
+        // Fallback: hardcoded default that exists on disk
+        console.log("[AudioContext] togglePlay: no playlist — loading hardcoded fallback");
+        const fallbackTrack: TrackInfo = {
+          id: "fallback",
+          name: "Sidi Bouganga feat Younes Hadir",
+          url: "/audio/featured/Sidi Bouganga feat Younes Hadir.mp3",
+        } as any;
+        playTrack(fallbackTrack);
+        return;
+      }
       console.log("[AudioContext] togglePlay: PLAY branch — calling audio.play()", {
         beforePlay: {
           audioPaused: audioRef.current.paused,
@@ -633,7 +659,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       }
     }
-  }, [isPlaying]);
+  }, [isPlaying, playlist]);
 
   const pause = () => {
     pauseTrack();
