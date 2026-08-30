@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { ToneItem } from "@/data/storeData";
 import { previewController } from "@/components/store/PresetCard";
+import { analyze } from "web-audio-beat-detector";
 
 type TrackInfo = ToneItem;
 
@@ -48,6 +49,11 @@ interface AudioContextType {
   duration: number;
   seek: (time: number) => void;
   stop: () => void;
+  // Real-time analyzed BPM for the currently loaded track (null while loading)
+  currentBpm: number | null;
+  setCurrentBpm: (bpm: number | null) => void;
+  // Offline BPM analysis trigger (fire-and-forget; never awaits)
+  analyzeTrackBpm: (audioSrc: string) => void;
   // Global media coordination
   pauseAllOtherMedia: (activeAudioEl?: HTMLAudioElement | null) => void;
   activeAudioRef: React.RefObject<HTMLAudioElement | null>;
@@ -110,6 +116,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [currentBpm, setCurrentBpm] = useState<number | null>(null);
   // Tick state once per rAF frame so consumers re-render when the analyser
   // node is created. Without this, components that read `analyserNode` from
   // the context never see updates created inside callbacks.
@@ -127,6 +134,35 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const tickAnalyser = useCallback(() => {
     setAnalyserTick((n) => n + 1);
   }, []);
+
+  /** Offline BPM analysis — runs on a temporary, separate AudioContext so it
+   *  never interferes with live playback or the visualizer's AnalyserNode.
+   *  Decodes the audio buffer offline and passes it to the beat detector. */
+  const analyzeTrackBpm = async (audioSrc: string) => {
+    try {
+      const response = await fetch(audioSrc);
+      if (!response.ok) {
+        console.error("BPM Analysis Failed: HTTP", response.status, "for", audioSrc);
+        setCurrentBpm(null);
+        return;
+      }
+      const arrayBuffer = await response.arrayBuffer();
+      // Temporary, throwaway AudioContext — used only to decode the file,
+      // then closed. Never connects to the live playback graph.
+      const tempCtx = new AudioContext();
+      try {
+        const audioBuffer = await tempCtx.decodeAudioData(arrayBuffer.slice(0));
+        const bpm = await analyze(audioBuffer);
+        setCurrentBpm(Math.round(bpm));
+      } finally {
+        // Release the temporary decoder context immediately
+        try { await tempCtx.close(); } catch { /* ignore */ }
+      }
+    } catch (error) {
+      console.error("BPM Analysis Failed:", error);
+      setCurrentBpm(null);
+    }
+  };
 
   const initAudio = useCallback(async () => {
     if (initGuardRef.current) {
@@ -373,6 +409,12 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     activeTrackRef.current = track;
     setActiveTrackState(track);
 
+    // Step 4a — Reset BPM while the analyzer is running (so the UI shows '--').
+    // This is decoupled from the live AnalyserNode stream; it runs on a separate
+    // offline AudioContext and never touches the playback graph.
+    setCurrentBpm(null);
+    void analyzeTrackBpm(audioSrc);
+
     // Sync index ref so skip nav starts from this track (direct selection from list)
     const idx = playlist.findIndex(
       (t) => decodeURIComponent((t as any)?.url || "") === decodeURIComponent((track as any)?.url || "")
@@ -613,6 +655,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     currentIndexRef.current = safeIndex;
     setActiveTrack(targetTrack);
     setIsPlaying(true);
+    setCurrentBpm(null);
+    void analyzeTrackBpm(targetUrl);
 
     // 3. Unlock Web Audio Context if suspended
     if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
@@ -917,6 +961,10 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           gainNodeRef,
           getAnalyserNode,
           ensureAudioContext,
+          // Offline BPM analysis
+          currentBpm,
+          setCurrentBpm,
+          analyzeTrackBpm,
         }}
       >
         {children}

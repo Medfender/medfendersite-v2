@@ -551,7 +551,7 @@ export default function Turntable({
                 <div className="w-20 h-14 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1" style={{ background: "linear-gradient(180deg, #02060a 0%, #000000 100%)", boxShadow: "inset 0 0 10px rgba(0,0,0,0.9), 0 0 6px rgba(0,216,246,0.15)" }}>
                   <span className="text-[8px] font-mono text-neutral-500 tracking-[0.25em] uppercase leading-none">BPM</span>
                   <span className={`text-2xl font-mono leading-none tabular-nums transition-all duration-300 ${bpm > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900'}`} style={{ textShadow: bpm > 0 && isPlaying ? '0 0 12px rgba(0, 255, 170, 0.6)' : 'none' }}>
-                    {bpm > 0 ? bpm.toFixed(1) : '--.-'}
+                    {bpm > 0 ? bpm : '--'}
                   </span>
                 </div>
                 <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Tempo</span>
