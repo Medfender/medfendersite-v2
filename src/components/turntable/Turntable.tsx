@@ -54,8 +54,9 @@ export default function Turntable({
       }
     }
     else if (transportState === 'paused') {
-      // 3. Paused: Lift needle straight up, but DO NOT flip the lever
-      setIsLifted(true);
+      // 3. Paused: FREEZE — no arm lift, no lever change, no movement.
+      // Vinyl stops spinning via vinylSpinning flag; displayAngle holds
+      // position via frozenAngleRef. Arm stays exactly where it is.
     }
     else if (transportState === 'stopped') {
       // 4. Stopped: Disengage lever, lift arm, swing back, drop
