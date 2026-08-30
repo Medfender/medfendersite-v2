@@ -424,12 +424,16 @@ export default function Turntable({
                       <path d="M -4.5,10 L 4.5,10 L 5,14 L -5,14 Z" fill="#2c3040" />
                     </g>
                     <g transform="rotate(23 0 8.5)">
-                      {/* CARTRIDGE & STYLUS (renders underneath headshell) */}
+                      {/* CARTRIDGE & STYLUS — top-down orthographic */}
                       <g id="cartridge-assembly">
+                        {/* Gold cartridge body */}
                         <rect x="-4.5" y="12" width="9" height="20" fill="#b89947" rx="1" />
+                        {/* Dark inner recess */}
                         <rect x="-3" y="15" width="6" height="15" fill="#111318" />
-                        <path d="M -1,32 L 1,32 L 0.5,37 L -0.5,37 Z" fill="#e5e7eb" />
-                        <circle cx="0" cy="36.5" r="0.8" fill="#ff3333" />
+                        {/* Diamond stylus tip — flat top-down */}
+                        <path d="M 0,34.5 L 1.2,36.5 L 0,38.5 L -1.2,36.5 Z" fill="#e5e7eb" />
+                        {/* Diamond center dot */}
+                        <circle cx="0" cy="36.5" r="0.4" fill="#d4d4d8" />
                       </g>
                       {/* HEADSHELL BODY */}
                       <g id="headshell-body">
@@ -442,9 +446,15 @@ export default function Turntable({
                         <line x1="2.5" y1="22" x2="4.5" y2="22" stroke="#222" strokeWidth="0.5" transform="rotate(-15 3.5 22)" />
                         <circle cx="0" cy="28" r="1.5" fill="#1a1c23" opacity="0.5" />
                       </g>
-                      {/* MACHINED FINGER LIFT */}
+                      {/* MACHINED FINGER LIFT — flat top-down pill strip */}
                       <g id="headshell-finger-lift">
-                        <path d="M 7.5,18 L 13,18 A 1.5 1.5 0 0 0 14.5,16.5 L 14.5,14" fill="none" stroke="url(#precision-chrome)" strokeWidth="1.2" strokeLinecap="round" />
+                        {/* Dark matte pill strip — flat top-down silhouette */}
+                        <rect x="7" y="11" width="8" height="7" rx="1.2" fill="#0e1015" stroke="#252830" strokeWidth="0.4" />
+                        {/* Thin center recess line (grip groove from above) */}
+                        <line x1="9" y1="11.5" x2="9" y2="17.5" stroke="#04060c" strokeWidth="0.8" strokeLinecap="round" />
+                        <line x1="13" y1="11.5" x2="13" y2="17.5" stroke="#04060c" strokeWidth="0.8" strokeLinecap="round" />
+                        {/* Subtle center highlight */}
+                        <line x1="11" y1="11.5" x2="11" y2="17.5" stroke="rgba(100,108,128,0.25)" strokeWidth="0.4" strokeLinecap="round" />
                       </g>
                     </g>
                     </g>
