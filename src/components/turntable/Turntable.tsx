@@ -172,15 +172,18 @@ export default function Turntable({
     prevPoweredRef.current = curr;
   }, [isPowered]);
 
+  const [rpm, setRpm] = useState<33 | 45>(33);
+  const [rpmFlash, setRpmFlash] = useState(false);
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
   const liveBpmDisplay = useMemo(() => {
     if (bpm === 'CAL' || !isPowered) return bpm === 'CAL' ? 'CAL' : '--';
     const base = Number(bpm) || 0;
     if (base <= 0) return '--';
-    const rate = 1 + pitch / 100;
-    return (base * rate).toFixed(2);
-  }, [bpm, pitch, isPowered]);
+    const rpmRate = rpm === 45 ? 1.35 : 1.0;
+    const pitchRate = 1 + pitch / 100;
+    return (base * rpmRate * pitchRate).toFixed(2);
+  }, [bpm, pitch, isPowered, rpm]);
   // Auto-reset pitch on every power transition (on or off) — first mount skipped.
   const initialMountRef = useRef(true);
   useEffect(() => {
@@ -192,12 +195,11 @@ export default function Turntable({
   const handlePitchChange = useCallback((delta: number) => {
     setPitch((prev) => {
       const next = Math.max(-8, Math.min(8, prev + delta));
-      // Map pitch % to playback rate (center 0 = 1.0, +/-8% = 0.92 / 1.08)
-      const rate = 1 + next / 100;
+      const rate = (rpm === 45 ? 1.35 : 1.0) * (1 + next / 100);
       if (setPlaybackRate) setPlaybackRate(rate);
       return next;
     });
-  }, [setPlaybackRate]);
+  }, [setPlaybackRate, rpm]);
 
   const vinylSpinning = transportState === 'playing' && isPowered;
 
@@ -748,7 +750,8 @@ export default function Turntable({
                     const pct = Math.round(-(dy / (PITCH_LEN / 2)) * 8);
                     const next = Math.max(-8, Math.min(8, pct));
                     setPitch(next);
-                    if (setPlaybackRate) setPlaybackRate(1 + next / 100);
+                    const rate = (rpm === 45 ? 1.35 : 1.0) * (1 + next / 100);
+                    if (setPlaybackRate) setPlaybackRate(rate);
                   };
                   const onUp = () => {
                     window.removeEventListener("mousemove", onMove);
@@ -769,7 +772,7 @@ export default function Turntable({
             </g>
           </svg>
 
-          {/* Bottom-left: Power + Play + Stop transport */}
+          {/* Bottom-left: Power + Play transport */}
           <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
@@ -795,35 +798,39 @@ export default function Turntable({
               </button>
               <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
             </div>
-            <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-              <button
-                onClick={isPowered ? handleDeckStop : undefined}
-                aria-label="Stop"
-                className="w-11 h-11 rounded-md border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
-                style={{
-                  background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
-                  boxShadow: !isPlaying
-                    ? "inset 0 0 10px rgba(239,68,68,0.3), 0 0 8px rgba(239,68,68,0.25), 0 3px 8px rgba(0,0,0,0.5)"
-                    : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)",
-                }}
-              >
-                <div
-                  className={`w-4 h-4 rounded-[2px] transition-all duration-200 ${
-                    !isPowered
-                      ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
-                      : (isPlaying || currentTime > 0)
-                        ? "bg-red-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"
-                        : "bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)]"
-                  }`}
-                />
-              </button>
-              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
-            </div>
+          </div>
+
+          {/* STOP — centered under vinyl spindle */}
+          <div className={`absolute bottom-3 left-[calc(215/720*100%)] -translate-x-1/2 z-30 flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+            <button
+              onClick={isPowered ? handleDeckStop : undefined}
+              aria-label="Stop"
+              className="w-6 h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+              style={{
+                background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
+                boxShadow: !isPlaying
+                  ? "inset 0 0 8px rgba(239,68,68,0.3), 0 0 6px rgba(239,68,68,0.25), 0 1px 2px rgba(0,0,0,0.5)"
+                  : "inset 0 0 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)",
+              }}
+            >
+              <div
+                className={`w-3 h-3 rounded-sm transition-all duration-200 ${
+                  !isPowered
+                    ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
+                    : (isPlaying || currentTime > 0)
+                      ? "bg-red-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"
+                      : "bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)]"
+                }`}
+              />
+            </button>
+            <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
           </div>
 
           {/* Bottom-right: BPM/Tempo */}
           <div className={`absolute right-3 bottom-3 z-30 flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-            <div className="w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+            <div className="relative w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+              {/* Status LED — flashes when RPM changes to show hardware linkage */}
+              <span aria-hidden="true" className={`absolute top-1 right-1 w-1 h-1 rounded-full ${rpmFlash ? "bg-cyan-300 shadow-[0_0_6px_2px_rgba(0,216,246,0.9)]" : "bg-zinc-700"}`} />
               <span className={`text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
               <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
                 {liveBpmDisplay}
@@ -835,11 +842,17 @@ export default function Turntable({
             <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
           </div>
 
-          {/* RPM — top-right of chassis */}
-          <div className={`absolute top-6 right-6 z-30 flex gap-4 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-            {[33, 45].map((rpm) => (
-              <button key={rpm} onClick={() => isPowered && setSpeed(rpm as 33 | 45)} aria-label={`${rpm} RPM`} aria-pressed={speed === rpm} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === rpm ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === rpm ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === rpm ? "inset 0 0 6px rgba(0,216,246,0.3), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === rpm ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
-                {rpm}
+          {/* RPM — left of BPM screen */}
+          <div className={`absolute bottom-6 right-32 z-30 flex gap-2 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+            {[33, 45].map((r) => (
+              <button key={r} onClick={() => {
+                if (!isPowered) return;
+                setRpm(r as 33 | 45);
+                setSpeed(r as 33 | 45);
+                setRpmFlash(true);
+                setTimeout(() => setRpmFlash(false), 200);
+              }} aria-label={`${r} RPM`} aria-pressed={speed === r} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === r ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === r ? "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === r ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
+                {r}
               </button>
             ))}
           </div>
