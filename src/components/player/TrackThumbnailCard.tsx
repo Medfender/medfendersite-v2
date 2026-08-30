@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Disc3 } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
@@ -39,6 +40,8 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
   const [resolvedSrc, setResolvedSrc] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const cancelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
   const trackNameRef = useRef(trackName);
 
@@ -140,7 +143,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
               role="button"
               tabIndex={0}
               aria-label={`Open preview of ${trackName}`}
-              onClick={() => setIsPreviewOpen(true)}
+              onClick={(e) => { e.stopPropagation(); e.preventDefault(); setIsPreviewOpen(true); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -160,33 +163,43 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
         </div>
       )}
 
-      {/* ─── Aperçu (Preview Lightbox) ─────────────────────────────────────── */}
-      <AnimatePresence>
-        {isPreviewOpen && resolvedSrc && (
-          <motion.div
-            key="preview-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md"
-            onClick={() => setIsPreviewOpen(false)}
-          >
-            {/* Enlarged image — stop propagation so clicking the image doesn't close */}
-            <motion.img
-              key={resolvedSrc}
-              src={resolvedSrc}
-              alt={`Preview of ${trackName}`}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 280, damping: 26 }}
-              onClick={(e) => e.stopPropagation()}
-              className="max-w-md w-full aspect-square object-cover rounded-md border border-amber-700/50 shadow-[0_0_40px_rgba(217,119,6,0.3)]"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ─── Artwork Card Holder (Preview Lightbox) — Portal to body ── */}
+      {mounted && isPreviewOpen && resolvedSrc && typeof document !== 'undefined'
+        ? createPortal(
+            <div
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-sm"
+              onClick={() => setIsPreviewOpen(false)}
+            >
+              {/* Card Holder — stops propagation so clicking card doesn't close */}
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="relative w-full max-w-2xl max-h-[75vh] bg-[#111] border border-gray-800 rounded-2xl p-4 flex flex-col shadow-2xl"
+              >
+                {/* Close button */}
+                <button
+                  onClick={() => setIsPreviewOpen(false)}
+                  aria-label="Close preview"
+                  className="absolute -top-3 -right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-neutral-800 border border-gray-700 text-gray-400 hover:text-white hover:bg-neutral-700 transition-colors shadow-lg"
+                >
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <line x1="1" y1="1" x2="13" y2="13" />
+                    <line x1="13" y1="1" x2="1" y2="13" />
+                  </svg>
+                </button>
+
+                {/* Image container */}
+                <div className="relative flex-1 min-h-0 w-full bg-black rounded-xl flex items-center justify-center overflow-hidden">
+                  <img
+                    src={resolvedSrc}
+                    alt={`Preview of ${trackName}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }
