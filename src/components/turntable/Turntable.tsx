@@ -201,7 +201,83 @@ export default function Turntable({
     });
   }, [setPlaybackRate, rpm]);
 
-  const vinylSpinning = transportState === 'playing' && isPowered;
+  // ─── Vinyl physics loop (rAF) ─────────────────────────────────────────────
+  const rotationRef = useRef(0);   // current angle in degrees
+  const velocityRef = useRef(0);   // degrees per frame (~4.16°/frame @ 60fps ≈ 33 RPM)
+  const targetVelRef = useRef(0);
+  // Motor engagement: true only when the motor is actively driving the platter
+  // at the selected RPM. Disengages on power-off or transport-stop so the
+  // platter coasts to a halt. Re-engages when the user picks 33 / 45 RPM
+  // while fully stopped (the only legal moment to change platter speed).
+  const motorEngagedRef = useRef(false);
+
+  // Motor engagement tracks power + transport state. Playing/paused keeps the
+  // motor engaged; stopping or powering off disengages it.
+  useEffect(() => {
+    if (!isPowered) {
+      motorEngagedRef.current = false;
+    } else if (transportState === 'stopped') {
+      motorEngagedRef.current = false;
+    } else {
+      motorEngagedRef.current = true; // playing or paused
+    }
+  }, [isPowered, transportState]);
+
+  // Target speed derived from RPM + power + motor-engagement state.
+  // - Power off  → target 0, motor forced disengaged.
+  // - Motor off  → target 0 (platter coasts, lerp + brake converge to 0).
+  // - Motor on   → target = 33/45 RPM velocity. The rAF lerp below smoothly
+  //                accelerates or decelerates the platter to whatever the
+  //                current RPM is — no instant snap on 33↔45 switches.
+  useEffect(() => {
+    if (!isPowered) {
+      targetVelRef.current = 0;
+      motorEngagedRef.current = false;
+    } else if (motorEngagedRef.current) {
+      targetVelRef.current = rpm === 45 ? 5.625 : 4.1667; // ~33/45 RPM in deg/frame
+    } else {
+      targetVelRef.current = 0; // motor disengaged — platter coasts
+    }
+  }, [isPowered, rpm]);
+
+  // Frame loop — smooth linear interpolation on velocity inside rAF
+  useEffect(() => {
+    let raf = 0;
+    const loop = () => {
+      // 1. Smooth velocity lerp: heavy platter glides to target gradually.
+      //    This is the core interpolation rule — no instant snaps.
+      const lerpFactor = 0.08;
+      velocityRef.current += (targetVelRef.current - velocityRef.current) * lerpFactor;
+
+      // 2. When fully powered off, apply extra friction so it brakes to a clean 0
+      if (!isPowered) {
+        velocityRef.current *= 0.98;
+        if (velocityRef.current < 0.05) velocityRef.current = 0;
+      }
+
+      // 3. Stop button / full-stop state: quick brake curve + snap to home
+      //    ONLY when fully stopped (not playing, not paused, currentTime === 0).
+      if (transportState === 'stopped' && !isPlaying && currentTime === 0) {
+        velocityRef.current *= 0.92; // quick brake deceleration
+        if (velocityRef.current < 0.05) {
+          velocityRef.current = 0;
+          rotationRef.current = 0; // snap to home once decelerated
+          // Motor is disengaged after stop — platter will coast from here.
+          motorEngagedRef.current = false;
+        }
+      }
+
+      // 4. Apply velocity to rotation (glides, never snaps)
+      rotationRef.current = (rotationRef.current + velocityRef.current) % 360;
+      setSpinTick((t) => t + 1);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [isPowered, transportState, isPlaying, currentTime, rpm]);
+
+  // Tick state for rAF rerender
+  const [spinTick, setSpinTick] = useState(0);
 
   // ─── Deck-mounted Stop button logic ─────────────────────────────────────────
   // Called by the new STOP hardware button inside the turntable chassis.
@@ -336,12 +412,6 @@ export default function Turntable({
       <div className="relative w-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
         <div className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)", aspectRatio: "720 / 520" }}>
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
-            <style>{`
-              @keyframes spin-vinyl { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-              .vinyl-spin { animation: spin-vinyl 2.4s linear infinite; }
-              .spin-stopped { animation: none !important; }
-            `}</style>
-
             <defs>
               <linearGradient id="anodized-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#2a2e38"/><stop offset="40%" stopColor="#1c1f28"/><stop offset="100%" stopColor="#0e1015"/></linearGradient>
               <linearGradient id="brushed-al" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#5a6070"/><stop offset="8%" stopColor="#7a8298"/><stop offset="16%" stopColor="#5a6070"/><stop offset="24%" stopColor="#7a8298"/><stop offset="32%" stopColor="#5a6070"/><stop offset="40%" stopColor="#7a8298"/><stop offset="48%" stopColor="#5a6070"/><stop offset="56%" stopColor="#7a8298"/><stop offset="64%" stopColor="#5a6070"/><stop offset="72%" stopColor="#7a8298"/><stop offset="80%" stopColor="#5a6070"/><stop offset="88%" stopColor="#7a8298"/><stop offset="96%" stopColor="#5a6070"/><stop offset="100%" stopColor="#4a5068"/></linearGradient>
@@ -397,8 +467,12 @@ export default function Turntable({
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 22} fill="none" stroke="#0a0c12" strokeWidth="6" />
             </g>
             <g
-              className={`vinyl-spin ${spinLocked ? "spin-stopped" : ""}`}
-              style={{ transformOrigin: `${PCX}px ${PCY}px` }}
+              className="vinyl-spin"
+              style={{
+                transformOrigin: `${PCX}px ${PCY}px`,
+                transform: `rotate(${rotationRef.current}deg)`,
+                animation: "none",
+              }}
             >
               <circle cx={PCX} cy={PCY} r={VINYL_R} fill="url(#vinyl-deep)" />
               {Array.from({ length: 24 }, (_, j) => {
@@ -842,19 +916,47 @@ export default function Turntable({
             <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
           </div>
 
-          {/* RPM — left of BPM screen */}
+          {/* RPM — left of BPM screen. Buttons are LOCKED OUT while the
+              transport is playing, paused, or anywhere other than a full
+              stop. They only commit the new RPM target when the turntable
+              is fully stopped (!isPlaying && currentTime === 0). The actual
+              motor speed then accelerates / decelerates via the rAF lerp —
+              it never snaps instantly. */}
           <div className={`absolute bottom-6 right-32 z-30 flex gap-2 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-            {[33, 45].map((r) => (
-              <button key={r} onClick={() => {
-                if (!isPowered) return;
-                setRpm(r as 33 | 45);
-                setSpeed(r as 33 | 45);
-                setRpmFlash(true);
-                setTimeout(() => setRpmFlash(false), 200);
-              }} aria-label={`${r} RPM`} aria-pressed={speed === r} className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300`} style={{ background: speed === r ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)", boxShadow: speed === r ? "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)", border: speed === r ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)" }}>
-                {r}
-              </button>
-            ))}
+            {[33, 45].map((r) => {
+              // Locked out unless the deck is in a full stop state.
+              const isFullStop = !isPlaying && currentTime === 0;
+              const isLocked = !isFullStop;
+              return (
+                <button
+                  key={r}
+                  onClick={() => {
+                    if (!isPowered) return;
+                    // Speed-change restriction: 33 / 45 RPM can only change
+                    // the motor's target speed when the turntable is in a
+                    // full stop state. Ignored during play / pause.
+                    if (!isFullStop) return;
+                    setRpm(r as 33 | 45);
+                    setSpeed(r as 33 | 45);
+                    setRpmFlash(true);
+                    setTimeout(() => setRpmFlash(false), 200);
+                  }}
+                  aria-label={`${r} RPM`}
+                  aria-pressed={speed === r}
+                  aria-disabled={isLocked}
+                  title={isLocked ? "Stop the deck before changing speed" : `${r} RPM`}
+                  className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300 ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
+                  style={{
+                    background: speed === r ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)",
+                    boxShadow: speed === r ? "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)",
+                    border: speed === r ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)",
+                    pointerEvents: isLocked ? "none" : "auto",
+                  }}
+                >
+                  {r}
+                </button>
+              );
+            })}
           </div>
 
         </div>

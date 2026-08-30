@@ -167,6 +167,7 @@ export default function VinylShowcase() {
 
   // ── Playlist select ───────────────────────────────────────────────────────
   const handlePlaylistSelect = (track: any) => {
+    const wasStopped = transportState === 'stopped' || (!isPlaying && currentTime === 0);
     const rawSrc = track?.url || track?.audioUrl || track?.src;
     if (audioRef.current) {
       if (rawSrc) {
@@ -200,6 +201,9 @@ export default function VinylShowcase() {
     }
     setIsPlaying(true);
     setActiveTrack(track);
+    // Auto-play tonearm: if the deck was fully stopped, trigger the play
+    // sequence so the tonearm drops and the needle lands on the record.
+    if (wasStopped) handleTogglePlay();
     if (rawSrc) {
       const clean = rawSrc.startsWith("http")
         ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
