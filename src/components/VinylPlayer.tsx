@@ -437,7 +437,7 @@ export function VinylPlayer() {
   const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (
-    <div className="relative w-full max-w-[820px] mx-auto" style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
+    <div className="relative w-full max-w-full lg:max-w-[820px] mx-auto overflow-hidden" style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
       <div className="relative w-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
         <div className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)", aspectRatio: "720 / 520" }}>
           <svg viewBox="0 0 720 520" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
@@ -904,7 +904,7 @@ export function VinylPlayer() {
           </svg>
 
           {/* Bottom-left: Power + Play transport */}
-          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
+          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 flex-wrap pointer-events-auto">
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
                 <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
@@ -979,7 +979,7 @@ export function VinylPlayer() {
               is fully stopped (!isPlaying && currentTime === 0). The actual
               motor speed then accelerates / decelerates via the rAF lerp —
               it never snaps instantly. */}
-          <div className={`absolute bottom-6 right-32 z-30 flex gap-2 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+          <div className={`absolute bottom-6 right-4 sm:right-8 lg:right-32 z-30 flex gap-2 flex-wrap pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
             {[33, 45].map((r) => {
               // Locked out unless the deck is in a full stop state.
               const isFullStop = !isPlaying && currentTime === 0;
