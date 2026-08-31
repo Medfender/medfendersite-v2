@@ -966,9 +966,11 @@ export function VinylPlayer() {
               <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
                 {liveBpmDisplay}
               </span>
-              <span className={`text-[9px] font-mono leading-none tabular-nums ${isPowered ? (pitch === 0 ? 'text-cyan-300' : pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30'}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
-                {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
-              </span>
+              {pitch !== 0 && (
+                <span className={`text-[9px] font-mono leading-none tabular-nums ${isPowered ? (pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30'}`} style={{ textShadow: isPowered ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : 'none' }}>
+                  {pitch > 0 ? '+' : ''}{pitch.toFixed(1)}%
+                </span>
+              )}
             </div>
             <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
           </div>
