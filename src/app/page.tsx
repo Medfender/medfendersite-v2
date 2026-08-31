@@ -1,7 +1,6 @@
 import FeaturedAudioSection from "@/components/sections/FeaturedAudioSection";
 import MediaSection from "@/components/media/MediaSection";
 import ContactSection from "@/components/contact/ContactSection";
-import VinylShowcase from "@/components/VinylShowcase";
 import Link from "next/link";
 import { packs } from "@/data/storeData";
 import PresetCard from "@/components/store/PresetCard";
@@ -44,7 +43,6 @@ export default function Home() {
         </div>
       </section>
 
-      <VinylShowcase />
       <MediaSection />
       <ContactSection />
     </main>
