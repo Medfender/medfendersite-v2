@@ -164,14 +164,24 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
       )}
 
       {/* ─── Artwork Card Holder — Guitar Stompbox Layout — Portal to body ── */}
-      {mounted && isPreviewOpen && resolvedSrc && typeof document !== 'undefined'
-        ? createPortal(
-            <div
+      {mounted && typeof document !== 'undefined' && createPortal(
+        <AnimatePresence mode="wait">
+          {isPreviewOpen && resolvedSrc && (
+            <motion.div
+              key="preview-modal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
               className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 bg-black/95 backdrop-blur-sm"
               onClick={() => setIsPreviewOpen(false)}
             >
               {/* Pedal Chassis — stops propagation so clicking card doesn't close */}
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.92, y: 10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
                 onClick={(e) => e.stopPropagation()}
                 className="relative w-full max-w-xl bg-zinc-900 rounded-lg shadow-[0_30px_60px_rgba(0,0,0,0.9),inset_0_2px_4px_rgba(255,255,255,0.1)] border-2 border-zinc-950 flex flex-col"
               >
@@ -210,7 +220,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                     <button
                       onClick={() => setIsPreviewOpen(false)}
                       aria-label="Close preview"
-                      className="w-12 h-12 rounded-full bg-gradient-to-b from-zinc-300 to-zinc-500 border-[2px] border-zinc-400 shadow-[0_5px_10px_rgba(0,0,0,0.6),inset_0_2px_3px_rgba(255,255,255,0.8)] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.8)] active:translate-y-1 transition-all"
+                      className="w-12 h-12 rounded-full bg-gradient-to-b from-zinc-300 to-zinc-500 border-[2px] border-zinc-400 shadow-[0_5px_10px_rgba(0,0,0,0.6),inset_0_2px_3px_rgba(255,255,255,0.8)] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.8)] transition-all cursor-pointer"
                     />
                   </div>
 
@@ -220,11 +230,13 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                     <p className="text-[10px] text-zinc-600 font-mono mt-0.5">Stereo Output · 24-Bit / 96kHz</p>
                   </div>
                 </div>
-              </div>
-            </div>,
-            document.body
-          )
-        : null}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        ,
+        document.body
+      )}
     </div>
   );
 }

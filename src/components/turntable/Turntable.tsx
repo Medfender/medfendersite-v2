@@ -138,17 +138,25 @@ export default function Turntable({
     }
   }, [isPowered, setIsPowered, togglePower]);
 
-  // Cue switch — full interactive behavior: starts music + drops needle from stop,
-  // kill switch when active.
+  // Cue switch — three-state machine driven by transportState:
+  //   1. Fully powered OFF → power on + play + needle drop.
+  //   2. ON & playing or paused → power off.
+  //   3. ON & stopped → trigger play + needle drop.
   const handleCueSwitchToggle = useCallback(() => {
     if (!isPowered) {
+      // State 1: Off → power on, start playback, drop the needle
       setIsPowered(true);
-      if (onPlay) onPlay();
+      if (onTogglePlay) onTogglePlay();
+      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
+    } else if (transportState === 'stopped') {
+      // State 3: Powered on but stopped → start playback + drop needle
+      if (onTogglePlay) onTogglePlay();
       setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
     } else {
+      // State 2: Currently playing or paused → kill switch: power off
       togglePower();
     }
-  }, [isPowered, setIsPowered, togglePower, onPlay, onNeedleDrop]);
+  }, [isPowered, transportState, setIsPowered, togglePower, onTogglePlay, onNeedleDrop]);
 
   // Power-off guard: whenever the table loses electrical power, immediately
   // return the tonearm to its resting cradle so it never stays stranded.
@@ -307,16 +315,20 @@ export default function Turntable({
   }, [stop]);
 
   // ── Tonearm click: Play from stop / Stop from play ─────────────────────────
+  // If the table is unpowered, pressing the arm powers it on and starts playback.
+  // If already powered, stopped state triggers play; playing state triggers pause/stop.
   const handleArmClick = useCallback(() => {
-    if (!isPowered) return;
-    if (!isPlaying && currentTime === 0) {
+    if (!isPowered) {
+      setIsPowered(true);
+      if (onTogglePlay) onTogglePlay();
+    } else if (!isPlaying && currentTime === 0) {
       // Stopped → Play: arm acts as play trigger
       if (onTogglePlay) onTogglePlay();
     } else {
       // Playing → Stop: arm acts as stop trigger
       if (onStop) onStop();
     }
-  }, [isPowered, isPlaying, currentTime, onTogglePlay, onStop]);
+  }, [isPowered, setIsPowered, isPlaying, currentTime, onTogglePlay, onStop]);
 
   // ── Headshell click: three-state machine ───────────────────────────────────
   //   Stopped / Idle  → Play  (drop the arm, start playback from 0)
