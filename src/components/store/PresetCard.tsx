@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { PackData, ToneItem } from "@/data/storeData";
 import { useAudio } from "@/context/AudioContext";
 
@@ -15,10 +17,10 @@ export const previewController = {
 
 export default function PresetCard({ preset }: { preset: PackData }) {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hover:border-cyan-500/50 transition flex flex-col">
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hover:border-cyan-500/50 transition flex flex-col group">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <span className="inline-block px-2.5 py-1 text-xs font-semibold bg-cyan-500/10 text-cyan-400 rounded-md mb-2">
+          <span className="inline-block px-2.5 py-1 text-xs font-semibold bg-cyan-500/10 text-cyan-400 rounded-md mb-2 shadow-[0_0_8px_rgba(0,216,246,0.15)]">
             {preset.badge}
           </span>
           <h3 className="text-xl font-bold text-white">{preset.title}</h3>
@@ -28,6 +30,15 @@ export default function PresetCard({ preset }: { preset: PackData }) {
         </span>
       </div>
       <p className="text-slate-400 text-sm mb-6">{preset.description}</p>
+
+      {/* VIEW DETAILS */}
+      <Link
+        href={`/store/${(preset as PackData & { slug: string }).slug}`}
+        className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-cyan-300 transition-colors group-hover:text-cyan-200"
+      >
+        View Details
+        <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+      </Link>
 
       <div className="space-y-4 mb-6">
         <h4 className="text-xs font-semibold text-slate-400 tracking-wider uppercase">Included Tones</h4>
