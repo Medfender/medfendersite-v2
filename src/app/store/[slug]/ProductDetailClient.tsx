@@ -15,148 +15,7 @@ import {
 } from "lucide-react";
 import type { PackData, ToneModel } from "@/data/storeData";
 import { useCart } from "@/lib/CartContext";
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// STUDIO ANALYZER — Web Audio API Canvas Spectrum
-// ═══════════════════════════════════════════════════════════════════════════════
-function StudioVisualizer({ active, audioRef }: { active: boolean; audioRef: React.RefObject<HTMLAudioElement | null> }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animRef = useRef<number>(0);
-  const ctxRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const sourceRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const dataRef = useRef<Uint8Array<ArrayBuffer>>(new Uint8Array(new ArrayBuffer(512)));
-
-  // Initialize AudioContext + Analyser once (only on user interaction / play)
-  const initAudioGraph = useCallback(() => {
-    if (typeof window === "undefined") return;
-    if (!audioRef.current) return;
-    try {
-      const AC = (window as any).AudioContext || (window as any).webkitAudioContext;
-      if (!ctxRef.current) {
-        ctxRef.current = new AC();
-      }
-      const ctx = ctxRef.current!;
-      if (ctx.state === "suspended") {
-        ctx.resume();
-      }
-      if (!analyserRef.current) {
-        analyserRef.current = ctx.createAnalyser();
-        analyserRef.current.fftSize = 1024;
-      }
-      if (!sourceRef.current) {
-        sourceRef.current = ctx.createMediaElementSource(audioRef.current);
-        sourceRef.current.connect(analyserRef.current);
-        analyserRef.current.connect(ctx.destination);
-      }
-    } catch (e) {
-      // Silent fail — browser may throttle audio context
-    }
-  }, [audioRef]);
-
-  // Draw loop
-  useEffect(() => {
-    if (!active) {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-      return;
-    }
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const resize = () => {
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    // Init graph when playing starts
-    initAudioGraph();
-
-    const draw = () => {
-      if (!canvas || !ctx || !analyserRef.current) return;
-      const canvasCtx = ctx;
-
-      animRef.current = requestAnimationFrame(draw);
-
-      const WIDTH = canvas.width;
-      const HEIGHT = canvas.height;
-      const bufferLength = analyserRef.current.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-
-      // Get frequency data
-      analyserRef.current.getByteFrequencyData(dataArray);
-
-      // Clear previous frame
-      canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
-
-      // Set up the glowing stroke
-      canvasCtx.lineWidth = 3;
-      canvasCtx.strokeStyle = "#06b6d4"; // Premium Cyan
-      canvasCtx.shadowBlur = 15;
-      canvasCtx.shadowColor = "#06b6d4";
-
-      canvasCtx.beginPath();
-
-      // Calculate width of each data point
-      const sliceWidth = (WIDTH * 1.0) / bufferLength;
-      let x = 0;
-
-      // Draw the continuous wave line
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 255.0;
-        // Multiply by 0.8 to prevent clipping at the very top of the canvas
-        const y = HEIGHT - (v * HEIGHT * 0.8);
-
-        if (i === 0) {
-          canvasCtx.moveTo(x, y);
-        } else {
-          // Connect the line smoothly
-          canvasCtx.lineTo(x, y);
-        }
-        x += sliceWidth;
-      }
-
-      // Stroke the glowing line
-      canvasCtx.stroke();
-
-      // Draw a subtle translucent fill beneath the wave
-      canvasCtx.lineTo(WIDTH, HEIGHT);
-      canvasCtx.lineTo(0, HEIGHT);
-      canvasCtx.fillStyle = "rgba(6, 182, 212, 0.05)";
-      canvasCtx.fill();
-    };
-
-    animRef.current = requestAnimationFrame(draw);
-    return () => {
-      window.removeEventListener("resize", resize);
-      if (animRef.current) cancelAnimationFrame(animRef.current);
-    };
-  }, [active, initAudioGraph]);
-
-  return (
-    <section className="relative w-full overflow-hidden bg-neutral-950 border-t border-zinc-800">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="flex items-center gap-3 mb-6">
-          <Waves size={18} className="text-cyan-400" />
-          <h2 className="text-[10px] font-black uppercase tracking-[0.35em] text-cyan-300">Studio Analyzer</h2>
-          <div className="h-px flex-1 bg-zinc-800" />
-          <span className="text-[10px] font-mono text-zinc-600 tracking-wider">Real-time spectrum — press Play to activate</span>
-        </div>
-        <div className="relative w-full h-[320px] md:h-[420px] rounded-none overflow-hidden border border-zinc-800 shadow-[0_0_40px_rgba(0,216,246,0.08)] bg-gradient-to-b from-neutral-950 to-black">
-          <canvas ref={canvasRef} className="w-full h-full block" />
-        </div>
-      </div>
-    </section>
-  );
-}
+import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // TONE CHANNEL — analog hardware row
@@ -322,9 +181,21 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
-          PHASE 2 — STUDIO ANALYZER (Web Audio API Oscilloscope Waveform)
+          PHASE 2 — STUDIO ANALYZER (Hero Spectrum Visualizer, full-width)
          ═══════════════════════════════════════════════════════════════════════ */}
-      <StudioVisualizer active={isPlaying} audioRef={audioRef} />
+      <section className="relative w-full overflow-hidden bg-neutral-950 border-t border-zinc-800">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+          <div className="flex items-center gap-3 mb-6">
+            <Waves size={18} className="text-cyan-400" />
+            <h2 className="text-[10px] font-black uppercase tracking-[0.35em] text-cyan-300">Studio Analyzer</h2>
+            <div className="h-px flex-1 bg-zinc-800" />
+            <span className="text-[10px] font-mono text-zinc-600 tracking-wider">Real-time spectrum — press Play to activate</span>
+          </div>
+          <div className="relative w-full h-[320px] md:h-[420px] rounded-none overflow-hidden border border-zinc-800 shadow-[0_0_40px_rgba(0,216,246,0.08)] bg-gradient-to-b from-neutral-950 to-black flex items-center justify-center">
+            <SpectrumVisualizer isActive={isPlaying} width={900} height={400} />
+          </div>
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════════════════════════════════════════
           PHASE 3 — CONTENT ARCHITECTURE (Grid)
@@ -461,15 +332,15 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
               {/* Header */}
               <div className="flex items-center justify-between px-6 py-5 border-b-2 border-zinc-800 bg-black/60">
                 <span className="text-[10px] font-black uppercase tracking-[0.35em] text-cyan-300">Buy This Pack</span>
-                <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-600">{pack.id.toUpperCase()}</span>
+                <span className="text-cyan-400 font-mono text-sm tracking-widest font-bold">{pack.id.toUpperCase()}</span>
               </div>
 
               <div className="p-8 space-y-6">
                 {/* Price */}
                 <div>
-                  <div className="text-[9px] font-mono uppercase tracking-[0.4em] text-zinc-500 mb-2">One-Time Price</div>
+                  <div className="text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] mb-2">One-Time Price</div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-7xl font-black tracking-tighter text-white leading-none">${pack.price.toFixed(2)}</span>
+                    <span className="text-4xl font-black text-white">${pack.price.toFixed(2)}</span>
                     <span className="text-xs font-mono text-zinc-500 tracking-widest uppercase">USD</span>
                   </div>
                   <div className="text-[10px] font-mono text-zinc-300 mt-2 tracking-wider">Instant digital download · {pack.toneModels.length} tones</div>
@@ -499,19 +370,19 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
                     exit={{ opacity: 0.8, scale: 0.99 }}
                     transition={{ duration: 0.12 }}
                     className={[
-                      "w-full flex flex-col items-center justify-center gap-2 py-7 px-6 cursor-pointer select-none transition-all duration-100 shadow-2xl",
+                      "w-full flex flex-row items-center justify-center gap-3 py-4 bg-cyan-500 hover:bg-cyan-400 text-black text-sm font-black uppercase tracking-[0.2em] rounded-sm transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.6)] active:scale-[0.98] cursor-pointer select-none",
                       added
-                        ? "bg-emerald-500 text-white shadow-[inset_0_0_30px_rgba(16,185,129,0.3)] active:translate-y-[1px]"
-                        : "bg-white text-black font-black uppercase tracking-widest shadow-[0_6px_0_0_#0891b2,0_0_30px_rgba(0,216,246,0.3)] hover:bg-cyan-50 hover:shadow-[0_8px_0_0_#0891b2,0_0_50px_rgba(0,216,246,0.5)] active:translate-y-[2px] active:shadow-[inset_0_4px_10px_rgba(0,0,0,0.6)]",
+                        ? "!bg-emerald-500 !text-white shadow-[inset_0_0_30px_rgba(16,185,129,0.3)]"
+                        : "",
                     ].join(" ")}
                   >
                     {added ? (
-                      <span className="text-2xl font-black uppercase tracking-widest">Added ✓</span>
+                      <span className="text-sm font-black uppercase tracking-[0.2em]">Added ✓</span>
                     ) : (
                       <>
-                        <ShoppingCart size={24} />
-                        <span className="text-2xl font-black uppercase tracking-widest leading-none">Add to Cart</span>
-                        <span className="text-[11px] font-mono tracking-widest opacity-70">${pack.price.toFixed(2)} · Instant</span>
+                        <ShoppingCart size={16} />
+                        <span className="text-sm font-black uppercase tracking-[0.2em] leading-none">Add to Cart</span>
+                        <span className="text-[10px] font-mono tracking-widest opacity-70">· ${pack.price.toFixed(2)}</span>
                       </>
                     )}
                   </motion.button>
