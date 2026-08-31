@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumCanvas from "@/components/visualizer/SpectrumCanvas";
-import Turntable from "@/components/turntable/Turntable";
 import type { VisualizerMode } from "@/lib/visualizer/visualizerRenderers";
 
 export default function VinylShowcase() {
@@ -28,7 +27,6 @@ export default function VinylShowcase() {
     analyserNode,
     setPlaybackRate,
     audioRef,
-    playTrack,
     setIsPlaying,
     setActiveTrack,
     pause,
@@ -212,20 +210,6 @@ export default function VinylShowcase() {
       setCurrentBpm(null);
       analyzeTrackBpm(audioSrc);
     }
-  };
-
-  // ── Turntable callbacks ───────────────────────────────────────────────────
-  const handleNeedleDrop = useCallback(() => {
-    // Nothing to do — audio is already started by playTrack before this fires.
-    // The authoritative transportState is already "playing".
-  }, []);
-
-  const handleTurntablePlay = () => {
-    if (activeTrack) playTrack(activeTrack);
-  };
-
-  const handleTurntableStop = () => {
-    ctxStop();
   };
 
   // ── BPM ───────────────────────────────────────────────────────────────────
@@ -438,30 +422,7 @@ export default function VinylShowcase() {
           </div>
         </div>
 
-        {/* ── Right Column: Vinyl ────────────────────────────────────────── */}
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-full max-w-2xl">
-            <Turntable
-              transportState={transportState}
-              progress={duration > 0 ? (currentTime / duration) : 0}
-              onTogglePlay={handleTogglePlay}
-              onStop={handleTurntableStop}
-              onNeedleDrop={handleNeedleDrop}
-              onPlay={handleTurntablePlay}
-              onPause={pause}
-              bpm={bpm}
-            />
-          </div>
-
-          {/* Current Track Info */}
-          <div className="text-center mb-8">
-            <h3 className="text-xl font-bold text-white mb-1">{trackName}</h3>
-            <p className="text-blue-400 font-semibold mb-2">{trackArtist}</p>
-            <p className="text-xs font-mono text-gray-500">
-              {fmt(currentTime)} / {fmt(duration)}
-            </p>
-          </div>
-        </div>
+        {/* ── Playlist / Transport / Spectrum remain intact ─────────────── */}
       </div>
     </section>
   );
