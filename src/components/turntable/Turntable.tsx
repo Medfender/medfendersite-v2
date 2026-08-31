@@ -177,6 +177,8 @@ export default function Turntable({
   const [rpmFlash, setRpmFlash] = useState(false);
   const [speed, setSpeed] = useState<33 | 45>(33);
   const [pitch, setPitch] = useState(0);
+  // Guards click-to-jump when user is dragging the pitch handle.
+  const draggingPitchRef = useRef(false);
   const liveBpmDisplay = useMemo(() => {
     if (bpm === 'CAL' || !isPowered) return bpm === 'CAL' ? 'CAL' : '--';
     const base = Number(bpm) || 0;
@@ -843,8 +845,28 @@ export default function Turntable({
           </g>
 
             {/* PITCH FADER */}
-            <g id="pitch-fader">
-              <rect x={PITCH_X - 4} y={PITCH_Y} width="8" height={PITCH_LEN} rx="3" fill="#06070b" stroke="#252830" strokeWidth="0.5" />
+            <g id="pitch-fader" onDoubleClick={() => { setPitch(0); if (setPlaybackRate) setPlaybackRate(1); }} style={{ cursor: 'pointer' }}>
+              <rect
+                x={PITCH_X - 4} y={PITCH_Y} width="8" height={PITCH_LEN} rx="3"
+                fill="#06070b" stroke="#252830" strokeWidth="0.5"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (draggingPitchRef.current) return;
+                  const svgEl = (e.currentTarget as SVGRectElement).closest("svg") as SVGSVGElement | null;
+                  if (!svgEl) return;
+                  const pt = svgEl.createSVGPoint();
+                  pt.x = e.clientX; pt.y = e.clientY;
+                  const ctm = svgEl.getScreenCTM();
+                  if (!ctm) return;
+                  const spt = pt.matrixTransform(ctm.inverse());
+                  const dy = spt.y - (PITCH_Y + PITCH_LEN / 2);
+                  const pct = Math.round(-(dy / (PITCH_LEN / 2)) * 8);
+                  const next = Math.max(-8, Math.min(8, pct));
+                  setPitch(next);
+                  const rate = (rpm === 45 ? 1.35 : 1.0) * (1 + next / 100);
+                  if (setPlaybackRate) setPlaybackRate(rate);
+                }}
+              />
               <rect x={PITCH_X - 2} y={PITCH_Y + 2} width="4" height={PITCH_LEN - 4} rx="2" fill="url(#anodized-dark)" />
               {Array.from({ length: 9 }, (_, i) => {
                 const t = i / 8; const y = PITCH_Y + t * PITCH_LEN; const isMajor = i === 0 || i === 4 || i === 8;
@@ -874,7 +896,9 @@ export default function Turntable({
                     const rate = (rpm === 45 ? 1.35 : 1.0) * (1 + next / 100);
                     if (setPlaybackRate) setPlaybackRate(rate);
                   };
+                  draggingPitchRef.current = true;
                   const onUp = () => {
+                    draggingPitchRef.current = false;
                     window.removeEventListener("mousemove", onMove);
                     window.removeEventListener("mouseup", onUp);
                   };
