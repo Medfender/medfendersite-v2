@@ -18,6 +18,7 @@ export default function Navbar() {
     { label: "Audio", href: "/audio" },
     { label: "Store", href: "/store" },
     { label: "Media", href: "/media" },
+    { label: "Support", href: "/support/setup-guide" },
     { label: "Contact", href: "/contact" },
   ];
 

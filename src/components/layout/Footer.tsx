@@ -15,6 +15,10 @@ export default function Footer() {
           <a href="#media" className="hover:text-cyan-300 transition">Media</a>
           <a href="#contact" className="hover:text-cyan-300 transition">Contact</a>
         </div>
+        <div className="flex flex-col md:items-end gap-1 text-sm text-zinc-400">
+          <span className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">Support</span>
+          <a href="/support/setup-guide" className="hover:text-cyan-400 transition font-medium">Installation & Setup →</a>
+        </div>
         <div className="flex items-center gap-4">
           <a href="#" aria-label="YouTube" className="text-neutral-400 hover:text-cyan-300 transition text-lg">▶</a>
           <a href="#" aria-label="Instagram" className="text-neutral-400 hover:text-cyan-300 transition text-lg">◉</a>
