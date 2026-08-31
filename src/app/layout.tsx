@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { AudioProvider } from "@/context/AudioContext";
+import { CartProvider } from "@/lib/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
@@ -29,10 +30,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-neutral-950 text-neutral-100 min-h-screen">
-        <Navbar />
-        <AudioProvider>
-          <PageTransition>{children}</PageTransition>
-        </AudioProvider>
+        <CartProvider>
+          <Navbar />
+          <AudioProvider>
+            <PageTransition>{children}</PageTransition>
+          </AudioProvider>
+        </CartProvider>
         <Footer />
         <Script
           src="https://assets.lemonsqueezy.com/lemon.js"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { PackData, ToneItem } from "@/data/storeData";
 import { useAudio } from "@/context/AudioContext";
+import { useCart } from "@/lib/CartContext";
 
 export const previewController = {
   listeners: new Set<(id: string | null, playing: boolean) => void>(),
@@ -16,6 +17,10 @@ export const previewController = {
 };
 
 export default function PresetCard({ preset }: { preset: PackData }) {
+  const { addToCart } = useCart();
+  const handleAdd = () => {
+    addToCart(preset);
+  };
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl hover:border-cyan-500/50 transition flex flex-col group">
       <div className="flex justify-between items-start mb-4">
@@ -47,15 +52,13 @@ export default function PresetCard({ preset }: { preset: PackData }) {
         ))}
       </div>
 
-      <a
-        href={preset.checkoutUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-auto inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-600 text-slate-950 font-extrabold text-sm px-5 py-3 shadow-[0_0_20px_rgba(0,216,246,0.35)] hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_0_28px_rgba(0,216,246,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 transition-transform"
-        aria-label={`Grab your ${preset.title} for $${preset.price.toFixed(2)}`}
+      <button
+        onClick={handleAdd}
+        aria-label={`Add ${preset.title} to cart`}
+        className="mt-auto inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-600 text-slate-950 font-extrabold text-sm px-5 py-3 shadow-[0_5px_20px_rgba(0,216,246,0.35)] hover:shadow-[0_8px_30px_rgba(0,216,246,0.55)] hover:scale-[1.02] active:scale-[0.98] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.7)] transition-all cursor-pointer"
       >
-        Grab Your Pack
-      </a>
+        Add to Cart
+      </button>
     </div>
   );
 }
