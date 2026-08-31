@@ -1,4 +1,3 @@
-import FeaturedAudioSection from "@/components/sections/FeaturedAudioSection";
 import MediaSection from "@/components/media/MediaSection";
 import ContactSection from "@/components/contact/ContactSection";
 import Link from "next/link";
@@ -11,8 +10,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
-      <FeaturedAudioSection />
-
       {/* ── Featured Packs: 3-card limit ── */}
       <section className="relative">
         <div className="max-w-6xl mx-auto px-6 py-20">
