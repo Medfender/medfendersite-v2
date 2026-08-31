@@ -1,7 +1,7 @@
 "use client";
 
 import FeaturedAudioSection from "@/components/sections/FeaturedAudioSection";
-import { VinylPlayer } from "@/components/VinylPlayer";
+import VinylShowcase from "@/components/VinylShowcase";
 
 export default function AudioClient() {
   return (
@@ -9,7 +9,7 @@ export default function AudioClient() {
       <FeaturedAudioSection />
 
       <section className="w-full px-6 py-12 flex justify-center">
-        <VinylPlayer />
+        <VinylShowcase />
       </section>
     </main>
   );
