@@ -230,9 +230,9 @@ export default function VinylShowcase() {
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <section className="w-full bg-[#111111] py-20 text-gray-300 font-sans border-y border-gray-900">
-      <header className="text-center mb-16 px-4">
-        <h2 className="text-5xl font-extrabold tracking-widest text-white mb-4 uppercase">
+    <section className="w-full bg-[#111111] py-8 text-gray-300 font-sans border-y border-gray-900">
+      <header className="text-center mb-6 px-4">
+        <h2 className="text-3xl font-extrabold tracking-widest text-white mb-2 uppercase">
           Featured Vinyl Showcase
         </h2>
         <p className="text-gray-400 text-lg">
@@ -241,7 +241,7 @@ export default function VinylShowcase() {
       </header>
 
       <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-start px-6">
-        {/* ── Left Column ─────────────────────────────────────────────────── */}
+        {/* ── Left Column: Transport + Spectrum ─────────────────────────── */}
         <div className="flex flex-col gap-10">
 
           {/* Transport + Progress */}
@@ -329,46 +329,6 @@ export default function VinylShowcase() {
             </div>
           </div>
 
-          {/* Playlist */}
-          <div>
-            <h3 className="text-sm tracking-widest text-gray-500 mb-4 font-semibold uppercase">Playlist</h3>
-            <div className="flex flex-col gap-2">
-              {playlist.map((track) => {
-                const isActive = (activeTrack as any)?.id === track.id;
-                return (
-                  <div
-                    key={track.id}
-                    onClick={() => handlePlaylistSelect(track)}
-                    className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
-                      isActive ? "bg-[#1a1a1a] border border-blue-900/30" : "hover:bg-gray-800/50"
-                    }`}
-                  >
-                    <div>
-                      <h4 className={`font-semibold ${isActive ? "text-blue-400" : "text-gray-200"}`}>
-                        {(track as any).name || (track as any).title || "Untitled"}
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-1">{(track as any).gearTag || (track as any).artist}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {isActive && isPlaying ? (
-                        <div className="flex gap-1 h-4 items-end">
-                          <div className="w-1 bg-blue-500 h-full animate-pulse" />
-                          <div className="w-1 bg-blue-500 h-2/3 animate-pulse delay-75" />
-                          <div className="w-1 bg-blue-500 h-4/5 animate-pulse delay-150" />
-                        </div>
-                      ) : isActive ? (
-                        <Play className="text-blue-500" size={16} />
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-              {playlist.length === 0 && (
-                <p className="text-gray-600 text-sm p-4">No tracks loaded — play from the player bar above.</p>
-              )}
-            </div>
-          </div>
-
           {/* Spectrum Analyzer */}
           <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-gray-800 mt-2">
             <div className="flex justify-between items-center mb-4">
@@ -422,7 +382,48 @@ export default function VinylShowcase() {
           </div>
         </div>
 
-        {/* ── Playlist / Transport / Spectrum remain intact ─────────────── */}
+        {/* ── Right Column: Playlist ─────────────────────────────────────── */}
+        <div className="flex flex-col gap-8">
+          {/* Playlist */}
+          <div>
+            <h3 className="text-sm tracking-widest text-gray-500 mb-4 font-semibold uppercase">Playlist</h3>
+            <div className="flex flex-col gap-2">
+              {playlist.map((track) => {
+                const isActive = (activeTrack as any)?.id === track.id;
+                return (
+                  <div
+                    key={track.id}
+                    onClick={() => handlePlaylistSelect(track)}
+                    className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
+                      isActive ? "bg-[#1a1a1a] border border-blue-900/30" : "hover:bg-gray-800/50"
+                    }`}
+                  >
+                    <div>
+                      <h4 className={`font-semibold ${isActive ? "text-blue-400" : "text-gray-200"}`}>
+                        {(track as any).name || (track as any).title || "Untitled"}
+                      </h4>
+                      <p className="text-xs text-gray-500 mt-1">{(track as any).gearTag || (track as any).artist}</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {isActive && isPlaying ? (
+                        <div className="flex gap-1 h-4 items-end">
+                          <div className="w-1 bg-blue-500 h-full animate-pulse" />
+                          <div className="w-1 bg-blue-500 h-2/3 animate-pulse delay-75" />
+                          <div className="w-1 bg-blue-500 h-4/5 animate-pulse delay-150" />
+                        </div>
+                      ) : isActive ? (
+                        <Play className="text-blue-500" size={16} />
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+              {playlist.length === 0 && (
+                <p className="text-gray-600 text-sm p-4">No tracks loaded — play from the player bar above.</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );

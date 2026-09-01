@@ -433,7 +433,7 @@ export function VinylPlayer() {
   else if (transportState === 'playing') displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
   else displayAngle = frozenAngleRef.current;
 
-  const PITCH_X = 660; const PITCH_Y = 130; const PITCH_LEN = 230;
+  const PITCH_X = 672; const PITCH_Y = 130; const PITCH_LEN = 230;
   const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (

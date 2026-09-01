@@ -22,7 +22,7 @@ export default function HeroVisualizer({ isSectionInView }: HeroVisualizerProps)
     >
       {/* Borderless / transparent container — visualizer canvas is incrusted
           on top of the hero background. All chrome is overlayed absolutely. */}
-      <div className="relative w-full h-[200px] sm:h-[200px] md:h-[240px] overflow-hidden bg-transparent pt-7">
+      <div className="relative w-full h-[240px] sm:h-[240px] md:h-[280px] overflow-hidden bg-transparent pt-7">
         {/* Spectrum Canvas — embedded seamlessly into the section */}
         <SpectrumCanvas
           analyserNode={analyserNode}
