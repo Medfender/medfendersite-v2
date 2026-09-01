@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useAudio } from "@/context/AudioContext";
+import { useAudioTick } from "@/lib/audio/useAudioTick";
 import { Disc3 } from "lucide-react";
 
 const EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
@@ -212,96 +213,47 @@ export default function Turntable({
     });
   }, [setPlaybackRate, rpm]);
 
-  // ─── Vinyl physics loop (rAF) — clean isolated rebuild ─────────────────────
-  // Strict isolation rules:
-  //   1. The rAF useEffect has an EMPTY dep array (mounts once).
-  //   2. The loop reads ONLY from refs — no React state, no closures.
-  //   3. Refs are kept in sync via direct assignment on every render
-  //      (NOT inside a state-driven useEffect, so it can't churn).
-  //   4. The only state write inside the loop is `setDisplayRotation`,
-  //      which the loop doesn't depend on.
+  // ─── Shared tick subscription (ADR-0001) ───────────────────────────────────
+  // The rAF lives in AudioTickController singleton. This component only
+  // subscribes via useAudioTick, applies physics to refs, and mutates the
+  // vinyl group via vinylRef.current.style.transform — zero React renders.
 
-  // Persistent physics state (refs survive re-renders).
+  // Persistent physics state + mirrors (survive re-renders, never trigger them)
   const rotationRef = useRef(0);    // current angle in degrees
   const velocityRef = useRef(0);    // current degrees-per-frame
+  const vinylRef = useRef<SVGGElement | null>(null); // rotation mutation target
 
-  // Refs mirroring React state. The rAF loop reads ONLY these.
   const isPoweredRef = useRef(isPowered);
-  const isPlayingRef = useRef(false);
-  const isPausedRef = useRef(false);
-  const currentTimeRef = useRef(0);
+  const isPlayingRef = useRef(isPlaying);
   const rpmRef = useRef<33 | 45>(33);
 
-  // Direct assignment on every render — keeps refs in sync without
-  // triggering any effect. Safe: writing to a ref doesn't cause a render.
+  // Direct assignment on every render — keeps refs in sync, zero render cost
   isPoweredRef.current = isPowered;
   isPlayingRef.current = isPlaying;
-  isPausedRef.current = false; // (no separate paused signal; transportState is authoritative)
-  currentTimeRef.current = currentTime;
   rpmRef.current = rpm;
 
-  // Single React state for the visible rotation angle. The loop writes
-  // here, but the loop itself doesn't depend on this state.
-  const [displayRotation, setDisplayRotation] = useState(0);
+  // Rotation anchor — hoisted from render body so the tick callback can reference it
+  const PCX = 215;
+  const PCY = 215;
 
-  // rAF loop — mount ONCE, never re-bound.
-  useEffect(() => {
-    let raf = 0;
-    let lastFrame = performance.now();
-    const FRAME_MS = 1000 / 60;
+  // Shared tick (ADR-0001): physics loop via controller, rotation via DOM mutation
+  useAudioTick((frame) => {
+    const powered = isPoweredRef.current;
+    const rpmRate = rpmRef.current === 45 ? 5.625 : 4.1667;
+    let targetVelocity = powered ? rpmRate : 0;
+    const lerpFactor = 0.08;
+    velocityRef.current += (targetVelocity - velocityRef.current) * lerpFactor;
+    if (!powered) {
+      velocityRef.current *= 0.96;
+      if (Math.abs(velocityRef.current) < 0.015) velocityRef.current = 0;
+    }
+    rotationRef.current = (rotationRef.current + velocityRef.current + 360) % 360;
+    if (vinylRef.current) {
+      vinylRef.current.style.transform = `rotate(${rotationRef.current}deg)`;
+      vinylRef.current.style.transformOrigin = `${PCX}px ${PCY}px`;
+    }
+  });
 
-    // Base rotation rates (degrees per frame at 60fps):
-    //   33 RPM = 360° / (60s × 60fps / 1.8) = 4.1667 deg/frame
-    //   45 RPM = 360° / (60s × 60fps / 2.45) ≈ 5.625 deg/frame
-    const RPM_33 = 4.1667;
-    const RPM_45 = 5.625;
-
-    const loop = (now: number) => {
-      // Delta-time normalization, clamped to absorb tab-switch jumps.
-      const dt = Math.min(Math.max(now - lastFrame, 1), FRAME_MS * 4) / FRAME_MS;
-      lastFrame = now;
-
-      // 1. Compute target velocity from refs only.
-      let targetVelocity = 0;
-      if (isPoweredRef.current) {
-        // Powered ON: motor always drives the platter — playing, paused,
-        // or stopped. Target = selected RPM rate. No full-stop gating here
-        // (that gates the 33/45 buttons in the UI, not the motor).
-        targetVelocity = rpmRef.current === 45 ? RPM_45 : RPM_33;
-      } else {
-        // Powered OFF: motor cuts out — platter coasts to a halt.
-        targetVelocity = 0;
-      }
-
-      // 2. Smoothly lerp current velocity toward target.
-      //    Constant lerp factor (no `* dt`) — frame-rate independent
-      //    because the rAF tick is locked to display refresh.
-      const lerpFactor = 0.08;
-      velocityRef.current += (targetVelocity - velocityRef.current) * lerpFactor;
-
-      // 3. Apply friction when powered off, so the brake is decisive
-      //    but smooth (not instant).
-      if (!isPoweredRef.current) {
-        velocityRef.current *= 0.96;
-        if (Math.abs(velocityRef.current) < 0.015) {
-          velocityRef.current = 0;
-        }
-      }
-
-      // 4. Integrate rotation. Continuous — never resets to 0.
-      rotationRef.current = (rotationRef.current + velocityRef.current * dt + 360) % 360;
-
-      // 5. Push visible angle to React state (one re-render per frame).
-      setDisplayRotation(rotationRef.current);
-
-      raf = requestAnimationFrame(loop);
-    };
-
-    raf = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  // ─── Deck-mounted Stop button logic ─────────────────────────────────────────
   // Called by the new STOP hardware button inside the turntable chassis.
   // Uses `stop()` from AudioContext so all subscribers (transportState, visualizer,
   // tonearm) react uniformly, then snaps the vinyl rotation back to 0deg.
@@ -436,7 +388,7 @@ export default function Turntable({
     };
   }, [transportState, armAngle]);
 
-  const PCX = 215; const PCY = 215; const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
+  const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
   // Top-down center of the counterweight puck. Offset slightly downward
   // from the original back-of-arm anchor so the scale tick numbers fit
@@ -465,7 +417,8 @@ export default function Turntable({
     <div className={`relative w-full max-w-[820px] mx-auto ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
       <div className="relative w-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
         <div className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)", aspectRatio: "720 / 480" }}>
-          <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block" }} aria-label="Turntable deck">
+          <div className="relative w-full overflow-hidden" style={{ aspectRatio: "720 / 480", maxHeight: "520px" }}>
+          <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block" }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
             <defs>
               <linearGradient id="anodized-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#2a2e38"/><stop offset="40%" stopColor="#1c1f28"/><stop offset="100%" stopColor="#0e1015"/></linearGradient>
               <linearGradient id="brushed-al" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#5a6070"/><stop offset="8%" stopColor="#7a8298"/><stop offset="16%" stopColor="#5a6070"/><stop offset="24%" stopColor="#7a8298"/><stop offset="32%" stopColor="#5a6070"/><stop offset="40%" stopColor="#7a8298"/><stop offset="48%" stopColor="#5a6070"/><stop offset="56%" stopColor="#7a8298"/><stop offset="64%" stopColor="#5a6070"/><stop offset="72%" stopColor="#7a8298"/><stop offset="80%" stopColor="#5a6070"/><stop offset="88%" stopColor="#7a8298"/><stop offset="96%" stopColor="#5a6070"/><stop offset="100%" stopColor="#4a5068"/></linearGradient>
@@ -521,10 +474,10 @@ export default function Turntable({
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 22} fill="none" stroke="#0a0c12" strokeWidth="6" />
             </g>
             <g
+              ref={vinylRef}
               className="vinyl-spin"
               style={{
                 transformOrigin: `${PCX}px ${PCY}px`,
-                transform: `rotate(${displayRotation}deg)`,
                 animation: "none",
                 willChange: 'transform',
               }}
@@ -928,6 +881,7 @@ export default function Turntable({
               <text x={PITCH_X} y={PITCH_Y - 6} textAnchor="middle" fontSize="6" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.8">PITCH</text>
             </g>
           </svg>
+          </div>
 
           {/* Bottom-left: Power + Play transport */}
           <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">

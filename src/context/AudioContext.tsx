@@ -4,6 +4,7 @@ import React, { createContext, useContext, useRef, useState, useCallback, useEff
 import { ToneItem } from "@/data/storeData";
 import { previewController } from "@/components/store/PresetCard";
 import { analyze } from "web-audio-beat-detector";
+import { audioTickController } from "@/lib/audio/AudioTickController";
 
 type TrackInfo = ToneItem;
 type TransportState = "stopped" | "playing" | "paused";
@@ -92,7 +93,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const isNavigatingRef = useRef<boolean>(false);
 
   // ─── ONE AUTHORITATIVE TRANSPORT STATE ─────────────────────────────────────
-  const [transportState, setTransportState] = useState<TransportState>("stopped");
+  const [transportState, setTransportStateRaw] = useState<TransportState>("stopped");
+  const setTransportState = useCallback((val: TransportState) => {
+    setTransportStateRaw(val);
+    audioTickController.setTransportState(val);
+  }, []);
   // isStopped derived — NOT a separate useState
   const isStopped = transportState === "stopped";
 
@@ -722,6 +727,11 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [tickAnalyser]);
 
   initWebAudioRef.current = initWebAudio;
+
+  // Seed the tick controller with refs after every analyser creation
+  useEffect(() => {
+    audioTickController.seedRefs(analyserRef.current, audioRef.current);
+  }, [analyserNode]);
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
