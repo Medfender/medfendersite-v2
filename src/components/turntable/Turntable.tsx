@@ -5,6 +5,8 @@ import { useAudio } from "@/context/AudioContext";
 import { useAudioTick } from "@/lib/audio/useAudioTick";
 import { Disc3 } from "lucide-react";
 
+const ARM_LAND_DELAY_MS = 1000; // headshell-gate: music waits for arm to land
+
 const EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
 
 function clean(name: string): string {
@@ -49,7 +51,10 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, currentTime } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, currentTime, audioRef } = useAudio();
+
+  // ── Movement flag (blocks parent audio play during arm swing) ───────────────
+  const isArmMovingRef = useRef(false);
 
   // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
   const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
@@ -129,58 +134,122 @@ export default function Turntable({
     }
   }, [isPlaying, isPowered, setIsPowered]);
 
-  // Power button — purely electrical toggle. No audio, no arm animation, no needle drop.
-  // Acts as the master kill switch when the table is already powered on.
+  // ── Power button (Master Rule §2) ──────────────────────────────────────────
+  // OFF  → ON  : power on; transportState stays 'stopped' (arm rests).
+  // ON   → OFF : kill switch; cut audio immediately via togglePower().
+  //   When coming from play/pause, also flip localTransport='stopped' so the
+  //   choreography effect runs the same lift→rotate→rest animation as the
+  //   stop button. (Moved below localTransport declaration to fix TDZ.)
+  // ── Cue Switch Choreography (Single Source of Truth) ───────────────────────
+  // All physical arm state — isLifted, armAngle, isLeverEngaged — is driven
+  // EXCLUSIVELY by the cue switch handler through a single useEffect that
+  // keys off `cuePhase`. No other useEffect may touch these values.
+  //
+  // cuePhase state machine:
+  //   'rest'        : arm at rest, headshell off the record
+  //   'cueing'      : OFF→ON sequence active (lift → rotate → drop)
+  //   'onDisk'      : headshell physically connected to the vinyl
+  //   'killing'     : ON→OFF sequence active (lift → rotate-to-rest)
+  type CuePhase = 'rest' | 'cueing' | 'onDisk' | 'killing';
+  const [cuePhase, setCuePhase] = useState<CuePhase>('rest');
+  const [isLifted, setIsLifted] = useState(false);
+  const [armAngle, setArmAngle] = useState(0);
+  const [isLeverEngaged, setIsLeverEngaged] = useState(false);
+
+  // Optimistic transport state — mirrors what the tonearm is physically doing
+  const [localTransport, setLocalTransport] = useState<'playing' | 'paused' | 'stopped'>('stopped');
+  const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isCueSwitchBusyRef = useRef(false); // Prevent reentrancy
+
+  // isResting is the master "tonearm is mid-animation" flag. It is true
+  // whenever the choreography is moving the arm (kill, stop, play→stop,
+  // pause→stop). The CSS transition strings key off `(isPowered || killPhase
+  // || isResting)` so the 1.2s cubic-bezier rotation and 0.4s lift are
+  // always active during an in-flight sequence — even after `isPowered`
+  // flips to false. Without this, hitting the power button from play/pause
+  // disables the CSS transition mid-flight and the arm snaps to rest.
+  const [isResting, setIsResting] = useState(false);
+
+  // Centralized tonearm rest animation — used by STOP button, Power-off, Cue-off.
+  // This is the exact animation sequence: lift → rotate to 0° → drop at rest.
+  const runRestAnimation = useCallback((audio?: HTMLAudioElement | null) => {
+    setIsResting(true);
+    setIsLifted(true);
+    setCuePhase('killing');
+    if (audio) {
+      try { audio.pause(); } catch { /* ignore */ }
+      try { audio.currentTime = 0; } catch { /* ignore */ }
+    }
+    const rotateTimer = setTimeout(() => {
+      setArmAngle(0);
+      setIsLeverEngaged(false);
+      const dropTimer = setTimeout(() => {
+        setIsLifted(false);
+        setCuePhase('rest');
+        setIsResting(false);
+      }, 1400);
+      return () => clearTimeout(dropTimer);
+    }, 200);
+    return () => clearTimeout(rotateTimer);
+  }, []);
+  useEffect(() => {
+    return () => {
+      if (playTimerRef.current) clearTimeout(playTimerRef.current);
+    };
+  }, []);
+
+  // Tracks localTransport so the choreography can detect transitions.
+  // Declared here (before the power effect) so power-off can sync it.
+  const prevLocalTransportRef = useRef<'playing' | 'stopped' | 'paused'>(localTransport);
+
+  // ── Power button (Master Rule §2) ──────────────────────────────────────────
+  // OFF  → ON  : power on; transportState stays 'stopped' (arm rests).
+  // ON   → OFF : kill switch; cut audio immediately via togglePower().
+  // When coming from play/pause, also flip localTransport='stopped' so the
+  // choreography effect runs the same lift→rotate→rest animation as the stop button.
+  // Power off uses the same lift→rotate→rest animation as the STOP button
+  // when coming from play or pause. From stop: just flip transport.
   const handlePowerButton = useCallback(() => {
     if (!isPowered) {
       setIsPowered(true);
     } else {
-      togglePower();
-    }
-  }, [isPowered, setIsPowered, togglePower]);
-
-  // Cue switch — three-state machine driven by transportState:
-  //   1. Fully powered OFF → power on + play + needle drop.
-  //   2. ON & playing or paused → power off.
-  //   3. ON & stopped → trigger play + needle drop.
-  const handleCueSwitchToggle = useCallback(() => {
-    if (!isPowered) {
-      // State 1: Off → power on, start playback, drop the needle
-      setIsPowered(true);
-      if (onTogglePlay) onTogglePlay();
-      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
-    } else if (transportState === 'stopped') {
-      // State 3: Powered on but stopped → start playback + drop needle
-      if (onTogglePlay) onTogglePlay();
-      setTimeout(() => { if (onNeedleDrop) onNeedleDrop(); }, 1000);
-    } else {
-      // State 2: Currently playing or paused → kill switch: power off
-      togglePower();
-    }
-  }, [isPowered, transportState, setIsPowered, togglePower, onTogglePlay, onNeedleDrop]);
-
-  // Power-off guard: whenever the table loses electrical power, immediately
-  // return the tonearm to its resting cradle so it never stays stranded.
-  // This fires the lift → swing-back → drop animation sequence locally,
-  // independent of the parent's transportState derivation.
-  const prevPoweredRef = useRef(isPowered);
-  const liftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    const prev = prevPoweredRef.current;
-    const curr = isPowered;
-    // Edge-triggered only: fire exclusively on true state boundary changes
-    if (prev !== curr) {
-      if (prev && !curr) {
-        // ON → OFF: master kill — cut power, kill audio, reset transport
-        // Tonearm return handled by AudioContext togglePower / stop
-      } else if (!prev && curr) {
-        // OFF → ON: restore idle / ready state — no forced playback, no arm interference
+      const audio = audioRef?.current;
+      if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
+        runRestAnimation(audio);
+        setLocalTransport('stopped');
+      } else {
+        setLocalTransport('stopped');
       }
+      togglePower();
     }
-    // Update boundary tracker only after evaluating the transition
-    prevPoweredRef.current = curr;
-  }, [isPowered]);
+  }, [isPowered, setIsPowered, togglePower, runRestAnimation, audioRef]);
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUE SWITCH — power toggle; on kill, uses rest animation.
+  // ═══════════════════════════════════════════════════════════════════════════
+  const handleCueSwitchToggle = useCallback(() => {
+    // OFF → ON: treat like play button (same mapping as handleArmClick when off)
+    if (!isPowered) {
+      setIsPowered(true);
+      setLocalTransport('playing');
+      return;
+    }
+    // ON and NOT stopped → power off (same mapping / animation as handlePowerButton kill)
+    if (localTransport !== 'stopped') {
+      const audio = audioRef?.current;
+      if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
+        runRestAnimation(audio);
+        setLocalTransport('stopped');
+      } else {
+        setLocalTransport('stopped');
+      }
+      prevLocalTransportRef.current = 'stopped';
+      if (onStop) onStop();
+      setIsPowered(false);
+    } else {
+      // ON and stopped → nothing (leave table running, don't kill)
+    }
+  }, [isPowered, setIsPowered, localTransport, runRestAnimation, audioRef, onStop]);
 
   const [rpm, setRpm] = useState<33 | 45>(33);
   const [rpmFlash, setRpmFlash] = useState(false);
@@ -261,42 +330,84 @@ export default function Turntable({
   const [stopSignal, setStopSignal] = useState(0);
   const [spinLocked, setSpinLocked] = useState(false);
 
+  // ── Stop button (Master Rule §4) ──────────────────────────────────────────
+  // OFF → no-op. ON → arm to rest; cut audio via onStop + vinyl snap.
   const handleDeckStop = useCallback(() => {
-    stop();
-    setStopSignal((n) => n + 1);
-  }, [stop]);
+    if (!isPowered) return;
+    if (onStop) onStop();
+    setLocalTransport('stopped');
+    setStopSignal((n) => n + 1);   // snap vinyl back to 0deg (lines 315-322)
+  }, [isPowered, onStop]);
 
-  // ── Tonearm click: Play from stop / Stop from play ─────────────────────────
-  // If the table is unpowered, pressing the arm powers it on and starts playback.
-  // If already powered, stopped state triggers play; playing state triggers pause/stop.
+  // ── Tonearm click: Play from stop / Stop from play or pause ───────────────
+  // Drives the choreography by flipping `localTransport` directly — the
+  // choreo useEffect keys off that state and runs the lift / rotate / drop
+  // animation, then calls the parent props (onPlay / onStop) via the
+  // cuePhase / onDisk bridge. Never call the parent props synchronously.
   const handleArmClick = useCallback(() => {
     if (!isPowered) {
+      // OFF • arm click → power on + play from stop
       setIsPowered(true);
-      if (onTogglePlay) onTogglePlay();
-    } else if (!isPlaying && currentTime === 0) {
-      // Stopped → Play: arm acts as play trigger
-      if (onTogglePlay) onTogglePlay();
+      setLocalTransport('playing');
+    } else if (localTransport === 'stopped') {
+      // STOPPED • arm click → play (full lift/rotate/drop)
+      setLocalTransport('playing');
     } else {
-      // Playing → Stop: arm acts as stop trigger
-      if (onStop) onStop();
+      // PLAYING or PAUSED • arm click → stop (full lift / rotate back to rest)
+      setLocalTransport('stopped');
     }
-  }, [isPowered, setIsPowered, isPlaying, currentTime, onTogglePlay, onStop]);
+  }, [isPowered, setIsPowered, localTransport]);
 
-  // ── Headshell click: three-state machine ───────────────────────────────────
-  //   Stopped / Idle  → Play  (drop the arm, start playback from 0)
-  //   Playing         → Pause (lift arm, hold position, no playhead reset)
-  //   Paused          → Play  (resume from current playhead)
-  // Safety: no-op when the deck is unpowered.
+  // ── Play/Pause button (sole toggle — ALWAYS flips localTransport) ─────────
+  // The button is the single user-facing command. It ONLY sets localTransport
+  // and cuePhase. It NEVER calls onPlay / onTogglePlay synchronously — those
+  // happen later, gated by the headshell-on-disk choreography, so:
+  //   - First click always works (icon flips immediately)
+  //   - Audio starts exactly when the headshell lands on the vinyl
+  //   - Subsequent clicks always flip the command (no apparent inversion)
+  //
+  // Timing rules:
+  //   Stop  → Play : 1000ms (full arm sequence: lift → rotate → drop)
+  //   Pause → Play : 400ms  (fast drop from lifted pause)
+  //   Play  → Pause: 0ms    (instant: lift arm immediately, audio.pause())
+  const handleDeckPlayPause = useCallback(() => {
+    if (!isPowered) return; // OFF → no-op
+    // Clear any pending drop timer so a rapid double-click doesn't fire a
+    // stale onPlay after the user has already flipped back to pause.
+    if (playTimerRef.current) {
+      clearTimeout(playTimerRef.current);
+      playTimerRef.current = null;
+    }
+
+    if (localTransport === 'playing') {
+      // ── PLAY → PAUSE (0ms: instant) ─────────────────────────────────
+      // Optimistic: flip icon immediately, then the choreo effect lifts
+      // the arm and calls onPause so audio actually stops.
+      setLocalTransport('paused');
+      return;
+    }
+
+    // STOP or PAUSED → PLAY. The choreo effect (below) runs the lift/rotate
+    // sequence and only calls onPlay after the headshell physically lands.
+    if (localTransport === 'paused') {
+      setLocalTransport('playing');
+    } else {
+      // 'stopped' → full lift/rotate/drop sequence
+      setLocalTransport('playing');
+    }
+  }, [isPowered, localTransport]);
+
+  // ── Headshell click: same play/pause toggle logic ──────────────────────────
   const handleHeadshellClick = useCallback(() => {
     if (!isPowered) return;
-    if (isPlaying) {
-      // Playing → Pause
-      if (onPause) onPause();
+    if (localTransport === 'playing') {
+      // PLAYING → PAUSE
+      setLocalTransport('paused');
     } else {
-      // Stopped OR Paused → Play / Resume
-      if (onTogglePlay) onTogglePlay();
+      // PAUSED / STOPPED → PLAY
+      setLocalTransport('playing');
     }
-  }, [isPowered, isPlaying, onTogglePlay, onPause]);
+  }, [isPowered, localTransport]);
 
   // Snap vinyl to 0deg whenever a stop signal fires.
   // Tracks the previous value so the effect only fires on actual increments,
@@ -311,10 +422,113 @@ export default function Turntable({
     return () => clearTimeout(t);
   }, [stopSignal]);
 
-  const [isLifted, setIsLifted] = useState(false);
-  const [armAngle, setArmAngle] = useState(0);
-  const [isLeverEngaged, setIsLeverEngaged] = useState(false);
   const [antiSkateAngle, setAntiSkateAngle] = useState(0);
+
+  // ── HIJACK: Intercept HTMLAudioElement.play() to block parent audio leaks ──
+  // CRITICAL: Music must NEVER play unless the headshell is connected to the
+  // vinyl. The Turntable sets _headshellOnDisk=true on the audio element when
+  // the headshell physically lands, and false when it lifts. This single
+  // boolean is the authoritative gate. Any audio.play() call from the parent
+  // (playTrack, togglePlay, etc.) is silently blocked until the gate opens.
+  useEffect(() => {
+    const audio = audioRef?.current || document.querySelector('audio');
+    if (audio && !(audio as any)._originalPlay) {
+      (audio as any)._originalPlay = audio.play.bind(audio);
+      (audio as any)._headshellOnDisk = false; // off until headshell lands
+      audio.play = function(): Promise<void> {
+        if (!(audio as any)._headshellOnDisk) {
+          console.log("[HeadshellGate] Play blocked: headshell not on vinyl");
+          return Promise.resolve();
+        }
+        return (audio as any)._originalPlay.apply(this, arguments);
+      };
+    }
+  }, [audioRef]);
+
+  // ── Headshell-on-vinyl gate: SINGLE AUTHORITY for audio playback ──────────
+  // Driven ONLY by `cuePhase`. The choreography useEffect sets cuePhase to
+  // 'onDisk' precisely when the headshell lands, and to 'killing' / 'rest'
+  // when it lifts. This is the single source of truth — no other code path
+  // may set _headshellOnDisk.
+  useEffect(() => {
+    const audio = audioRef?.current;
+    if (!audio) return;
+
+    const headshellOnDisk = cuePhase === 'onDisk';
+    (audio as any)._headshellOnDisk = headshellOnDisk;
+
+    if (!headshellOnDisk) {
+      // Headshell not on vinyl → force pause immediately to prevent any blip
+      try { audio.pause(); } catch { /* ignore */ }
+    }
+  }, [cuePhase, audioRef]);
+
+  // ── Headshell-onDisk event bridge → parent transport ──────────────────────
+  // The Turntable is the choreographer: when cuePhase flips to 'onDisk' the
+  // headshell has physically touched the vinyl. But the drop animation isn't
+  // finished yet (CSS transition 0.6s rotation + 0.4s lift). We MUST wait
+  // for the animation to complete before calling onPlay so music resumes
+  // exactly when the needle is visually settled in the groove.
+  const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevCuePhaseRef = useRef<CuePhase>(cuePhase);
+  useEffect(() => {
+    const prev = prevCuePhaseRef.current;
+    const curr = cuePhase;
+    if (prev === curr) return;
+    prevCuePhaseRef.current = curr;
+
+    // Clear any pending drop timer (defensive — rapid clicks)
+    if (dropTimerRef.current) {
+      clearTimeout(dropTimerRef.current);
+      dropTimerRef.current = null;
+    }
+
+    if (curr === 'onDisk' && prev !== 'onDisk') {
+      // Headshell physically on vinyl, but drop animation still in progress.
+      // Wait 650ms (longest CSS transition 0.6s + margin) before resuming.
+      dropTimerRef.current = setTimeout(() => {
+        dropTimerRef.current = null;
+        if (onPlay) onPlay();
+        else if (onTogglePlay) onTogglePlay();
+      }, 650);
+    } else if (curr === 'killing' && prev === 'onDisk') {
+      // Headshell lifted from disk → pause audio immediately (don't wait)
+      if (onPause) onPause();
+    } else if (curr === 'rest' && (prev === 'onDisk' || prev === 'killing')) {
+      // Arm returned to rest → ensure parent is stopped
+      if (dropTimerRef.current) {
+        clearTimeout(dropTimerRef.current);
+        dropTimerRef.current = null;
+      }
+      if (onStop) onStop();
+    }
+  }, [cuePhase, onPlay, onPause, onStop, onTogglePlay]);
+
+  // ── Tonearm Gate Timer Cleanup ─────────────────────────────────────────────
+  // Only handles cleanup when power/state changes. The Cue Switch (handleCueSwitchToggle)
+  // is the SOLE AUTHORITY for audio timing during arm swing. No competing gates allowed.
+  const gateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (gateTimerRef.current) clearTimeout(gateTimerRef.current);
+      if (dropTimerRef.current) clearTimeout(dropTimerRef.current);
+      isArmMovingRef.current = false; // Unmount: release any block
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPowered && gateTimerRef.current) {
+      clearTimeout(gateTimerRef.current);
+      gateTimerRef.current = null;
+      isArmMovingRef.current = false; // Power off: release any block
+    }
+    if (localTransport === 'stopped' && gateTimerRef.current) {
+      clearTimeout(gateTimerRef.current);
+      gateTimerRef.current = null;
+      isArmMovingRef.current = false;
+    }
+  }, [isPowered, localTransport]);
 
   const handleAntiSkateMouseDown = useCallback((e: React.MouseEvent<SVGGElement>) => {
     e.preventDefault();
@@ -346,47 +560,141 @@ export default function Turntable({
     window.addEventListener('mouseup', handleUp);
   }, []);
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUE SWITCH CHOREOGRAPHY — drives arm animation from localTransport state.
+  // This is the SOLE AUTHORITY for isLifted, armAngle, cuePhase, and
+  // _headshellOnDisk. It runs when localTransport changes and determines the
+  // correct animation sequence.
+  //
+  // Key rules:
+  //   'stopped' → 'playing' : lift → rotate → drop (1000ms total)
+  //   'paused'  → 'playing' : lift → drop  (400ms — arm already at disk)
+  //   'playing' → 'paused'  : lift immediately (0ms)
+  //   'playing' → 'stopped' : lift → rotate back to rest
+  //
+  // Audio playback (onPlay) is called ONLY when cuePhase transitions to 'onDisk'.
+  // The _headshellOnDisk flag is set HERE and only HERE — no other writes.
+  // Kill-phase timer logic removed — rest animation is now centralized in
+  // runRestAnimation() called directly by handlePowerButton and handleCueSwitchToggle.
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CUE SWITCH CHOREOGRAPHY — drives arm animation from localTransport state.
+  // This is the SOLE AUTHORITY for isLifted, armAngle, cuePhase, and
+  // _headshellOnDisk. It runs when localTransport changes and determines the
+  // correct animation sequence.
+  //
+  // Key rules:
+  //   'stopped' → 'playing' : lift → rotate → drop (1000ms total)
+  //   'paused'  → 'playing' : lift → drop  (400ms — arm already at disk)
+  //   'playing' → 'paused'  : lift immediately (0ms)
+  //   'playing' → 'stopped' : lift → rotate back to rest
+  //   'paused'  → 'stopped' : lift → rotate back to rest
+  //
+  // Audio playback (onPlay) is called ONLY when cuePhase transitions to 'onDisk'.
+  // The _headshellOnDisk flag is set HERE and only HERE — no other writes.
+  // ═══════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    let timer1: ReturnType<typeof setTimeout>;
-    let timer2: ReturnType<typeof setTimeout>;
+    let dropTimer: ReturnType<typeof setTimeout> | undefined;
+    let rotateTimer: ReturnType<typeof setTimeout> | undefined;
 
-    if (transportState === 'playing') {
-      if (armAngle === 0) {
-        // 1. Coming from STOP: Engage lever, lift arm, swing, drop
-        setIsLeverEngaged(true);
-        setIsLifted(true);
-        timer1 = setTimeout(() => {
-          setArmAngle(38);
-          timer2 = setTimeout(() => setIsLifted(false), 600);
-        }, 400);
-      } else {
-        // 2. Coming from PAUSE: Lever stays engaged. Just drop the needle.
-        setIsLifted(false);
+    const prev = prevLocalTransportRef.current;
+    const curr = localTransport;
+
+    // Only react to actual localTransport changes — skip initial mount
+    if (prev === curr) {
+      return;
+    }
+
+    const audio = audioRef?.current;
+
+    // ── PLAY → PAUSE (localTransport: 'playing' → 'paused') ────────────────
+    if (prev === 'playing' && curr === 'paused') {
+      // Immediate lift → cuePhase goes to 'killing' → headshell effect sets
+      // _headshellOnDisk=false and pauses audio.
+      setIsLifted(true);
+      setCuePhase('killing');
+      prevLocalTransportRef.current = curr;
+      return;
+    }
+
+    // ── STOP → PLAY (localTransport: 'stopped' → 'playing') ─────────────────
+    // Full sequence: lift → rotate → drop (1000ms). The headshell effect
+    // fires onPlay when cuePhase becomes 'onDisk'.
+    if (prev === 'stopped' && curr === 'playing') {
+      if (audio) {
+        (audio as any)._gagged = true;
+        audio.muted = true;
+        audio.playbackRate = 0;
       }
-    }
-    else if (transportState === 'paused') {
-      console.log("Tonearm State Update ->", { transportState, isStopped: false, isPowered, armAngle, action: 'paused-on-record' });
-      // 3. Paused: Tonearm freezes at current angle (does NOT return to park)
-      //    and lifts off the record. Lever is left UNDISTURBED — pause does
-      //    not flip the cue switcher. Lever only resets on stop / power off.
-      setIsLifted(true);
-    }
-    else if (transportState === 'stopped') {
-      console.log("Tonearm State Update ->", { transportState, isStopped: true, isPowered, armAngle, action: 'resting' });
-      // 4. Stopped: Disengage lever, lift arm, swing back, drop
-      setIsLeverEngaged(false);
-      setIsLifted(true);
-      timer1 = setTimeout(() => {
-        setArmAngle(0);
-        timer2 = setTimeout(() => setIsLifted(false), 600);
-      }, 400);
+      setIsLifted(true);              // 1. Lift FIRST (prevent scratch)
+      setIsLeverEngaged(true);
+      setCuePhase('cueing');
+      rotateTimer = setTimeout(() => {
+        setArmAngle(38);             // 2. Rotate to disk (while lifted)
+        dropTimer = setTimeout(() => {
+          setIsLifted(false);        // 3. DROP needle
+          setCuePhase('onDisk');     // → headshell effect fires onPlay()
+          if (audio) {
+            (audio as any)._gagged = false;
+            audio.muted = false;
+            audio.playbackRate = 1;
+          }
+        }, 400);
+      }, 600);
+      prevLocalTransportRef.current = curr;
+      return;
     }
 
+    // ── PAUSE → PLAY (localTransport: 'paused' → 'playing') ─────────────────
+    // From paused: arm is at disk angle (lifted). Must lift slightly, drop.
+    // Music must stay PAUSED during lift — only resume when headshell lands.
+    if (prev === 'paused' && curr === 'playing') {
+      if (audio) {
+        (audio as any)._armMoving = true; // arm is moving → block stray play()
+        try { audio.pause(); } catch { /* ignore */ }
+      }
+      isArmMovingRef.current = true;
+      setIsLifted(true);              // lift (prepare for drop)
+      setIsLeverEngaged(true);
+      setCuePhase('cueing');
+      dropTimer = setTimeout(() => {
+        setIsLifted(false);           // DROP needle — headshell touches vinyl
+        setCuePhase('onDisk');        // → headshell effect fires onPlay()
+        isArmMovingRef.current = false;
+        if (audio) {
+          (audio as any)._armMoving = false;
+          (audio as any)._gagged = false;
+          audio.muted = false;       // un-gag: headshell is on disk → allowed
+          audio.playbackRate = 1;
+        }
+      }, 400);
+      prevLocalTransportRef.current = curr;
+      return;
+    }
+
+    // ── PAUSED → STOP (localTransport: 'paused' → 'stopped') ────────────────
+    // From paused the arm is at the disk (lifted at 38°). Lift, swing back
+    // to rest, then drop at rest.
+    if (prev === 'paused' && curr === 'stopped') {
+      runRestAnimation(audio);
+      prevLocalTransportRef.current = curr;
+      return;
+    }
+
+    // ── PLAY → STOP (localTransport: 'playing' → 'stopped') ─────────────────
+    // Lift arm and rotate back to rest cradle.
+    if (prev === 'playing' && curr === 'stopped') {
+      runRestAnimation(audio);
+      prevLocalTransportRef.current = curr;
+      return;
+    }
+
+    prevLocalTransportRef.current = curr;
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
+      clearTimeout(dropTimer);
+      clearTimeout(rotateTimer);
     };
-  }, [transportState, armAngle]);
+  }, [localTransport, audioRef]);
 
   const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
   const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
@@ -406,7 +714,7 @@ export default function Turntable({
   }, [transportState, currentProgress]);
 
   let displayAngle: number;
-  if (transportState === 'stopped') displayAngle = PARK_ANGLE;
+  if (transportState === 'stopped' || (!isPowered && !isResting)) displayAngle = PARK_ANGLE;
   else if (transportState === 'playing') displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
   else displayAngle = frozenAngleRef.current;
 
@@ -669,9 +977,9 @@ export default function Turntable({
               </g>
 
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
-              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: 'transform 0.4s ease-in-out, filter 0.4s ease-in-out' }}>
+              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 0.4s ease-in-out, filter 0.4s ease-in-out' : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g id="tonearm-assembly" style={{ transform: `rotate(${transportState === 'stopped' ? 0 : armAngle}deg)`, transformOrigin: '490px 75px', transition: 'transform 0.6s cubic-bezier(0.34, 1.1, 0.64, 1)' }}>
+                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform 1.2s cubic-bezier(0.34, 1.1, 0.64, 1)' : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">
@@ -900,14 +1208,14 @@ export default function Turntable({
               <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
             </div>
             <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-              <button onClick={isPowered ? onTogglePlay : undefined} aria-label={transportState === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: transportState === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
-                {transportState === 'playing' ? (
+              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+                {localTransport === 'playing' ? (
                   <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                 ) : (
                   <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
                 )}
               </button>
-              <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{transportState === 'playing' ? "Pause" : "Play"}</span>
+              <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{localTransport === 'playing' ? "Pause" : "Play"}</span>
             </div>
           </div>
 
