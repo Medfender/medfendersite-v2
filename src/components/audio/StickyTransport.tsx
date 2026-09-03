@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
@@ -92,6 +92,7 @@ export default function StickyTransport() {
   // previous one and only animates when state actually changes.
   const [isHidden, setIsHidden] = useState(false);
   const [miniMode, setMiniMode] = useState<"bars" | "curve" | "waveform">("bars");
+  const [vinylVisible, setVinylVisible] = useState(false);
 
   useEffect(() => {
     let lastY = typeof window !== "undefined" ? window.scrollY : 0;
@@ -113,15 +114,15 @@ export default function StickyTransport() {
       if (currentY <= 16) {
         // Always show when at the very top of the page
         setIsHidden(false);
-      } else if (distanceFromBottom <= HIDE_NEAR_BOTTOM_PX) {
-        // Near the very bottom of the page → hide
+      } else if (vinylVisible) {
+        // Inside Vinyl Showcase section → hide
         setIsHidden(true);
       } else if (currentY < lastY - 4) {
         // Scrolling UP → reveal the bar
         setIsHidden(false);
       } else if (currentY > lastY + 4) {
-        // Scrolling DOWN mid-page → keep visible (don't surprise the user by
-        // hiding while they read). Hide only at the bottom (handled above).
+        // Scrolling DOWN outside vinyl showcase → show (bar re-appears past it)
+        setIsHidden(false);
       }
 
       lastY = currentY;
@@ -141,6 +142,20 @@ export default function StickyTransport() {
       window.removeEventListener("resize", onScroll);
       if (rafId) cancelAnimationFrame(rafId);
     };
+  }, []);
+
+  // ── Vinyl Showcase observer: bar hides when inside vinyl, shows after ─────
+  const vinylRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = document.getElementById("vinyl-showcase-section");
+    if (!el) return;
+    const obs = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        setVinylVisible(e.isIntersecting);
+      }
+    }, { threshold: 0.01 });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   // ── Resolve thumbnail src for the active track (amber-stroked cover) ────

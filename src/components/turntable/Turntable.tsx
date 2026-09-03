@@ -454,6 +454,17 @@ export default function Turntable({
 
   const [antiSkateAngle, setAntiSkateAngle] = useState(0);
 
+  // When playlist selects a track, trigger choreography through turntable (master)
+  const prevCurrentTrackRef = useRef(currentTrack);
+  useEffect(() => {
+    const prev = prevCurrentTrackRef.current;
+    const curr = currentTrack;
+    prevCurrentTrackRef.current = curr;
+    if (curr && prev !== curr && isPowered && localTransport === 'stopped') {
+      setLocalTransport('playing');
+    }
+  }, [currentTrack, isPowered, localTransport]);
+
   // ── HIJACK: Intercept HTMLAudioElement.play() to block parent audio leaks ──
   // CRITICAL: Music must NEVER play unless the headshell is connected to the
   // vinyl. The Turntable sets _headshellOnDisk=true on the audio element when

@@ -91,7 +91,7 @@ export default function AudioClient() {
         </section>
 
         {/* ── Section 4: Vinyl Showcase ─────────────────────────────────────── */}
-        <section className="w-full">
+        <section id="vinyl-showcase-section" className="w-full">
           <VinylShowcase />
         </section>
 
