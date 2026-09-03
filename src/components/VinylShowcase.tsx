@@ -1,178 +1,47 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
+import React, { useState } from "react";
+import { Play } from "lucide-react";
 import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 import { useAudio } from "@/context/AudioContext";
 import SpectrumCanvas from "@/components/visualizer/SpectrumCanvas";
 import type { VisualizerMode } from "@/lib/visualizer/visualizerRenderers";
+import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
 
+/**
+ * Vinyl Showcase — pure listening/visual showcase section.
+ * No duplicate transport: play/pause/stop/prev/next are owned by
+ * StickyTransport (the fixed bottom dock). Clicking a track here
+ * loads it onto the master turntable pipeline; the docked bar
+ * reflects the change.
+ */
 export default function VinylShowcase() {
   const {
-    transportState,
-    isPowered,
-    isPlaying,
-    togglePlay,
-    playNext,
-    playPrevious,
-    seek,
-    currentTime,
-    duration,
-    volume,
-    setVolume,
-    isMuted,
-    toggleMute,
     playlist,
     activeTrack,
-    analyserNode,
-    setPlaybackRate,
+    isPlaying,
     audioRef,
-    setIsPlaying,
     setActiveTrack,
-    pause,
     ensureAudioContext,
-    currentBpm,
-    setCurrentBpm,
-    analyzeTrackBpm,
-    stop: ctxStop,
-    togglePower,
+    analyserNode,
   } = useAudio();
 
-  const [pitch, setPitch] = useState<number>(0);
-  const [visMode, setVisMode] = useState<VisualizerMode>("bars");
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+  const [visMode, setVisMode] = useState<VisualizerMode>("curve");
   const [visTheme, setVisTheme] = useState<ColorTheme>("cyan");
 
-  // ── Pitch → playbackRate ─────────────────────────────────────────────────
-  useEffect(() => {
-    setPlaybackRate(1 + pitch / 100);
-  }, [pitch, setPlaybackRate]);
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-  const fmt = (sec: number) => {
-    if (isNaN(sec) || !isFinite(sec) || !sec) return "0:00";
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    seek(Number(e.target.value));
-  };
-
-  const handleVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setVolume(Number(e.target.value));
-  };
-
-  // Click outside closes the volume popover
-  useEffect(() => {
-    if (!showVolumeSlider) return;
-    const onDocClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-volume-popover]')) return;
-      setShowVolumeSlider(false);
-    };
-    document.addEventListener('click', onDocClick);
-    return () => document.removeEventListener('click', onDocClick);
-  }, [showVolumeSlider]);
-
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
-
-  // ── Track info from context ───────────────────────────────────────────────
-  const trackName =
-    (activeTrack as any)?.name || (activeTrack as any)?.title || "No track selected";
-  const trackArtist = (activeTrack as any)?.gearTag || (activeTrack as any)?.artist || "—";
-
-  // ── Prev handler ─────────────────────────────────────────────────────────
-  const handlePrev = () => {
-    if (!playlist || playlist.length === 0) return;
-
-    if (currentTime > 3) {
-      seek(0);
-      return;
-    }
-
-    const curIdx = playlist.findIndex((t: any) => (t as any)?.id === (activeTrack as any)?.id);
-    const prevIdx = (curIdx - 1 + playlist.length) % playlist.length;
-    const track = playlist[prevIdx] as any;
-    const wasPlaying = transportState === "playing";
-
-    if (audioRef.current) {
-      const rawSrc = track?.url || track?.audioUrl || track?.src;
-      if (rawSrc) {
-        const clean = rawSrc.startsWith("http")
-          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
-          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
-        audioRef.current.src = encodeURI(decodeURIComponent(clean));
-        audioRef.current.currentTime = 0;
-        audioRef.current.load();
-      }
-    }
-    setActiveTrack(track);
-
-    if (wasPlaying) {
-      if (ensureAudioContext) ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err));
-      if (audioRef.current) audioRef.current.play().catch((err: unknown) => {
-        if ((err as Error)?.name !== 'AbortError') console.error('[VinylShowcase] Prev play error:', err);
-      });
-    } else {
-      if (audioRef.current) audioRef.current.pause();
-    }
-  };
-
-  // ── Next handler ───────────────────────────────────────────────────────────
-  const handleNext = () => {
-    if (!playlist || playlist.length === 0) return;
-    const curIdx = playlist.findIndex((t: any) => (t as any)?.id === (activeTrack as any)?.id);
-    const nextIdx = (curIdx + 1) % playlist.length;
-    const track = playlist[nextIdx] as any;
-
-    if (audioRef.current) {
-      const rawSrc = track?.url || track?.audioUrl || track?.src;
-      if (rawSrc) {
-        const clean = rawSrc.startsWith("http")
-          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
-          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
-        audioRef.current.src = encodeURI(decodeURIComponent(clean));
-        audioRef.current.currentTime = 0;
-        audioRef.current.load();
-      }
-    }
-    setActiveTrack(track);
-    if (ensureAudioContext) ensureAudioContext().catch((err: unknown) => console.error("AudioContext resume failed:", err));
-    if (audioRef.current) {
-      audioRef.current.play().catch((err: unknown) => {
-        if ((err as Error)?.name !== 'AbortError') console.error('[VinylShowcase] Skip play error:', err);
-      });
-    }
-  };
-
-  // ── Play/Pause button ─────────────────────────────────────────────────────
-  // transportState is the single authoritative state. No local state needed.
-  const handleTogglePlay = () => {
-    togglePlay();
-  };
-
-  // ── Stop button ───────────────────────────────────────────────────────────
-  const handleStop = () => {
-    ctxStop();
-  };
-
-  // ── Power toggle ──────────────────────────────────────────────────────────
-  const handleTogglePower = () => {
-    togglePower();
-  };
-
-  // ── Playlist select ───────────────────────────────────────────────────────
+  // ── Playlist select: loads onto master pipeline (no local play/stop) ────
   const handlePlaylistSelect = (track: any) => {
-    const wasStopped = transportState === 'stopped' || (!isPlaying && currentTime === 0);
     const rawSrc = track?.url || track?.audioUrl || track?.src;
     if (audioRef.current) {
       if (rawSrc) {
         try {
-          const clean = decodeURIComponent(rawSrc.startsWith("http")
-            ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
-            : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`);
+          const clean = decodeURIComponent(
+            rawSrc.startsWith("http")
+              ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
+              : rawSrc.startsWith("/")
+                ? rawSrc
+                : `/${rawSrc}`
+          );
           const encoded = encodeURI(clean);
           const currentPath = audioRef.current.src
             ? new URL(audioRef.current.src).pathname
@@ -187,244 +56,184 @@ export default function VinylShowcase() {
         }
       }
     }
-    if (ensureAudioContext) ensureAudioContext().catch((err: unknown) =>
+    setActiveTrack(track);
+    ensureAudioContext?.().catch((err: unknown) =>
       console.error("AudioContext resume failed:", err)
     );
-    if (audioRef.current) {
-      audioRef.current.play().catch((err: unknown) => {
-        if ((err as Error)?.name !== 'AbortError') {
-          console.error("[VinylShowcase] Playlist selection play error:", err);
-        }
-      });
-    }
-    setIsPlaying(true);
-    setActiveTrack(track);
-    // Auto-play tonearm: if the deck was fully stopped, trigger the play
-    // sequence so the tonearm drops and the needle lands on the record.
-    if (wasStopped) handleTogglePlay();
-    if (rawSrc) {
-      const clean = rawSrc.startsWith("http")
-        ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
-        : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
-      const audioSrc = encodeURI(decodeURIComponent(clean));
-      setCurrentBpm(null);
-      analyzeTrackBpm(audioSrc);
-    }
   };
 
-  // ── BPM ───────────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (isPowered && isPlaying && activeTrack) {
-      const rawSrc = (activeTrack as any)?.url || (activeTrack as any)?.audioUrl || (activeTrack as any)?.src;
-      if (rawSrc) {
-        const clean = rawSrc.startsWith("http")
-          ? rawSrc.replace(/^https?:\/\/[^/]+/, "")
-          : rawSrc.startsWith("/") ? rawSrc : `/${rawSrc}`;
-        const audioSrc = encodeURI(decodeURIComponent(clean));
-        analyzeTrackBpm(audioSrc);
-      }
-    }
-  }, [isPowered, isPlaying, activeTrack, analyzeTrackBpm]);
-
-  const bpm = (isPowered && isPlaying) ? (currentBpm ?? 0) : 0;
-
-  // ── Render ───────────────────────────────────────────────────────────────
   return (
-    <section className="w-full bg-[#111111] py-8 text-gray-300 font-sans border-y border-gray-900">
-      <header className="text-center mb-6 px-4">
-        <h2 className="text-3xl font-extrabold tracking-widest text-white mb-2 uppercase">
-          Featured Vinyl Showcase
+    <section className="w-full bg-[#111111] py-14 md:py-18 text-gray-300 font-sans border-y border-white/[0.04]">
+      <header className="max-w-7xl mx-auto px-4 md:px-6 mb-8">
+        <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
+          Tactile Listening
         </h2>
-        <p className="text-gray-400 text-lg">
-          A tactile listening experience. Select a track, drop the needle, and watch the vinyl spin.
+        <p className="mt-1 text-2xl md:text-3xl font-bold text-white tracking-tight">
+          Vinyl Showcase
+        </p>
+        <p className="mt-2 text-sm text-neutral-400 max-w-2xl">
+          Pick a side. The spectrum pulses in real time, the master turntable spins
+          above, and the docked bar takes over for transport.
         </p>
       </header>
 
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-start px-6">
-        {/* ── Left Column: Transport + Spectrum ─────────────────────────── */}
-        <div className="flex flex-col gap-10">
-
-          {/* Transport + Progress */}
-          <div className="flex items-center gap-3 bg-[#1a1a1a] p-6 rounded-2xl border border-gray-800">
-            <button onClick={handlePrev} className="text-gray-400 hover:text-white transition-colors">
-              <SkipBack size={24} />
-            </button>
-            <button
-              onClick={handleTogglePlay}
-              className="w-11 h-11 flex-shrink-0 flex items-center justify-center rounded-full text-white hover:bg-white/10 hover:text-cyan-300 transition-colors"
-            >
-              {transportState === "playing" ? <Pause size={24} /> : <Play className="ml-1" size={24} />}
-            </button>
-            <button
-              onClick={handleStop}
-              aria-label="Stop"
-              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
-              title="Stop"
-            >
-              <Square className="w-5 h-5 fill-current" />
-            </button>
-            <button onClick={handleNext} className="text-gray-400 hover:text-white transition-colors">
-              <SkipForward size={24} />
-            </button>
-
-            {/* Progress Bar */}
-            <div className="flex-1 flex items-center gap-4 ml-4">
-              <span className="text-xs font-mono">{fmt(currentTime)}</span>
-              <div className="flex-1 h-1 bg-gray-700 rounded-full relative cursor-pointer">
-                <div
-                  className="absolute top-0 left-0 h-full bg-blue-500 rounded-full transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 100}
-                  value={currentTime || 0}
-                  onChange={handleSeek}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  aria-label="Seek"
-                />
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow transition-all"
-                  style={{ left: `calc(${progress}% - 6px)` }}
-                />
+      <div className="max-w-7xl mx-auto px-4 md:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* ── Left: Live Spectrum ─────────────────────────────────────── */}
+        <div className="rounded-2xl bg-[#0a0a0a] border border-white/[0.06] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs tracking-[0.3em] text-neutral-500 font-semibold uppercase">
+              Real-Time Spectrum
+            </h3>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-neutral-900 rounded-md p-0.5 border border-white/[0.06]">
+                {(["bars", "curve"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setVisMode(m)}
+                    className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
+                      visMode === m
+                        ? "bg-cyan-500/20 text-cyan-300"
+                        : "text-neutral-500 hover:text-neutral-300"
+                    }`}
+                    aria-label={`Switch to ${m} mode`}
+                    aria-pressed={visMode === m}
+                  >
+                    {m === "curve" ? "Curve" : "Bars"}
+                  </button>
+                ))}
               </div>
-              <span className="text-xs font-mono">{fmt(duration)}</span>
-            </div>
-
-            {/* Volume */}
-            <div className="relative flex items-center gap-2" data-volume-popover>
-              <button
-                onClick={() => setShowVolumeSlider((v) => !v)}
-                aria-label={showVolumeSlider ? "Hide volume slider" : "Show volume slider"}
-                aria-expanded={showVolumeSlider}
-                className={`transition-colors ml-2 ${showVolumeSlider ? "text-cyan-400" : "text-gray-400 hover:text-white"}`}
-                title={showVolumeSlider ? "Hide volume slider" : "Show volume slider"}
-              >
-                {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-              </button>
-
-              <div
-                className={`absolute bottom-full right-0 mb-3 flex items-center gap-3 px-4 py-3 rounded-xl bg-[#181818]/95 border border-cyan-500/20 backdrop-blur-xl shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-out origin-bottom-right whitespace-nowrap ${
-                  showVolumeSlider ? "opacity-100 translate-y-0 scale-100 pointer-events-auto" : "opacity-0 translate-y-2 scale-95 pointer-events-none"
-                }`}
-              >
-                <input
-                  type="range" min="0" max="1" step="0.01"
-                  value={volume}
-                  onChange={handleVolume}
-                  className="w-28 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0"
-                  aria-label="Volume"
-                />
-                <span className="text-[10px] font-mono text-neutral-400 tabular-nums w-7 text-right">{Math.round(volume * 100)}</span>
-                <button
-                  onClick={toggleMute}
-                  aria-label={isMuted ? "Unmute" : "Mute"}
-                  className={`transition-colors flex items-center justify-center w-6 h-6 rounded-full ${isMuted ? "text-red-400 bg-red-400/10" : "text-cyan-400 hover:text-white"}`}
-                  title={isMuted ? "Unmute" : "Mute"}
-                >
-                  {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Spectrum Analyzer */}
-          <div className="bg-[#1a1a1a] p-6 rounded-2xl border border-gray-800 mt-2">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xs tracking-widest text-gray-500 font-semibold uppercase">Real-Time Spectrum Analyzer</h3>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] text-gray-600 hidden md:inline">PEAK HOLD | LOGARITHMIC</span>
-                <div className="flex items-center gap-1 bg-neutral-900 rounded-md p-0.5 border border-gray-800">
-                  {(["bars", "curve"] as const).map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setVisMode(m)}
-                      className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded transition-colors ${
-                        visMode === m
-                          ? "bg-blue-600 text-white"
-                          : "text-gray-500 hover:text-gray-300"
-                      }`}
-                      aria-label={`Switch to ${m} mode`}
-                    >
-                      {m === "curve" ? "Wave" : m}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex items-center gap-2 ml-2">
-                  {(
-                    [
-                      { theme: "cyan" as ColorTheme, label: "Cyan / Blue", colorClass: "bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.6)]" },
-                      { theme: "neon" as ColorTheme, label: "Red / Neon", colorClass: "bg-rose-500 shadow-[0_0_4px_rgba(244,63,94,0.6)]" },
-                      { theme: "emerald" as ColorTheme, label: "Green / Emerald", colorClass: "bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.6)]" },
-                    ] as const
-                  ).map(({ theme, label, colorClass }) => (
-                    <button
-                      key={theme}
-                      onClick={() => setVisTheme(theme)}
-                      aria-label={label + " theme"}
-                      title={label}
-                      className={`w-4 h-4 rounded-full ${colorClass} border-2 border-neutral-700 transition-all duration-200 hover:scale-110 ${visTheme === theme ? "ring-2 ring-white ring-offset-1 ring-offset-neutral-900 scale-110" : "opacity-50 hover:opacity-100"}`}
-                    />
-                  ))}
-                </div>
+                {(
+                  [
+                    { theme: "cyan" as ColorTheme, label: "Cyan", colorClass: "bg-sky-400 shadow-[0_0_4px_rgba(56,189,248,0.6)]" },
+                    { theme: "neon" as ColorTheme, label: "Red", colorClass: "bg-rose-500 shadow-[0_0_4px_rgba(244,63,94,0.6)]" },
+                    { theme: "emerald" as ColorTheme, label: "Green", colorClass: "bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.6)]" },
+                  ] as const
+                ).map(({ theme, label, colorClass }) => (
+                  <button
+                    key={theme}
+                    onClick={() => setVisTheme(theme)}
+                    aria-label={`${label} theme`}
+                    title={label}
+                    className={`w-4 h-4 rounded-full ${colorClass} border border-neutral-700 transition-all duration-200 hover:scale-110 ${
+                      visTheme === theme ? "ring-2 ring-white ring-offset-1 ring-offset-neutral-900 scale-110" : "opacity-50 hover:opacity-100"
+                    }`}
+                  />
+                ))}
               </div>
             </div>
-            <div className="w-full h-24 relative">
-              <SpectrumCanvas
-                analyserNode={analyserNode}
-                isPlaying={isPlaying}
-                mode={visMode}
-                theme={visTheme || "cyan"}
-                className="w-full h-full block"
-              />
-            </div>
           </div>
+          <div className="w-full h-40 relative">
+            <SpectrumCanvas
+              analyserNode={analyserNode}
+              isPlaying={isPlaying}
+              mode={visMode}
+              theme={visTheme}
+              className="w-full h-full block"
+            />
+          </div>
+          <p className="mt-3 text-[10px] font-mono text-neutral-600 uppercase tracking-[0.2em]">
+            Logarithmic · 48 bars · peak hold
+          </p>
         </div>
 
-        {/* ── Right Column: Playlist ─────────────────────────────────────── */}
-        <div className="flex flex-col gap-8">
-          {/* Playlist */}
-          <div>
-            <h3 className="text-sm tracking-widest text-gray-500 mb-4 font-semibold uppercase">Playlist</h3>
-            <div className="flex flex-col gap-2">
-              {playlist.map((track) => {
-                const isActive = (activeTrack as any)?.id === track.id;
-                return (
-                  <div
-                    key={track.id}
-                    onClick={() => handlePlaylistSelect(track)}
-                    className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-colors ${
-                      isActive ? "bg-[#1a1a1a] border border-blue-900/30" : "hover:bg-gray-800/50"
-                    }`}
-                  >
-                    <div>
-                      <h4 className={`font-semibold ${isActive ? "text-blue-400" : "text-gray-200"}`}>
-                        {(track as any).name || (track as any).title || "Untitled"}
-                      </h4>
-                      <p className="text-xs text-gray-500 mt-1">{(track as any).gearTag || (track as any).artist}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {isActive && isPlaying ? (
-                        <div className="flex gap-1 h-4 items-end">
-                          <div className="w-1 bg-blue-500 h-full animate-pulse" />
-                          <div className="w-1 bg-blue-500 h-2/3 animate-pulse delay-75" />
-                          <div className="w-1 bg-blue-500 h-4/5 animate-pulse delay-150" />
-                        </div>
-                      ) : isActive ? (
-                        <Play className="text-blue-500" size={16} />
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
-              {playlist.length === 0 && (
-                <p className="text-gray-600 text-sm p-4">No tracks loaded — play from the player bar above.</p>
-              )}
-            </div>
+        {/* ── Right: Playlist Grid ─────────────────────────────────────── */}
+        <div className="rounded-2xl bg-[#0a0a0a] border border-white/[0.06] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xs tracking-[0.3em] text-neutral-500 font-semibold uppercase">
+              Tracklist
+            </h3>
+            <span className="text-[10px] font-mono text-neutral-600">
+              {playlist.length} tracks
+            </span>
           </div>
+          <div className="flex flex-col gap-1.5 max-h-[260px] overflow-y-auto pr-1">
+            {playlist.map((track) => {
+              const isActive = (activeTrack as any)?.id === track.id;
+              return (
+                <ShowcaseRow
+                  key={track.id}
+                  track={track}
+                  isActive={isActive}
+                  isPlaying={isPlaying}
+                  onClick={() => handlePlaylistSelect(track)}
+                />
+              );
+            })}
+            {playlist.length === 0 && (
+              <p className="text-neutral-600 text-xs p-4 text-center">
+                No tracks loaded.
+              </p>
+            )}
+          </div>
+          <p className="mt-4 text-[10px] font-mono text-neutral-600 uppercase tracking-[0.2em] text-center">
+            Transport handled by docked bar player
+          </p>
         </div>
       </div>
     </section>
+  );
+}
+
+// ── Per-row component so each row resolves its own thumbnail without forcing
+//    the whole list to re-render when the active track changes ──
+function ShowcaseRow({
+  track,
+  isActive,
+  isPlaying,
+  onClick,
+}: {
+  track: any;
+  isActive: boolean;
+  isPlaying: boolean;
+  onClick: () => void;
+}) {
+  const coverSrc = useResolvedThumbnail(track);
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center justify-between gap-3 p-3 rounded-lg text-left transition-all group w-full ${
+        isActive
+          ? "bg-cyan-500/[0.06] border border-cyan-500/30"
+          : "hover:bg-white/[0.03] border border-transparent"
+      }`}
+      aria-label={`Select ${(track as any).name || (track as any).title}`}
+      aria-pressed={isActive}
+    >
+      <div
+        className="relative shrink-0 rounded-md overflow-hidden border border-amber-500/40 bg-[#0e0e12]"
+        style={{ width: 36, height: 36, boxShadow: isActive ? "0 0 8px rgba(245,158,11,0.5)" : "0 0 4px rgba(245,158,11,0.2)" }}
+        aria-hidden
+      >
+        {coverSrc ? (
+          <img src={coverSrc} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="w-2 h-2 rounded-full bg-amber-500/40" />
+          </div>
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <h4 className={`text-sm font-semibold truncate ${isActive ? "text-cyan-300" : "text-neutral-200"}`}>
+          {(track as any).name || (track as any).title || "Untitled"}
+        </h4>
+        <p className="text-[10px] text-neutral-500 truncate mt-0.5 font-mono">
+          {(track as any).gearTag || (track as any).artist}
+        </p>
+      </div>
+      <div className="flex items-center gap-3 ml-1 shrink-0">
+        {isActive && isPlaying ? (
+          <div className="flex gap-0.5 h-4 items-end">
+            <div className="w-0.5 bg-cyan-400 h-full animate-pulse rounded-full" />
+            <div className="w-0.5 bg-cyan-400 h-2/3 animate-pulse rounded-full" style={{ animationDelay: "0.15s" }} />
+            <div className="w-0.5 bg-cyan-400 h-4/5 animate-pulse rounded-full" style={{ animationDelay: "0.3s" }} />
+          </div>
+        ) : isActive ? (
+          <Play className="text-cyan-400" size={14} />
+        ) : (
+          <Play className="text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity" size={12} />
+        )}
+      </div>
+    </button>
   );
 }

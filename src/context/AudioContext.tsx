@@ -2,9 +2,19 @@
 
 import React, { createContext, useContext, useRef, useState, useCallback, useEffect } from "react";
 import { ToneItem } from "@/data/storeData";
+import { featuredArtists } from "@/data/trackList";
 import { previewController } from "@/components/store/PresetCard";
 import { analyze } from "web-audio-beat-detector";
 import { audioTickController } from "@/lib/audio/AudioTickController";
+
+// Map a FeaturedTrack (trackList.ts) → ToneItem shape (storeData.ts) so the
+// context stays type-safe while accepting data from the track list source.
+const toToneItem = (t: any): ToneItem => ({
+  id: t.id,
+  name: t.name,
+  gearTag: t.gearTag || t.artist || "",
+  audioUrl: t.audioUrl,
+});
 
 type TrackInfo = ToneItem;
 type TransportState = "stopped" | "playing" | "paused";
@@ -114,6 +124,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeTrack, setActiveTrackState] = useState<TrackInfo | null>(null);
   const activeTrackRef = useRef<TrackInfo | null>(null);
   const [playlist, setPlaylist] = useState<TrackInfo[]>([]);
+
+  // Seed the playlist on mount from the canonical featured-artist track list.
+  // Without this the PlaylistPanel renders "No tracks loaded" and the patch
+  // browser's audition has nothing to play against. Featured artists are the
+  // single source of truth surfaced to the UI.
+  useEffect(() => {
+    const seeded = featuredArtists.map(toToneItem);
+    setPlaylist(seeded);
+  }, []);
   const [volume, setVolumeState] = useState(0.85);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -137,13 +156,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const buildCleanUrl = (raw: string | undefined): string => {
     if (!raw || typeof raw !== "string") {
-      return "/audio/featured/Sidi Bouganga feat Younes Hadir.mp3";
+      return "/audio/featured-artists/Sidi Bouganga feat Younes Hadir.mp3";
     }
+    // Preserve the path as-is but resolve relative paths against /audio/featured-artists/ if missing segment
     const stripped = raw.startsWith("http")
       ? raw.replace(/^https?:\/\/[^/]+/, "")
       : raw;
     const withSlash = stripped.startsWith("/") ? stripped : `/${stripped}`;
-    return encodeURI(decodeURIComponent(withSlash));
+    // Fix missing "featured-artists" segment for hardcoded paths
+    const fixed = withSlash.replace("/audio/featured/", "/audio/featured-artists/");
+    return encodeURI(decodeURIComponent(fixed)).replace(/%20/g, "%20");
   };
 
   const needsTrackReload = (track: TrackInfo, currentSrc: string): boolean => {
@@ -346,17 +368,13 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const cleanPath = decodeURIComponent(audioSrc);
     const encodedSrc = encodeURI(cleanPath);
     const currentOrigin = audioRef.current.src ? new URL(audioRef.current.src).pathname : "";
-    if (currentOrigin && currentOrigin !== encodedSrc) {
+    // Always start from the beginning — reload if new source, reset time if same
+    if (!audioRef.current.src || currentOrigin !== encodedSrc) {
       audioRef.current.src = encodedSrc;
       audioRef.current.load();
-      audioRef.current.currentTime = 0;
-      setDuration(0);
-    } else if (!currentOrigin) {
-      audioRef.current.src = encodedSrc;
-      audioRef.current.load();
-      audioRef.current.currentTime = 0;
-      setDuration(0);
     }
+    audioRef.current.currentTime = 0;
+    setDuration(0);
 
     activeTrackRef.current = track;
     setActiveTrackState(track);
@@ -454,7 +472,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const fallbackTrack: TrackInfo = {
           id: "fallback",
           name: "Sidi Bouganga feat Younes Hadir",
-          url: "/audio/featured/Sidi Bouganga feat Younes Hadir.mp3",
+          url: "/audio/featured-artists/Sidi Bouganga feat Younes Hadir.mp3",
         } as any;
         playTrack(fallbackTrack);
         return;

@@ -170,6 +170,25 @@ export default function Turntable({
   // disables the CSS transition mid-flight and the arm snaps to rest.
   const [isResting, setIsResting] = useState(false);
 
+  // STOP button: arm rest animation ONLY — cue switch untouched (no setIsLeverEngaged)
+  const runStopRestAnimation = useCallback((audio?: HTMLAudioElement | null) => {
+    setIsResting(true);
+    setIsLifted(true);
+    setCuePhase('killing');
+    if (audio) { try { audio.pause(); } catch {} try { audio.currentTime = 0; } catch {} }
+    const rotateTimer = setTimeout(() => {
+      setArmAngle(0);
+      // NOTE: isLeverEngaged NOT modified — cue switch stays where it was
+      const dropTimer = setTimeout(() => {
+        setIsLifted(false);
+        setCuePhase('rest');
+        setIsResting(false);
+      }, 1400);
+      return () => clearTimeout(dropTimer);
+    }, 200);
+    return () => clearTimeout(rotateTimer);
+  }, []);
+
   // Centralized tonearm rest animation — used by STOP button, Power-off, Cue-off.
   // This is the exact animation sequence: lift → rotate to 0° → drop at rest.
   const runRestAnimation = useCallback((audio?: HTMLAudioElement | null) => {
@@ -217,10 +236,12 @@ export default function Turntable({
       if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
         runRestAnimation(audio);
         setLocalTransport('stopped');
+        // Defer power off until after drop completes (rotate 1.4s + drop 1.4s)
+        setTimeout(() => togglePower(), 3000);
       } else {
         setLocalTransport('stopped');
+        togglePower();
       }
-      togglePower();
     }
   }, [isPowered, setIsPowered, togglePower, runRestAnimation, audioRef]);
 
@@ -240,14 +261,23 @@ export default function Turntable({
       if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
         runRestAnimation(audio);
         setLocalTransport('stopped');
+        prevLocalTransportRef.current = 'stopped';
+        if (onStop) onStop();
+        setTimeout(() => setIsPowered(false), 3000);
+        // Don't call togglePower() — deferred via setIsPowered
       } else {
         setLocalTransport('stopped');
+        prevLocalTransportRef.current = 'stopped';
+        if (onStop) onStop();
+        setIsPowered(false);
       }
+    } else {
+      // ON and stopped → cue switch also powers off (table already at rest, no animation needed)
+      setLocalTransport('stopped');
       prevLocalTransportRef.current = 'stopped';
       if (onStop) onStop();
+      setIsLeverEngaged(false); // reset cue switch to position 0 so it's ready as play
       setIsPowered(false);
-    } else {
-      // ON and stopped → nothing (leave table running, don't kill)
     }
   }, [isPowered, setIsPowered, localTransport, runRestAnimation, audioRef, onStop]);
 
@@ -676,7 +706,7 @@ export default function Turntable({
     // From paused the arm is at the disk (lifted at 38°). Lift, swing back
     // to rest, then drop at rest.
     if (prev === 'paused' && curr === 'stopped') {
-      runRestAnimation(audio);
+      if (!isResting) runStopRestAnimation(audio);
       prevLocalTransportRef.current = curr;
       return;
     }
@@ -684,7 +714,7 @@ export default function Turntable({
     // ── PLAY → STOP (localTransport: 'playing' → 'stopped') ─────────────────
     // Lift arm and rotate back to rest cradle.
     if (prev === 'playing' && curr === 'stopped') {
-      runRestAnimation(audio);
+      if (!isResting) runStopRestAnimation(audio);
       prevLocalTransportRef.current = curr;
       return;
     }
@@ -718,14 +748,14 @@ export default function Turntable({
   else if (transportState === 'playing') displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
   else displayAngle = frozenAngleRef.current;
 
-  const PITCH_X = 672; const PITCH_Y = 130; const PITCH_LEN = 230;
+  const PITCH_X = 720; const PITCH_Y = 90; const PITCH_LEN = 230;
   const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (
-    <div className={`relative w-full max-w-[820px] mx-auto ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))' }}>
-      <div className="relative w-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
-        <div className="relative w-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)", aspectRatio: "720 / 480" }}>
-          <div className="relative w-full overflow-hidden" style={{ aspectRatio: "720 / 480", maxHeight: "520px" }}>
+    <div className={`relative flex-shrink-0 ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))', width: '100%', maxWidth: 'clamp(380px, 48vw, 600px)', aspectRatio: '720 / 480', maxHeight: 'clamp(220px, 32vw, 340px)' }}>
+      <div className="relative w-full h-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
+        <div className="relative w-full h-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)" }}>
+          <div className="relative w-full h-full overflow-hidden" style={{ aspectRatio: "720 / 480", maxHeight: "inherit" }}>
           <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block" }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
             <defs>
               <linearGradient id="anodized-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#2a2e38"/><stop offset="40%" stopColor="#1c1f28"/><stop offset="100%" stopColor="#0e1015"/></linearGradient>
@@ -977,7 +1007,7 @@ export default function Turntable({
               </g>
 
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
-              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 0.4s ease-in-out, filter 0.4s ease-in-out' : 'none' }}>
+              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
                 <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform 1.2s cubic-bezier(0.34, 1.1, 0.64, 1)' : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
@@ -1217,32 +1247,29 @@ export default function Turntable({
               </button>
               <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{localTransport === 'playing' ? "Pause" : "Play"}</span>
             </div>
-          </div>
-
-          {/* STOP — centered under vinyl spindle */}
-          <div className={`absolute bottom-3 left-[calc(215/720*100%)] -translate-x-1/2 z-30 flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-            <button
-              onClick={isPowered ? handleDeckStop : undefined}
-              aria-label="Stop"
-              className="w-6 h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
-              style={{
-                background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
-                boxShadow: !isPlaying
-                  ? "inset 0 0 8px rgba(239,68,68,0.3), 0 0 6px rgba(239,68,68,0.25), 0 1px 2px rgba(0,0,0,0.5)"
-                  : "inset 0 0 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)",
-              }}
-            >
-              <div
-                className={`w-3 h-3 rounded-sm transition-all duration-200 ${
+            {/* STOP — right next to play, same gap as power→play (gap-3 = 12px) */}
+            <div className={`flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+              <button
+                onClick={isPowered ? handleDeckStop : undefined}
+                aria-label="Stop"
+                className="w-6 h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+                style={{
+                  background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
+                  boxShadow: !isPlaying
+                    ? "inset 0 0 8px rgba(239,68,68,0.3), 0 0 6px rgba(239,68,68,0.25), 0 1px 2px rgba(0,0,0,0.5)"
+                    : "inset 0 0 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)",
+                }}
+              >
+                <div className={`w-3 h-3 rounded-sm transition-all duration-200 ${
                   !isPowered
                     ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
                     : (isPlaying || currentTime > 0)
                       ? "bg-red-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"
                       : "bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)]"
-                }`}
-              />
-            </button>
-            <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
+                }`} />
+              </button>
+              <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
+            </div>
           </div>
 
           {/* Bottom-right: BPM/Tempo */}
