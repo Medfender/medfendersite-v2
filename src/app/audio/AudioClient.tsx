@@ -9,6 +9,9 @@ import StickyTransport from "@/components/audio/StickyTransport";
 import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
+import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
+
+import { deckControls } from "@/lib/audio/DeckControls";
 
 export default function AudioClient() {
   const {
@@ -45,6 +48,8 @@ export default function AudioClient() {
       thumbnail: track.thumbnail || track.coverUrl || track.thumbnail || undefined,
     };
     if (playTrack) playTrack(candidate);
+    // Selecting a track must always result in playing — never trigger a pause.
+    deckControls.play();
   };
 
   return (
@@ -58,9 +63,18 @@ export default function AudioClient() {
 
         {/* ── Section 3: Master Turntable & Playlist Workstation ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-20 md:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 lg:gap-6 items-start">
-            {/* Center: 3D Turntable (master audio source of truth) */}
-            <div className="w-full flex justify-start lg:justify-start flex-shrink-0">
+          {/* Section header: Tactile Listening / Vinyl Showcase */}
+          <div className="mb-6">
+            <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
+              Tactile Listening
+            </h2>
+            <p className="mt-1 text-xl md:text-2xl font-bold text-white tracking-tight">
+              Vinyl Showcase
+            </p>
+          </div>
+          <div className="relative">
+            {/* Turntable — centered */}
+            <div className="w-full flex justify-center flex-shrink-0">
               <Turntable
                 transportState={transportState}
                 progress={progress}
@@ -72,14 +86,13 @@ export default function AudioClient() {
                 bpm={bpm}
               />
             </div>
+          </div>
 
-            {/* Right Panel: Integrated Playlist Card */}
-            <aside className="w-full lg:max-w-[320px] lg:ml-auto">
-              <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]" style={{ height: 'clamp(200px, 28vw, 300px)', maxHeight: 'clamp(200px, 28vw, 300px)' }}>
-                {/* Playlist */}
-                <PlaylistPanel />
-              </div>
-            </aside>
+          {/* Playlist: below the turntable section */}
+          <div className="mt-6">
+            <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]">
+              <PlaylistPanel />
+            </div>
           </div>
         </section>
 

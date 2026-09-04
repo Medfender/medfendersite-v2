@@ -133,6 +133,27 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const seeded = featuredArtists.map(toToneItem);
     setPlaylist(seeded);
+    // Auto-select the first track so the audio page always has an active
+    // selection on arrival. Sets activeTrack, primes the audio src, and runs
+    // BPM analysis. Does NOT auto-play — the user still drives playback.
+    if (seeded.length > 0 && !activeTrackRef.current) {
+      const first = seeded[0];
+      activeTrackRef.current = first;
+      setActiveTrackState(first);
+      currentIndexRef.current = 0;
+      const rawSrc = (first as any)?.url || (first as any)?.audioUrl || (first as any)?.src;
+      const cleanSrc = buildCleanUrl(rawSrc);
+      if (audioRef.current) {
+        audioRef.current.preload = "auto";
+        audioRef.current.crossOrigin = "anonymous";
+        audioRef.current.src = cleanSrc;
+        audioRef.current.load();
+      }
+      // Prime the turntable choreography so the needle starts in play
+      // state (transport will be stopped; the arm rest animation still
+      // runs when play is triggered by the user, preserving the gate).
+      void analyzeTrackBpm(cleanSrc);
+    }
   }, []);
   const [volume, setVolumeState] = useState(0.85);
   const [currentTime, setCurrentTime] = useState(0);

@@ -5,28 +5,13 @@ import { useAudio } from "@/context/AudioContext";
 import { useAudioTick } from "@/lib/audio/useAudioTick";
 import { deckControls } from "@/lib/audio/DeckControls";
 import { featuredArtists } from "@/data/trackList";
+import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
 import { Disc3 } from "lucide-react";
 
 const ARM_LAND_DELAY_MS = 1000; // headshell-gate: music waits for arm to land
 
-const EXTS = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "webp", "WEBP"];
-
 function clean(name: string): string {
   return (name || "").trim();
-}
-
-function buildPatterns(name: string, artist: string): string[] {
-  const cleanName = clean(name);
-  const cleanArtist = clean(artist);
-  const patterns: string[] = [];
-  if (cleanName) patterns.push(cleanName);
-  if (cleanArtist) patterns.push(cleanArtist); // artist-only (e.g. "Ousmane Cissokho.jpeg")
-  if (cleanArtist && cleanName) {
-    patterns.push(`${cleanArtist} - ${cleanName}`);
-    patterns.push(`${cleanArtist} feat ${cleanName}`);
-    patterns.push(`${cleanArtist} - ${cleanName} feat ${cleanArtist}`);
-  }
-  return Array.from(new Set(patterns));
 }
 
 export default function Turntable({
@@ -58,75 +43,13 @@ export default function Turntable({
   // ── Movement flag (blocks parent audio play during arm swing) ───────────────
   const isArmMovingRef = useRef(false);
 
-  // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
+  // ─── Center label thumbnail — shared resolver (same patterns as sticky + playlist) ───
+  // Uses the same hook as StickyTransport and PlaylistPanel so thumbnails stay in sync.
+  const labelThumbnail = useResolvedThumbnail(currentTrack as any);
   const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
-  const rawArtist =
-    (currentTrack as any)?.artist || (currentTrack as any)?.gearTag || (currentTrack as any)?.author || "";
   const trackName = clean(rawName);
-
-  const [resolvedLabelSrc, setResolvedLabelSrc] = useState<string | null>(null);
-  const [labelFailed, setLabelFailed] = useState(false);
-  const cancelLabelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
-
-  useEffect(() => {
-    if (!rawName && !rawArtist) {
-      setResolvedLabelSrc(null);
-      setLabelFailed(false);
-      return;
-    }
-
-    // Cancel any in-flight preloader from the previous track
-    cancelLabelRef.current.cancelled = true;
-    const session = { cancelled: false };
-    cancelLabelRef.current = session;
-
-    setLabelFailed(false);
-    setResolvedLabelSrc(null);
-
-    const patterns = buildPatterns(rawName, rawArtist);
-    console.log("[VinylLabel] Trying patterns:", patterns);
-
-    let patternIdx = 0;
-    let extIdx = 0;
-
-    const tryNext = () => {
-      if (session.cancelled) return;
-      if (patternIdx >= patterns.length) {
-        console.log("[VinylLabel] All combinations exhausted — fallback");
-        setLabelFailed(true);
-        setResolvedLabelSrc(null);
-        return;
-      }
-      const pattern = patterns[patternIdx];
-      const ext = EXTS[extIdx];
-      const url = `/images/Thumbnails/${encodeURIComponent(pattern)}.${ext}`;
-
-      const img = new Image();
-      img.onload = () => {
-        if (session.cancelled) return;
-        console.log("[VinylLabel] ✓ Found:", url);
-        setResolvedLabelSrc(url);
-        setLabelFailed(false);
-      };
-      img.onerror = () => {
-        if (session.cancelled) return;
-        extIdx++;
-        if (extIdx >= EXTS.length) {
-          patternIdx++;
-          extIdx = 0;
-        }
-        setTimeout(tryNext, 0);
-      };
-      console.log("[VinylLabel] Attempting:", url);
-      img.src = url;
-    };
-
-    tryNext();
-
-    return () => {
-      session.cancelled = true;
-    };
-  }, [rawName, rawArtist]);
+  // labelFailed: true only when the shared hook returned null (no pattern matched)
+  const labelFailed = !labelThumbnail;
 
   // Reconcile turntable power when external playback triggers it
   // (e.g. vinyl player play button). Keeps physical button in sync.
@@ -229,15 +152,25 @@ export default function Turntable({
   const prevLocalTransportRef = useRef<'playing' | 'stopped' | 'paused'>(localTransport);
 
   // ── Power button (Master Rule §2) ──────────────────────────────────────────
-  // OFF  → ON  : power on; transportState stays 'stopped' (arm rests).
-  // ON   → OFF : kill switch; cut audio immediately via togglePower().
-  // When coming from play/pause, also flip localTransport='stopped' so the
-  // choreography effect runs the same lift→rotate→rest animation as the stop button.
+  // OFF  → ON  : power on + start playing (loads first track if none active).
+  // ON   → OFF : kill switch; cut audio immediately + rest animation.
   // Power off uses the same lift→rotate→rest animation as the STOP button
   // when coming from play or pause. From stop: just flip transport.
   const handlePowerButton = useCallback(() => {
     if (!isPowered) {
+      // Power on + always start playing (load first track if empty)
       setIsPowered(true);
+      if (currentTrack == null && playTrack) {
+        const first = featuredArtists[0];
+        playTrack({
+          id: first.id,
+          name: first.name,
+          gearTag: first.gearTag,
+          audioUrl: first.audioUrl,
+          thumbnail: first.thumbnail,
+        } as any);
+      }
+      setLocalTransport('playing');
     } else {
       const audio = audioRef?.current;
       if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
@@ -250,7 +183,7 @@ export default function Turntable({
         togglePower();
       }
     }
-  }, [isPowered, setIsPowered, togglePower, runRestAnimation, audioRef]);
+  }, [isPowered, setIsPowered, togglePower, runRestAnimation, audioRef, currentTrack, playTrack]);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // CUE SWITCH — power toggle ONLY; arm animation is a separate user action.
@@ -259,46 +192,45 @@ export default function Turntable({
   // ═══════════════════════════════════════════════════════════════════════════
   // Register with shared singleton so StickyTransport, PlaylistPanel buttons route here.
   useEffect(() => {
+    const loadFirst = () => {
+      if (currentTrack == null && playTrack) {
+        const first = featuredArtists[0];
+        playTrack({
+          id: first.id,
+          name: first.name,
+          gearTag: first.gearTag,
+          audioUrl: first.audioUrl,
+          thumbnail: first.thumbnail,
+        } as any);
+      }
+    };
     deckControls.register({
       play: () => {
+        // Selecting a new track while playing must stay playing (never pause).
+        // Force power on, load first track if empty, and always set playing.
         if (!isPowered) {
           setIsPowered(true);
-          if (currentTrack == null && playTrack) {
-            const first = featuredArtists[0];
-            playTrack({
-              id: first.id,
-              name: first.name,
-              gearTag: first.gearTag,
-              audioUrl: first.audioUrl,
-              thumbnail: first.thumbnail,
-            } as any);
-          }
-          setLocalTransport('playing');
+          loadFirst();
         }
+        setLocalTransport('playing');
       },
       pause: () => {
-        if (localTransport !== 'stopped') {
-          setLocalTransport('stopped');
+        if (isPowered && localTransport === 'playing') {
+          setLocalTransport('paused');
         }
       },
       toggle: () => {
         if (!isPowered) {
+          // Off → power on + play (with first-track fallback for empty state)
           setIsPowered(true);
-          if (currentTrack == null && playTrack) {
-            const first = featuredArtists[0];
-            playTrack({
-              id: first.id,
-              name: first.name,
-              gearTag: first.gearTag,
-              audioUrl: first.audioUrl,
-              thumbnail: first.thumbnail,
-            } as any);
-          }
+          loadFirst();
           setLocalTransport('playing');
-        } else if (localTransport === 'stopped') {
-          setLocalTransport('playing');
+        } else if (localTransport === 'playing') {
+          // Real play/pause toggle (not stop)
+          setLocalTransport('paused');
         } else {
-          setLocalTransport('stopped');
+          // paused or stopped → play
+          setLocalTransport('playing');
         }
       },
       stop: () => {
@@ -604,6 +536,7 @@ export default function Turntable({
   // Not used for start — start is driven only by the isLifted drop rule above.
   // Kept for state tracking and debug logging only.
   const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unGagTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCuePhaseRef = useRef<CuePhase>(cuePhase);
   useEffect(() => {
     const prev = prevCuePhaseRef.current;
@@ -758,18 +691,21 @@ export default function Turntable({
       setIsLeverEngaged(true);
       setCuePhase('cueing');
       rotateTimer = setTimeout(() => {
-        setArmAngle(38);             // 2. Rotate to disk (while lifted)
-        // 3. DROP needle at exactly the moment the CSS rotation completes
-        //    (2500ms = rotation duration). Needle touches black vinyl here.
+        setArmAngle(38);             // Rotate to disk (while lifted) — CSS rotation = 1.5s
         dropTimer = setTimeout(() => {
-          setIsLifted(false);        // Drop animation starts
-          setCuePhase('onDisk');     // → headshell touches disk = sound fires
+          // The CSS drop animation (1.5s) runs after isLifted goes false.
+          setIsLifted(false);
+        }, 1500);
+        // Match the CSS drop duration (1.5s) — un-gag only when needle
+        // physically contacts the vinyl. Keeping audio gagged prevents any
+        // stray play() call from leaking through before onTransitionEnd fires.
+        unGagTimerRef.current = setTimeout(() => {
           if (audio) {
             (audio as any)._gagged = false;
             audio.muted = false;
             audio.playbackRate = 1;
           }
-        }, 2500);
+        }, 1500 + 1500);
       }, 600);
       prevLocalTransportRef.current = curr;
       return;
@@ -789,19 +725,10 @@ export default function Turntable({
       setIsLifted(true);              // lift (prepare for drop)
       setIsLeverEngaged(true);
       setCuePhase('cueing');
-      // Wait for the fast CSS drop to complete (220ms + small margin) before
-      // flipping cuePhase to 'onDisk' and triggering onPlay.
+      // Start the drop. onTransitionEnd fires when the CSS drop completes,
+      // then sets cuePhase='onDisk' and calls onPlay.
       dropTimer = setTimeout(() => {
-        setIsLifted(false);           // DROP needle — headshell touches vinyl
-        setCuePhase('onDisk');        // → headshell effect fires onPlay()
-        setIsQuickLift(false);        // quick resume complete — revert to 1.2s
-        isArmMovingRef.current = false;
-        if (audio) {
-          (audio as any)._armMoving = false;
-          (audio as any)._gagged = false;
-          audio.muted = false;       // un-gag: headshell is on disk → allowed
-          audio.playbackRate = 1;
-        }
+        setIsLifted(false); // quick drop starts
       }, 220);
       prevLocalTransportRef.current = curr;
       return;
@@ -828,6 +755,10 @@ export default function Turntable({
     return () => {
       clearTimeout(dropTimer);
       clearTimeout(rotateTimer);
+      if (unGagTimerRef.current) {
+        clearTimeout(unGagTimerRef.current);
+        unGagTimerRef.current = null;
+      }
     };
   }, [localTransport, audioRef]);
 
@@ -937,7 +868,7 @@ export default function Turntable({
               ))}</g>
               <circle cx={PCX} cy={PCY} r={LABEL_R} fill="#0a0c14" />
               {/* Label artwork — image inside the spinning vinyl group, clipped to circle */}
-              {labelFailed || !resolvedLabelSrc ? (
+              {labelFailed || !labelThumbnail ? (
                 <>
                   <circle cx={PCX} cy={PCY} r={LABEL_R - 2} fill="none" stroke="url(#gold)" strokeWidth="5" />
                   <circle cx={PCX} cy={PCY} r={LABEL_R - 14} fill="none" stroke="url(#gold)" strokeWidth="2" opacity="0.6" />
@@ -954,7 +885,7 @@ export default function Turntable({
                     <circle cx={PCX} cy={PCY} r={LABEL_R - 3} />
                   </clipPath>
                   <image
-                    href={resolvedLabelSrc}
+                    href={labelThumbnail ?? undefined}
                     x={PCX - (LABEL_R - 3)}
                     y={PCY - (LABEL_R - 3)}
                     width={(LABEL_R - 3) * 2}
@@ -1010,6 +941,9 @@ export default function Turntable({
                   <circle cx={TPX + 20} cy={TPY + 24} r="3.5" fill="url(#precision-chrome)" stroke="#4a5262" strokeWidth="0.4" />
                 </g>
 
+                {/* Housing plate — small horizontal backing tucked behind right edge of base ring (rotated 90° to fit under cue) */}
+                <path d="M -12,0 L 0,0 L 0,22 L -12,22 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="0.8" filter="url(#shadow-sm)" transform={`translate(${TPX + 32}, ${TPY + 12}) rotate(90)`} />
+
                 {/* Pivot housing — the deck-mounted bearing socket. DOES NOT rotate. */}
                 <g id="tonearm-pivot-housing" filter="url(#shadow-md)">
                   <circle cx={TPX} cy={TPY} r="34" fill="url(#dark-alloy)" stroke="#0e1015" strokeWidth="0.8" />
@@ -1037,28 +971,6 @@ export default function Turntable({
                   </g>
                 </g>
 
-                {/* Cue system base — deck-mounted, does NOT rotate */}
-                <g id="cueing-system" transform="translate(0, -10)">
-                  {/* 1. Mechanical Cam Housing (The Bridge connecting the lever to the piston and main base) */}
-                  <path d="M 454,106 L 474,94 L 474,80 L 446,80 A 12 12 0 0,0 446,103 Z" fill="url(#dark-alloy)" stroke="#1a1c23" strokeWidth="1" filter="url(#shadow-sm)" />
-
-                  {/* 2. Static Lever Pivot Base */}
-                  <circle cx="454" cy="92" r="9" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" onClick={handleCueSwitchToggle} style={{ cursor: 'pointer' }} />
-                  <circle cx="454" cy="92" r="4" fill="#111" />
-
-                  {/* 3. The Animated Lever (Tied strictly to Start/Stop state) */}
-                  <g style={{
-                    transform: `rotateX(${isLeverEngaged ? 180 : 0}deg)`,
-                    transformOrigin: '454px 92px',
-                    transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-                  }}>
-                     {/* Shorter, thinner metal shaft */}
-                     <rect x="452.75" y="78" width="2.5" height="14" rx="1" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" onClick={handleCueSwitchToggle} style={{ cursor: 'pointer' }} />
-                     {/* Vibrant accent cue lever tip */}
-                     <circle cx="454" cy="77" r="3" fill="#e63946" stroke="#111318" strokeWidth="0.5" />
-                  </g>
-                </g>
-
                 {/* Static cue arc (lift path indicator) */}
                 <g id="cueing-arc">
                   <path d={`M ${TPX - 12},${TPY + 8} Q ${TPX},${TPY + 14} ${TPX + 12},${TPY + 8}`} fill="none" stroke="url(#precision-chrome)" strokeWidth="1.2" strokeLinecap="round" />
@@ -1080,20 +992,9 @@ export default function Turntable({
                     2. #cue-lever-handle — rotates only at its base pivot.
                   Sits ABOVE static base but BELOW rotating arm.
                   ══════════════════════════════════════════════════════════ */}
-              <g id="cue-lift-mechanism">
-                {/* Chrome Hydraulic Piston Base */}
-                <rect x="473.5" y="86" width="5" height="12" rx="2" fill="url(#precision-chrome)" stroke="#222" strokeWidth="0.5" />
+              <text x="522" y="115" textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
 
-                {/* Static Piston Rod & Rubber Crescent */}
-                <rect x="474.5" y="80" width="3" height="10" fill="url(#precision-chrome)" />
 
-                {/* Black matte rubber rail */}
-                <path d="M 468,90 A 25,25 0 0,0 512,90" fill="none" stroke="#111318" strokeWidth="7" strokeLinecap="round" />
-
-                {/* Inner rubber highlight */}
-                <path d="M 468,90 A 25,25 0 0,0 512,90" fill="none" stroke="#2d323d" strokeWidth="4" strokeLinecap="round" />
-              </g>
-              <text x="456" y="115" textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
 
               {/* ─────────────────────────────────────────────────────────
                   #tonearm-assembly — THE ONLY GROUP THAT ROTATES.
@@ -1105,7 +1006,7 @@ export default function Turntable({
                 <circle cx={TPX} cy={TPY} r="24" fill="url(#dark-alloy)" stroke="#252830" strokeWidth="0.6" />
                 <circle cx={TPX} cy={TPY} r="20" fill="none" stroke="url(#precision-chrome)" strokeWidth="2.4" />
                 {[
-                  [TPX + 28, TPY, 0], [TPX, TPY + 28, 90], [TPX, TPY - 28, 270],
+                  [TPX - 28, TPY, 0], [TPX, TPY + 28, 90], [TPX, TPY - 28, 270],
                 ].map(([sx, sy], i) => (
                   <circle key={i} cx={sx as number} cy={sy as number} r="2.4" fill="url(#precision-chrome)" stroke="#4a5262" strokeWidth="0.4" />
                 ))}
@@ -1114,15 +1015,28 @@ export default function Turntable({
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
               <g id="tonearm-lift-wrapper"
                 onTransitionEnd={(e) => {
-                  if (e.propertyName === 'transform' && isLifted === false && cuePhase === 'onDisk') {
-                    // Needle just finished dropping onto black vinyl. Exact moment.
+                  if (e.propertyName === 'transform' && isLifted === false && cuePhase === 'cueing') {
+                    // Needle finished the full drop: lifted → dropped onto vinyl.
+                    // Only now is the headshell physically touching the disk.
+                    setCuePhase('onDisk');
+                    if (audioRef.current) {
+                      // Open the headshell-on-vinyl gate SYNCHRONOUSLY here.
+                      // The cuePhase-driven useEffect runs after the next
+                      // render, but onPlay() is called right now and the
+                      // gate check inside playTrack() needs the open state
+                      // visible immediately or it blocks the play() call.
+                      (audioRef.current as any)._headshellOnDisk = true;
+                      (audioRef.current as any)._gagged = false;
+                      audioRef.current.muted = false;
+                      audioRef.current.playbackRate = 1;
+                    }
                     if (onPlay) onPlay();
                     else if (onTogglePlay) onTogglePlay();
                   }
                 }}
-                style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
+                style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? ('transform ' + (isQuickLift ? '0.22s' : '1.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1), filter ' + (isQuickLift ? '0.22s' : '1.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1)') : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform ' + (isQuickLift ? '0.22s' : '2.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none' }}>
+                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? ('transform ' + (isQuickLift ? '0.22s' : '1.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1)') : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">

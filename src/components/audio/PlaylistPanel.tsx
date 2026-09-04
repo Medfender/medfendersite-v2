@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Play } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
+import { deckControls } from "@/lib/audio/DeckControls";
 
 // ── Small thumbnail card (re-used for both active track hero and per-row chips) ──
 function Thumbnail({ src, size = 32, accent = "cyan" }: { src: string | null; size?: number; accent?: "cyan" | "amber" }) {
@@ -47,8 +48,9 @@ export default function PlaylistPanel() {
 
   // Route through the central playTrack so the 3D turntable, sticky transport,
   // spectrum analyzer, and active-track state all update from the same source.
-  // Direct DOM src/load/play() calls here previously drifted the rest of the
-  // page out of sync with the playlist selection.
+  // Then trigger the turntable's choreographed play so the headshell drops and
+  // the headshell-on-vinyl gate actually lets audio through. Without this, the
+  // track loads but stays silent (the gate blocks play() until the needle lands).
   const handlePlaylistSelect = (track: any) => {
     if (!track) return;
     const candidate = {
@@ -59,6 +61,10 @@ export default function PlaylistPanel() {
       thumbnail: track.thumbnail || track.coverUrl || undefined,
     };
     playTrack(candidate as any);
+    // Selecting a track must always result in playing — never trigger a pause.
+    // Force play through the turntable choreography so the needle drops and
+    // the headshell-on-vinyl gate opens without flipping to paused.
+    deckControls.play();
   };
 
   return (
@@ -83,9 +89,8 @@ export default function PlaylistPanel() {
         <h3 className="text-xs tracking-widest text-gray-500 font-semibold uppercase">Playlist</h3>
         <span className="text-[10px] font-mono text-neutral-600">{playlist.length} tracks</span>
       </div>
-      {/* Invisible escalator: hidden scrollbar, scrollable via mouse wheel / trackpad / touch */}
-      {/* Playlist rows — taller card with tighter spacing */}
-      <div className="flex flex-col gap-1 overflow-y-auto max-h-[180px] pr-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {/* Playlist rows */}
+      <div className="flex flex-col gap-1">
         {playlist.map((track) => {
           const isActive = (activeTrack as any)?.id === track.id;
           return (
