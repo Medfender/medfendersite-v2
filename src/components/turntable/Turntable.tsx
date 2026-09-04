@@ -1112,7 +1112,15 @@ export default function Turntable({
               </g>
 
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
-              <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
+              <g id="tonearm-lift-wrapper"
+                onTransitionEnd={(e) => {
+                  if (e.propertyName === 'transform' && isLifted === false && cuePhase === 'onDisk') {
+                    // Needle just finished dropping onto black vinyl. Exact moment.
+                    if (onPlay) onPlay();
+                    else if (onTogglePlay) onTogglePlay();
+                  }
+                }}
+                style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
                 <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform ' + (isQuickLift ? '0.22s' : '2.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
