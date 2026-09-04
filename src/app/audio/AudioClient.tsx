@@ -10,68 +10,6 @@ import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
 
-function WaveformDivider() {
-  const { isPlaying, currentBpm } = useAudio();
-  // Half-time period: 60 / bpm / 2. Calm 2s fallback when BPM unavailable.
-  const bpmNum = typeof currentBpm === "number" && currentBpm > 0 ? currentBpm : 60;
-  const periodSec = isPlaying ? 60 / bpmNum / 2 : 0;
-  return (
-    <div
-      className="w-full overflow-hidden"
-      aria-hidden
-      style={{
-        height: 48,
-        background: "linear-gradient(180deg, transparent 0%, rgba(0,216,246,0.015) 50%, transparent 100%)",
-        position: "relative",
-      }}
-    >
-      <svg
-        viewBox="0 0 1440 48"
-        preserveAspectRatio="none"
-        className="w-full block"
-        style={{ height: 48, position: "absolute", inset: 0 }}
-      >
-        <defs>
-          <linearGradient id="div-fill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor="#00d8f6" stopOpacity={isPlaying ? 0.55 : 0.08} />
-            <stop offset="50%" stopColor="#00d8f6" stopOpacity={isPlaying ? 0.18 : 0.03} />
-            <stop offset="100%" stopColor="#00d8f6" stopOpacity={0} />
-          </linearGradient>
-          <filter id="div-blur">
-            <feGaussianBlur stdDeviation="2" />
-          </filter>
-        </defs>
-
-        {/* Frequency bar fill — narrow strip at center of divider */}
-        <rect
-          x="0"
-          y="23"
-          width="1440"
-          height="2"
-          fill="url(#div-fill)"
-          rx="1"
-          filter="url(#div-blur)"
-        />
-
-        {/* Center signal line */}
-        <line
-          x1="0" y1="24" x2="1440" y2="24"
-          stroke="#00d8f6"
-          strokeWidth={isPlaying ? "1" : "0.5"}
-          opacity={isPlaying ? 0.85 : 0.2}
-          style={{ transition: "stroke-width 0.5s ease, opacity 0.5s ease" }}
-        />
-      </svg>
-
-      <style>{`
-        @media (prefers-reduced-motion: reduce) {
-          * { animation: none !important; }
-        }
-      `}</style>
-    </div>
-  );
-}
-
 export default function AudioClient() {
   const {
     transportState,
@@ -150,9 +88,6 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
-
-        {/* ── Section 5: Waveform SVG Divider ──────────────────────────────── */}
-        <WaveformDivider />
 
         {/* ── Section 6: Gear Info Cards (TONEX + HX Stomp XL) ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
