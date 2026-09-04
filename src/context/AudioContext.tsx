@@ -80,6 +80,7 @@ interface AudioContextType {
   gainNodeRef: React.RefObject<GainNode | null>;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   getAnalyserNode: () => AnalyserNode | null;
+  getFrequencyBands: () => { high: number; mid: number; low: number };
   ensureAudioContext: () => Promise<void>;
 }
 
@@ -341,6 +342,40 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     connectAudioElement(audioRef.current);
     return analyserRef.current;
   }, [connectAudioElement]);
+
+  /**
+   * getFrequencyBands — reads the active analyser's frequency data and
+   * collapses it into three averaged bands (low / mid / high) normalized
+   * to [0.0, 1.0]. Used by the R3F particle background to drive shader
+   * displacement uniforms on every frame.
+   *
+   * Bins: low = 0-10% of spectrum (bass), mid = 10-50% (mids), high = 50-100% (treble).
+   * Returns zeros when no analyser is connected (e.g., before playback).
+   */
+  const getFrequencyBands = useCallback((): { high: number; mid: number; low: number } => {
+    if (!analyserRef.current) return { low: 0, mid: 0, high: 0 };
+    const analyser = analyserRef.current;
+    const bins = new Uint8Array(analyser.frequencyBinCount);
+    analyser.getByteFrequencyData(bins);
+    const len = bins.length;
+    if (len === 0) return { low: 0, mid: 0, high: 0 };
+
+    const lowEnd = Math.max(1, Math.floor(len * 0.10));
+    const midEnd = Math.max(lowEnd + 1, Math.floor(len * 0.50));
+
+    let lowSum = 0;
+    let midSum = 0;
+    let highSum = 0;
+    for (let i = 0; i < lowEnd; i++) lowSum += bins[i];
+    for (let i = lowEnd; i < midEnd; i++) midSum += bins[i];
+    for (let i = midEnd; i < len; i++) highSum += bins[i];
+
+    return {
+      low: lowSum / (lowEnd * 255),
+      mid: midSum / ((midEnd - lowEnd) * 255),
+      high: highSum / ((len - midEnd) * 255),
+    };
+  }, []);
 
   // ─── Power toggle ──────────────────────────────────────────────────────────
   const togglePower = useCallback(() => {
@@ -895,6 +930,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           analyserNode,
           gainNodeRef,
           getAnalyserNode,
+          getFrequencyBands,
           ensureAudioContext,
           currentBpm,
           setCurrentBpm,
