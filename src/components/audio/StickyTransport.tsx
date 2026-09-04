@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
+import { deckControls } from "@/lib/audio/DeckControls";
 import MiniVisualizer from "./MiniVisualizer";
 import TrackThumbnailCard from "@/components/player/TrackThumbnailCard";
 
@@ -196,7 +197,16 @@ export default function StickyTransport() {
             <SkipBack size={14} />
           </button>
           <button
-            onClick={togglePlay}
+            onClick={() => {
+              // Delegate choreography through turntable (master) — does NOT call togglePlay
+              // directly so the tonearm animation fires. The turntable then triggers the
+              // audio gate at the right moment (headshell on disk).
+              if (isPlaying) {
+                deckControls.pause();
+              } else {
+                deckControls.toggle();
+              }
+            }}
             aria-label={isPlaying ? "Pause" : "Play"}
             className="relative w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
             style={{
@@ -215,7 +225,11 @@ export default function StickyTransport() {
             )}
           </button>
           <button
-            onClick={stop}
+            onClick={() => {
+              // Route through turntable choreography — preserves the lift/rotate/rest
+              // animation that the deck's own Stop button drives.
+              deckControls.stop();
+            }}
             aria-label="Stop"
             className="w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 flex items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
           >

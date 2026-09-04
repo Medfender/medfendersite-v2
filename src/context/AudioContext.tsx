@@ -368,13 +368,15 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const cleanPath = decodeURIComponent(audioSrc);
     const encodedSrc = encodeURI(cleanPath);
     const currentOrigin = audioRef.current.src ? new URL(audioRef.current.src).pathname : "";
-    // Always start from the beginning — reload if new source, reset time if same
-    if (!audioRef.current.src || currentOrigin !== encodedSrc) {
+    // Only reload + reset to 0 if the source actually changed.
+    // If we're just resuming from pause on the same track, keep currentTime.
+    const isSameSource = audioRef.current.src && currentOrigin === encodedSrc;
+    if (!isSameSource) {
       audioRef.current.src = encodedSrc;
       audioRef.current.load();
+      audioRef.current.currentTime = 0;
+      setDuration(0);
     }
-    audioRef.current.currentTime = 0;
-    setDuration(0);
 
     activeTrackRef.current = track;
     setActiveTrackState(track);
@@ -689,6 +691,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       audioRef.current.currentTime = 0;
       setDuration(0);
     }
+    // Same-source track change (e.g. playPath): do NOT reload
+    // to keep current playback position intact.
   }, [activeTrack]);
 
   const handleAudioError = () => {

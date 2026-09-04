@@ -21,4 +21,5 @@
 ## Technical Rules
 - Verify build (`npm run build`) before finishing.
 - Capture screenshots via `node screenshot.mjs http://localhost:3000` when polishing.
+- **Visual QA (enforced):** After any CSS, Tailwind, or UI layout changes you MUST navigate the local dev server (`http://localhost:3000/audio` or relevant page), take a screenshot via Chrome DevTools / Playwright MCP, visually verify design compliance, and check the console for errors — see `docs/agents/visual-qa.md`. No exceptions.
 - Do not push to GitHub until explicitly instructed.

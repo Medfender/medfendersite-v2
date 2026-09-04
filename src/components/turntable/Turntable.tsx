@@ -51,7 +51,7 @@ export default function Turntable({
   bpm?: number | 'CAL';
 }) {
   // Global audio context — single source of truth for power state
-  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, currentTime, audioRef } = useAudio();
+  const { isPowered, isPlaying, togglePower, setIsPowered, setPlaybackRate, currentTrack, currentTime, audioRef, playTrack } = useAudio();
 
   // ── Movement flag (blocks parent audio play during arm swing) ───────────────
   const isArmMovingRef = useRef(false);
@@ -156,6 +156,11 @@ export default function Turntable({
   const [armAngle, setArmAngle] = useState(0);
   const [isLeverEngaged, setIsLeverEngaged] = useState(false);
 
+  // Fast-mode flag: only applied for the quick lift/drop of pause/resume
+  // (play→pause and pause→play), not for the full stop rest animation.
+  const [isQuickLift, setIsQuickLift] = useState(false);
+  const isQuickLiftRef = useRef(false);
+
   // Optimistic transport state — mirrors what the tonearm is physically doing
   const [localTransport, setLocalTransport] = useState<'playing' | 'paused' | 'stopped'>('stopped');
   const playTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -246,16 +251,29 @@ export default function Turntable({
   }, [isPowered, setIsPowered, togglePower, runRestAnimation, audioRef]);
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // CUE SWITCH — power toggle; on kill, uses rest animation.
+  // CUE SWITCH — power toggle ONLY; arm animation is a separate user action.
+  // OFF → ON: power on, arm stays at rest, no playback triggered.
+  // ON  → OFF: power off (with rest animation if currently playing/paused).
   // ═══════════════════════════════════════════════════════════════════════════
   const handleCueSwitchToggle = useCallback(() => {
-    // OFF → ON: treat like play button (same mapping as handleArmClick when off)
+    // OFF → ON: power on + start play.
+    // If no track is active, fall back to the first playlist entry so the
+    // animation always has something to play.
     if (!isPowered) {
       setIsPowered(true);
+      if (currentTrack == null && playTrack) {
+        // No track loaded: load the canonical featured track so the
+        // animation + audio stay in sync (master-source-of-truth).
+        playTrack({
+          id: "featured",
+          name: "Sidi Bouganga feat Younes Hadir",
+          audioUrl: "/audio/featured-artists/Sidi Bouganga feat Younes Hadir.mp3",
+        } as any);
+      }
       setLocalTransport('playing');
       return;
     }
-    // ON and NOT stopped → power off (same mapping / animation as handlePowerButton kill)
+    // ON and NOT stopped → power off (with rest animation if playing/paused)
     if (localTransport !== 'stopped') {
       const audio = audioRef?.current;
       if (prevLocalTransportRef.current === 'playing' || prevLocalTransportRef.current === 'paused') {
@@ -264,7 +282,6 @@ export default function Turntable({
         prevLocalTransportRef.current = 'stopped';
         if (onStop) onStop();
         setTimeout(() => setIsPowered(false), 3000);
-        // Don't call togglePower() — deferred via setIsPowered
       } else {
         setLocalTransport('stopped');
         prevLocalTransportRef.current = 'stopped';
@@ -272,11 +289,11 @@ export default function Turntable({
         setIsPowered(false);
       }
     } else {
-      // ON and stopped → cue switch also powers off (table already at rest, no animation needed)
+      // ON and stopped → power off (already at rest, no animation needed)
       setLocalTransport('stopped');
       prevLocalTransportRef.current = 'stopped';
       if (onStop) onStop();
-      setIsLeverEngaged(false); // reset cue switch to position 0 so it's ready as play
+      setIsLeverEngaged(false);
       setIsPowered(false);
     }
   }, [isPowered, setIsPowered, localTransport, runRestAnimation, audioRef, onStop]);
@@ -439,6 +456,10 @@ export default function Turntable({
     }
   }, [isPowered, localTransport]);
 
+  useEffect(() => {
+    isQuickLiftRef.current = isQuickLift;
+  }, [isQuickLift]);
+
   // Snap vinyl to 0deg whenever a stop signal fires.
   // Tracks the previous value so the effect only fires on actual increments,
   // not on the initial mount (when prevRef === current === 0).
@@ -526,12 +547,14 @@ export default function Turntable({
 
     if (curr === 'onDisk' && prev !== 'onDisk') {
       // Headshell physically on vinyl, but drop animation still in progress.
-      // Wait 650ms (longest CSS transition 0.6s + margin) before resuming.
+      // For quick resume (0.22s CSS), use a tighter delay. Default full drop
+      // keeps 650ms (covers 1.2s rotation + 0.4s lift).
+      const waitMs = isQuickLiftRef.current ? 240 : 650;
       dropTimerRef.current = setTimeout(() => {
         dropTimerRef.current = null;
         if (onPlay) onPlay();
         else if (onTogglePlay) onTogglePlay();
-      }, 650);
+      }, waitMs);
     } else if (curr === 'killing' && prev === 'onDisk') {
       // Headshell lifted from disk → pause audio immediately (don't wait)
       if (onPause) onPause();
@@ -649,9 +672,9 @@ export default function Turntable({
     const audio = audioRef?.current;
 
     // ── PLAY → PAUSE (localTransport: 'playing' → 'paused') ────────────────
+    // Quick lift: fast 0.22s transition (pause animation only)
     if (prev === 'playing' && curr === 'paused') {
-      // Immediate lift → cuePhase goes to 'killing' → headshell effect sets
-      // _headshellOnDisk=false and pauses audio.
+      setIsQuickLift(true);
       setIsLifted(true);
       setCuePhase('killing');
       prevLocalTransportRef.current = curr;
@@ -690,6 +713,8 @@ export default function Turntable({
     // From paused: arm is at disk angle (lifted). Must lift slightly, drop.
     // Music must stay PAUSED during lift — only resume when headshell lands.
     if (prev === 'paused' && curr === 'playing') {
+      // Quick resume: fast 0.22s transition (drop back to disk)
+      setIsQuickLift(true);
       if (audio) {
         (audio as any)._armMoving = true; // arm is moving → block stray play()
         try { audio.pause(); } catch { /* ignore */ }
@@ -698,9 +723,12 @@ export default function Turntable({
       setIsLifted(true);              // lift (prepare for drop)
       setIsLeverEngaged(true);
       setCuePhase('cueing');
+      // Wait for the fast CSS drop to complete (220ms + small margin) before
+      // flipping cuePhase to 'onDisk' and triggering onPlay.
       dropTimer = setTimeout(() => {
         setIsLifted(false);           // DROP needle — headshell touches vinyl
         setCuePhase('onDisk');        // → headshell effect fires onPlay()
+        setIsQuickLift(false);        // quick resume complete — revert to 1.2s
         isArmMovingRef.current = false;
         if (audio) {
           (audio as any)._armMoving = false;
@@ -708,7 +736,7 @@ export default function Turntable({
           audio.muted = false;       // un-gag: headshell is on disk → allowed
           audio.playbackRate = 1;
         }
-      }, 400);
+      }, 220);
       prevLocalTransportRef.current = curr;
       return;
     }
@@ -1020,7 +1048,7 @@ export default function Turntable({
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
               <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform 1.2s cubic-bezier(0.34, 1.1, 0.64, 1)' : 'none' }}>
+                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform ' + (isQuickLift ? '0.22s' : '1.2s') + ' cubic-bezier(0.34, 1.1, 0.64, 1)' : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">

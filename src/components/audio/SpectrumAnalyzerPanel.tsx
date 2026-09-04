@@ -18,7 +18,12 @@ import type { ColorTheme } from "@/lib/visualizer/useAudioVisualizer";
 const MAX_DB = 18;
 const BAND_TYPES: FilterType[] = ["lowcut", "lowshelf", "peaking", "highshelf", "highcut"];
 
-export default function SpectrumAnalyzerPanel() {
+interface SpectrumAnalyzerPanelProps {
+  selectedBandId: number | null;
+  setSelectedBandId: (id: number | null) => void;
+}
+
+export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandId }: SpectrumAnalyzerPanelProps) {
   const { analyserNode, isPlaying, transportState } = useAudio();
   const playingRef = useRef(isPlaying);
   const transportRef = useRef(transportState);
@@ -30,7 +35,6 @@ export default function SpectrumAnalyzerPanel() {
   const dragRef = useRef<{ bandId: number } | null>(null);
   const hoverRef = useRef<number | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const [selectedBandId, setSelectedBandId] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<"curve" | "bars">("curve");
   const [colorTheme, setColorTheme] = useState<ColorTheme>("cyan");
   const viewModeRef = useRef<"curve" | "bars">("curve");
@@ -267,33 +271,6 @@ export default function SpectrumAnalyzerPanel() {
     };
   }, []);
 
-  // ── Dock toolbar handlers ────────────────────────────────────────────────
-
-  const setHoverType = (type: FilterType) => {
-    const id = hoverRef.current ?? selectedBandId;
-    if (id != null) audioTickController.setBandType(id, type);
-  };
-
-  const toggleSelected = () => {
-    const id = hoverRef.current ?? selectedBandId;
-    if (id != null) audioTickController.toggleBand(id);
-  };
-
-  const deleteSelected = () => {
-    const id = hoverRef.current ?? selectedBandId;
-    if (id != null) {
-      audioTickController.removeBand(id);
-      if (selectedBandId === id) setSelectedBandId(null);
-      hoverRef.current = null;
-    }
-  };
-
-  const resetAll = () => {
-    audioTickController.resetAll();
-    setSelectedBandId(null);
-    hoverRef.current = null;
-  };
-
   // ── JSX ──────────────────────────────────────────────────────────────────
 
   return (
@@ -301,7 +278,7 @@ export default function SpectrumAnalyzerPanel() {
       ref={containerRef}
       className="relative w-full overflow-hidden"
       style={{
-        height: "clamp(220px, 32vw, 340px)",
+        height: "clamp(320px, 42vw, 480px)",
         background: "transparent",
       }}
     >
@@ -427,108 +404,6 @@ export default function SpectrumAnalyzerPanel() {
         ))}
       </div>
 
-      {/* Dock toolbar — premium glass-morphism panel */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 12,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 20,
-          display: "flex",
-          alignItems: "center",
-          gap: 3,
-          padding: "6px 10px",
-          background: "rgba(6,8,12,0.88)",
-          border: "1px solid rgba(0,216,246,0.2)",
-          borderRadius: 3,
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06), inset 0 -1px 0 rgba(0,0,0,0.4)",
-        }}
-      >
-        {BAND_TYPES.map((t) => (
-          <button
-            key={t}
-            onClick={() => setHoverType(t)}
-            style={{
-              padding: "3px 8px",
-              fontSize: 9,
-              fontFamily: "'JetBrains Mono', monospace",
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "#94a3b8",
-              background: "transparent",
-              border: "1px solid rgba(148,163,184,0.2)",
-              borderRadius: 1,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.color = "#f2e6c8";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(0,216,246,0.5)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.color = "#94a3b8";
-              (e.currentTarget as HTMLElement).style.borderColor = "rgba(148,163,184,0.2)";
-            }}
-          >
-            {t}
-          </button>
-        ))}
-        <div style={{ width: 1, background: "rgba(148,163,184,0.15)", margin: "2px 4px" }} />
-        <button
-          onClick={toggleSelected}
-          style={{
-            padding: "3px 8px",
-            fontSize: 9,
-            fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "#94a3b8",
-            background: "transparent",
-            border: "1px solid rgba(148,163,184,0.2)",
-            borderRadius: 1,
-            cursor: "pointer",
-          }}
-        >
-          Toggle
-        </button>
-        <button
-          onClick={deleteSelected}
-          style={{
-            padding: "3px 8px",
-            fontSize: 9,
-            fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "#94a3b8",
-            background: "transparent",
-            border: "1px solid rgba(148,163,184,0.2)",
-            borderRadius: 1,
-            cursor: "pointer",
-          }}
-        >
-          Del
-        </button>
-        <button
-          onClick={resetAll}
-          style={{
-            padding: "3px 8px",
-            fontSize: 9,
-            fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "#f87171",
-            background: "transparent",
-            border: "1px solid rgba(248,113,113,0.2)",
-            borderRadius: 1,
-            cursor: "pointer",
-          }}
-        >
-          Flat
-        </button>
-      </div>
     </div>
   );
 }

@@ -101,7 +101,20 @@
       "Bash(google-chrome --version)",
       "Bash(npx --yes @babel/parser --plugins jsx --sourceType module src/components/turntable/Turntable.tsx)",
       "Bash(git diff-tree *)",
-      "Bash(git reset *)"
+      "Bash(git reset *)",
+      "Bash(npm --version)",
+      "Bash(npx playwright *)",
+      "Bash(npm ls *)",
+      "Bash(sudo ln -sf /usr/lib64/libada.so.4 /usr/lib64/libada.so.3)",
+      "Bash(LD_PRELOAD=/usr/lib64/libada.so.4 node *)",
+      "Bash(netstat -tlnp)",
+      "Bash(kill -0 899284)",
+      "Bash(pacman -Qo /usr/lib/libada.so.3)",
+      "Bash(pacman -F libada.so.3)",
+      "Read(//usr/lib/**)",
+      "Bash(ldconfig -p)",
+      "Bash(sudo pacman -S v8)",
+      "Bash(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=\"$HOME/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome\" node *)"
     ]
   }
 }

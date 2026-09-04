@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useAudio } from "@/context/AudioContext";
+import { audioTickController } from "@/lib/audio/AudioTickController";
 import Turntable from "@/components/turntable/Turntable";
 import StudioAnalyzer from "@/components/audio/SpectrumAnalyzerPanel";
 import PatchBrowser from "@/components/audio/PatchBrowser";
@@ -10,8 +11,72 @@ import StickyTransport from "@/components/audio/StickyTransport";
 import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
+import { EQDockToolbar } from "@/components/audio/EQDockToolbar";
+
+function WaveformDivider() {
+  const { isPlaying, currentBpm } = useAudio();
+  // Half-time period: 60 / bpm / 2. Calm 2s fallback when BPM unavailable.
+  const bpmNum = typeof currentBpm === "number" && currentBpm > 0 ? currentBpm : 60;
+  const periodSec = isPlaying ? 60 / bpmNum / 2 : 0;
+  return (
+    <div
+      className="w-full overflow-hidden"
+      aria-hidden
+      style={{
+        height: 48,
+        background: "linear-gradient(180deg, transparent 0%, rgba(0,216,246,0.015) 50%, transparent 100%)",
+        position: "relative",
+      }}
+    >
+      <svg
+        viewBox="0 0 1440 48"
+        preserveAspectRatio="none"
+        className="w-full block"
+        style={{ height: 48, position: "absolute", inset: 0 }}
+      >
+        <defs>
+          <linearGradient id="div-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#00d8f6" stopOpacity={isPlaying ? 0.55 : 0.08} />
+            <stop offset="50%" stopColor="#00d8f6" stopOpacity={isPlaying ? 0.18 : 0.03} />
+            <stop offset="100%" stopColor="#00d8f6" stopOpacity={0} />
+          </linearGradient>
+          <filter id="div-blur">
+            <feGaussianBlur stdDeviation="2" />
+          </filter>
+        </defs>
+
+        {/* Frequency bar fill — narrow strip at center of divider */}
+        <rect
+          x="0"
+          y="23"
+          width="1440"
+          height="2"
+          fill="url(#div-fill)"
+          rx="1"
+          filter="url(#div-blur)"
+        />
+
+        {/* Center signal line */}
+        <line
+          x1="0" y1="24" x2="1440" y2="24"
+          stroke="#00d8f6"
+          strokeWidth={isPlaying ? "1" : "0.5"}
+          opacity={isPlaying ? 0.85 : 0.2}
+          style={{ transition: "stroke-width 0.5s ease, opacity 0.5s ease" }}
+        />
+      </svg>
+
+      <style>{`
+        @media (prefers-reduced-motion: reduce) {
+          * { animation: none !important; }
+        }
+      `}</style>
+    </div>
+  );
+}
 
 export default function AudioClient() {
+  const [selectedBandId, setSelectedBandId] = React.useState<number | null>(null);
   const {
     transportState,
     isPowered,
@@ -25,6 +90,13 @@ export default function AudioClient() {
     stop: ctxStop,
     pause,
   } = useAudio();
+
+  // Resolve active filter type for the selected band (used by EQDockToolbar)
+  const activeType: import("@/lib/audio/AudioTickController").FilterType | null = (() => {
+    if (selectedBandId == null) return null;
+    const band = audioTickController.eqBands.find((b: any) => b.id === selectedBandId);
+    return band?.type ?? null;
+  })();
 
   const handleTogglePlay = () => togglePlay();
   const handleTurntablePlay = () => {
@@ -55,13 +127,6 @@ export default function AudioClient() {
       >
         {/* ── Section 1: Featured Audio Hero Banner ─────────────────────────── */}
         <FeaturedAudioSection />
-
-        {/* ── Section 2: Studio Analyzer ───────────────────────────────────── */}
-        <section className="w-full z-10 pt-4 md:pt-6">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <StudioAnalyzer />
-          </div>
-        </section>
 
         {/* ── Section 3: Master Turntable & Playlist Workstation ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-20 md:pb-24">
@@ -95,44 +160,23 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
+        {/* ── Section 4b: Studio Analyzer Pro ──────────────────────────── */}
+        <section className="w-full z-10 pt-4 md:pt-6">
+          <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-4">
+            <StudioAnalyzer
+              selectedBandId={selectedBandId}
+              setSelectedBandId={setSelectedBandId}
+            />
+            <EQDockToolbar
+              selectedBandId={selectedBandId}
+              setSelectedBandId={setSelectedBandId}
+              activeType={activeType}
+            />
+          </div>
+        </section>
+
         {/* ── Section 5: Waveform SVG Divider ──────────────────────────────── */}
-        <div className="w-full overflow-hidden" aria-hidden>
-          <svg
-            viewBox="0 0 1440 40"
-            preserveAspectRatio="none"
-            className="w-full block"
-            style={{ height: 40 }}
-          >
-            <defs>
-              <linearGradient id="wave-cyan" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#00d8f6" stopOpacity="0" />
-                <stop offset="30%" stopColor="#00d8f6" stopOpacity="0.8" />
-                <stop offset="50%" stopColor="#00d8f6" stopOpacity="1" />
-                <stop offset="70%" stopColor="#00d8f6" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#00d8f6" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M0,20 C180,5 360,35 540,20 C720,5 900,35 1080,20 C1260,5 1350,30 1440,20 L1440,40 L0,40 Z"
-              fill="none"
-              stroke="url(#wave-cyan)"
-              strokeWidth="1.5"
-              style={{
-                filter: "drop-shadow(0 0 6px rgba(0,216,246,0.7))",
-              }}
-            />
-            <path
-              d="M0,20 C180,35 360,5 540,20 C720,35 900,5 1080,20 C1260,35 1350,10 1440,20 L1440,40 L0,40 Z"
-              fill="none"
-              stroke="url(#wave-cyan)"
-              strokeWidth="0.8"
-              opacity="0.4"
-              style={{
-                filter: "drop-shadow(0 0 3px rgba(0,216,246,0.4))",
-              }}
-            />
-          </svg>
-        </div>
+        <WaveformDivider />
 
         {/* ── Section 6: Gear Info Cards (TONEX + HX Stomp XL) ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
@@ -146,7 +190,25 @@ export default function AudioClient() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* IK Multimedia TONEX */}
-            <div className="group rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-amber-500/30 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)]">
+            <div
+              className="group relative overflow-hidden rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-amber-500/30 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)]"
+            >
+              {/* Small product thumbnail — placed in corner, not dominant */}
+              <img
+                src="/images/Line 6 IK/tonex_one_pedal_bundle_prodmenu@2x.webp"
+                alt="TONEX"
+                className="absolute top-4 right-4 w-14 h-14 object-contain opacity-40 mix-blend-screen rounded-md pointer-events-none group-hover:opacity-60 transition-opacity"
+                style={{ filter: "drop-shadow(0 0 6px rgba(245,158,11,0.3))" }}
+              />
+              {/* Subtle background texture — very low opacity */}
+              <div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none opacity-[0.07] mix-blend-overlay rounded-2xl bg-cover bg-right-top"
+                style={{
+                  backgroundImage: "url('/images/Line 6 IK/Tonex IK.webp')",
+                  backgroundSize: "contain",
+                }}
+              />
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
@@ -186,7 +248,25 @@ export default function AudioClient() {
             </div>
 
             {/* Line 6 HX Stomp XL */}
-            <div className="group rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_40px_rgba(0,216,246,0.08)]">
+            <div
+              className="group relative overflow-hidden rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_40px_rgba(0,216,246,0.08)]"
+            >
+              {/* Small product thumbnail */}
+              <img
+                src="/images/Line 6 IK/Line-6-XL-Stomp-1024x614.webp"
+                alt="HX Stomp XL"
+                className="absolute top-4 right-4 w-14 h-14 object-contain opacity-40 mix-blend-screen rounded-md pointer-events-none group-hover:opacity-60 transition-opacity"
+                style={{ filter: "drop-shadow(0 0 6px rgba(0,216,246,0.3))" }}
+              />
+              {/* Subtle background texture */}
+              <div
+                aria-hidden
+                className="absolute inset-0 pointer-events-none opacity-[0.07] mix-blend-overlay rounded-2xl bg-cover bg-left-bottom"
+                style={{
+                  backgroundImage: "url('/images/Line 6 IK/hxstomp.webp')",
+                  backgroundSize: "contain",
+                }}
+              />
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
