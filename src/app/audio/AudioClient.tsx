@@ -10,6 +10,7 @@ import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
+import AudioCanvas from "@/components/audio/AudioCanvas";
 
 import { deckControls } from "@/lib/audio/DeckControls";
 
@@ -26,6 +27,7 @@ export default function AudioClient() {
     togglePlay,
     stop: ctxStop,
     pause,
+    getFrequencyBands,
   } = useAudio();
 
   const handleTogglePlay = () => togglePlay();
@@ -54,9 +56,10 @@ export default function AudioClient() {
 
   return (
     <>
+      <AudioCanvas getFrequencyBands={getFrequencyBands ?? (() => ({ high: 0, mid: 0, low: 0 }))} />
       <main
-        className="min-h-screen flex flex-col bg-[#0b0f19] text-neutral-100 relative overflow-x-hidden"
-        style={{ backgroundImage: "none" }}
+        className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden"
+        style={{ background: 'transparent' }}
       >
         {/* ── Section 1: Featured Audio Hero Banner ─────────────────────────── */}
         <FeaturedAudioSection />
@@ -121,6 +124,7 @@ export default function AudioClient() {
               <img
                 src="/images/Line 6 IK/tonex_one_pedal_bundle_prodmenu@2x.webp"
                 alt="TONEX"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 className="absolute top-4 right-4 w-14 h-14 object-contain opacity-40 mix-blend-screen rounded-md pointer-events-none group-hover:opacity-60 transition-opacity"
                 style={{ filter: "drop-shadow(0 0 6px rgba(245,158,11,0.3))" }}
               />
@@ -179,6 +183,7 @@ export default function AudioClient() {
               <img
                 src="/images/Line 6 IK/Line-6-XL-Stomp-1024x614.webp"
                 alt="HX Stomp XL"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 className="absolute top-4 right-4 w-14 h-14 object-contain opacity-40 mix-blend-screen rounded-md pointer-events-none group-hover:opacity-60 transition-opacity"
                 style={{ filter: "drop-shadow(0 0 6px rgba(0,216,246,0.3))" }}
               />
