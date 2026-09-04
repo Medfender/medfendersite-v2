@@ -1,0 +1,354 @@
+- generic [active] [ref=f12e1]:
+  - navigation [ref=f12e2]:
+    - generic [ref=f12e3]:
+      - link "Medfender Home" [ref=f12e4] [cursor=pointer]:
+        - /url: /
+        - text: Medfender
+      - generic [ref=f12e5]:
+        - link "Audio" [ref=f12e6] [cursor=pointer]:
+          - /url: /audio
+        - link "Store" [ref=f12e8] [cursor=pointer]:
+          - /url: /store
+        - link "Media" [ref=f12e9] [cursor=pointer]:
+          - /url: /media
+        - link "Support" [ref=f12e10] [cursor=pointer]:
+          - /url: /support/setup-guide
+        - link "Contact" [ref=f12e11] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f12e12]:
+        - button "Toggle language" [ref=f12e13]: EN
+        - button "Open cart (0 items)" [ref=f12e14]
+  - generic [ref=f12e20]:
+    - main [ref=f12e21]:
+      - generic [ref=f12e23]:
+        - generic [ref=f12e24]:
+          - generic [ref=f12e25]:
+            - generic [ref=f12e26]: Featured Audio
+            - generic [ref=f12e28]: Live · 23:41:27
+          - generic [ref=f12e29]: Reference Monitoring
+        - generic [ref=f12e32]:
+          - generic [ref=f12e33]:
+            - heading "Studio Engine In Motion." [level=1] [ref=f12e34]:
+              - text: Studio Engine
+              - generic [ref=f12e35]: In Motion.
+            - paragraph [ref=f12e36]: A real-time listening workstation built around a master turntable engine. Every preset, EQ curve, and signal-chain node below is driven by the same audio state — no parallel graphs, no double-renders.
+          - generic [ref=f12e37]:
+            - generic [ref=f12e38]:
+              - generic [ref=f12e39]: Now On Deck
+              - generic [ref=f12e42]: "Off"
+            - generic [ref=f12e45]: Sidi Bouganga
+            - generic [ref=f12e46]: Fender Strat · TONEX Capture · HX Stomp XL
+            - generic [ref=f12e47]:
+              - generic [ref=f12e48]: 192 kHz
+              - generic [ref=f12e51]: ·
+              - generic [ref=f12e52]: 32-bit
+              - generic [ref=f12e53]: ·
+              - generic [ref=f12e54]: 126 dB
+              - generic [ref=f12e55]: ·
+              - generic [ref=f12e56]: < 1 ms
+      - generic [ref=f12e57]:
+        - generic [ref=f12e58]:
+          - heading "Tactile Listening" [level=2] [ref=f12e59]
+          - paragraph [ref=f12e60]: Vinyl Showcase
+        - generic [ref=f12e65]:
+          - img "Turntable deck" [ref=f12e67]:
+            - generic [ref=f12e227]:
+              - generic [ref=f12e263]: A-SKATE
+              - generic [ref=f12e272]: CUE
+            - generic [ref=f12e318] [cursor=pointer]:
+              - generic [ref=f12e321]: +8%
+              - generic [ref=f12e322]: "0"
+              - generic [ref=f12e323]: "-8%"
+              - generic [ref=f12e328]: PITCH
+          - generic [ref=f12e329]:
+            - generic [ref=f12e330]:
+              - button "Power on" [ref=f12e333]
+              - generic [ref=f12e335]: Power
+            - generic:
+              - button "Play"
+              - generic: Play
+            - generic:
+              - button "Stop"
+              - generic: STOP
+          - generic:
+            - generic:
+              - generic: BPM
+              - generic: "--"
+              - generic: ±0.0%
+            - generic: Tempo
+          - generic:
+            - button "33 RPM" [pressed] [ref=f12e336]: "33"
+            - button "45 RPM" [ref=f12e337]: "45"
+        - generic [ref=f12e341]:
+          - generic [ref=f12e745]:
+            - generic [ref=f12e746]: Now playing
+            - generic [ref=f12e747]: Sidi Bouganga
+            - generic [ref=f12e748]: Fender Strat · TONEX Capture · HX Stomp XL
+          - generic [ref=f12e342]:
+            - heading "Playlist" [level=3] [ref=f12e343]
+            - generic [ref=f12e344]: 4 tracks
+          - generic [ref=f12e345]:
+            - generic [ref=f12e751] [cursor=pointer]:
+              - heading "Sidi Bouganga" [level=4] [ref=f12e752]
+              - paragraph [ref=f12e753]: Fender Strat · TONEX Capture · HX Stomp XL
+            - generic [ref=f12e759] [cursor=pointer]:
+              - heading "Rijal Allah" [level=4] [ref=f12e760]
+              - paragraph [ref=f12e761]: Gnaoua Trance · Modulated Reverb · HX Stomp
+            - generic [ref=f12e767] [cursor=pointer]:
+              - heading "Vices et Bordel" [level=4] [ref=f12e768]
+              - paragraph [ref=f12e769]: Acoustic Kora · IK ToneX Acoustic
+            - generic [ref=f12e775] [cursor=pointer]:
+              - heading "What You Won't Do For Love" [level=4] [ref=f12e776]
+              - paragraph [ref=f12e777]: Smooth Jazz Rhodes · HX Stomp XL
+      - generic [ref=f12e348]:
+        - generic [ref=f12e349]:
+          - heading "Tactile Listening" [level=2] [ref=f12e350]
+          - paragraph [ref=f12e351]: Vinyl Showcase
+          - paragraph [ref=f12e352]: Pick a side. The spectrum pulses in real time, the master turntable spins above, and the docked bar takes over for transport.
+        - generic [ref=f12e353]:
+          - generic [ref=f12e354]:
+            - generic [ref=f12e355]:
+              - heading "Real-Time Spectrum" [level=3] [ref=f12e356]
+              - generic [ref=f12e357]:
+                - generic [ref=f12e358]:
+                  - button "Switch to bars mode" [ref=f12e359]: Bars
+                  - button "Switch to curve mode" [pressed] [ref=f12e360]: Curve
+                - generic [ref=f12e361]:
+                  - button "Cyan theme" [ref=f12e362]
+                  - button "Red theme" [ref=f12e363]
+                  - button "Green theme" [ref=f12e364]
+            - paragraph [ref=f12e367]: Logarithmic · 48 bars · peak hold
+          - generic [ref=f12e368]:
+            - generic [ref=f12e369]:
+              - heading "Tracklist" [level=3] [ref=f12e370]
+              - generic [ref=f12e371]: 4 tracks
+            - generic [ref=f12e372]:
+              - button "Select Sidi Bouganga" [pressed] [ref=f12e781]:
+                - generic [ref=f12e783]:
+                  - heading "Sidi Bouganga" [level=4] [ref=f12e784]
+                  - paragraph [ref=f12e785]: Fender Strat · TONEX Capture · HX Stomp XL
+              - button "Select Rijal Allah" [ref=f12e789]:
+                - generic [ref=f12e791]:
+                  - heading "Rijal Allah" [level=4] [ref=f12e792]
+                  - paragraph [ref=f12e793]: Gnaoua Trance · Modulated Reverb · HX Stomp
+              - button "Select Vices et Bordel" [ref=f12e797]:
+                - generic [ref=f12e799]:
+                  - heading "Vices et Bordel" [level=4] [ref=f12e800]
+                  - paragraph [ref=f12e801]: Acoustic Kora · IK ToneX Acoustic
+              - button "Select What You Won't Do For Love" [ref=f12e805]:
+                - generic [ref=f12e807]:
+                  - heading "What You Won't Do For Love" [level=4] [ref=f12e808]
+                  - paragraph [ref=f12e809]: Smooth Jazz Rhodes · HX Stomp XL
+            - paragraph [ref=f12e374]: Transport handled by docked bar player
+      - generic [ref=f12e375]:
+        - generic [ref=f12e376]:
+          - heading "Profiling & Modeling" [level=2] [ref=f12e377]
+          - paragraph [ref=f12e378]: Gear Info
+        - generic [ref=f12e379]:
+          - generic [ref=f12e380]:
+            - img "TONEX"
+            - generic [ref=f12e381]:
+              - generic [ref=f12e388]:
+                - heading "IK Multimedia TONEX" [level=3] [ref=f12e389]
+                - paragraph [ref=f12e390]: Amplification & Cab IR
+              - generic [ref=f12e391]: Modeler
+            - paragraph [ref=f12e392]: AI-trained amplifier and cabinet impulse response modeling. TONEX captures the exact harmonic behavior of your favorite amps — from clean headroom to saturated drive — and replays them with 192 kHz / 32-bit precision.
+            - generic [ref=f12e393]:
+              - generic [ref=f12e394]:
+                - generic [ref=f12e395]: Resolution
+                - generic [ref=f12e396]: 192 kHz
+              - generic [ref=f12e397]:
+                - generic [ref=f12e398]: Bit Depth
+                - generic [ref=f12e399]: 32-bit
+              - generic [ref=f12e400]:
+                - generic [ref=f12e401]: SNR
+                - generic [ref=f12e402]: 126 dB
+              - generic [ref=f12e403]:
+                - generic [ref=f12e404]: Latency
+                - generic [ref=f12e405]: < 1 ms
+          - generic [ref=f12e406]:
+            - img "HX Stomp XL"
+            - generic [ref=f12e407]:
+              - generic [ref=f12e416]:
+                - heading "Line 6 HX Stomp XL" [level=3] [ref=f12e417]
+                - paragraph [ref=f12e418]: Multi-Effects & Processing
+              - generic [ref=f12e419]: Multi-FX
+            - paragraph [ref=f12e420]: Next-generation HX modeling processor with four stereo signal processing paths. Run up to eight simultaneous effects chains, including amplifier models, drive stages, modulations, delays, and reverbs — all with ultra-low latency.
+            - generic [ref=f12e421]:
+              - generic [ref=f12e422]:
+                - generic [ref=f12e423]: Processing
+                - generic [ref=f12e424]: 4× Stereo
+              - generic [ref=f12e425]:
+                - generic [ref=f12e426]: Paths
+                - generic [ref=f12e427]: 8 Simultaneous
+              - generic [ref=f12e428]:
+                - generic [ref=f12e429]: DSP
+                - generic [ref=f12e430]: SHARC × 2
+              - generic [ref=f12e431]:
+                - generic [ref=f12e432]: Looper
+                - generic [ref=f12e433]: Up to 2 min
+      - generic [ref=f12e435]:
+        - generic [ref=f12e436]:
+          - heading "Preset & Patch Browser" [level=2] [ref=f12e441]
+          - generic [ref=f12e442]: 4 patches
+        - generic [ref=f12e443]:
+          - generic [ref=f12e444] [cursor=pointer]:
+            - generic [ref=f12e451]:
+              - generic [ref=f12e453]: Line 6 HX Stomp XL
+              - generic [ref=f12e454]: .hlx
+            - heading "NX Blue Drive" [level=3] [ref=f12e455]
+            - paragraph [ref=f12e456]: Drive → Amp Capture → Stereo Delay → IR
+            - generic [ref=f12e457]:
+              - generic [ref=f12e458]: Overdrive
+              - generic [ref=f12e459]: Clean Amp
+              - generic [ref=f12e460]: Stereo
+            - generic [ref=f12e461]:
+              - generic [ref=f12e462]: .hlx
+              - button "Download NX Blue Drive" [ref=f12e463]: Download Patch
+          - generic [ref=f12e467] [cursor=pointer]:
+            - generic [ref=f12e474]:
+              - generic [ref=f12e476]: IK Multimedia ToneX
+              - generic [ref=f12e477]: .txp
+            - heading "ToneX Black Tube" [level=3] [ref=f12e478]
+            - paragraph [ref=f12e479]: Tube Preamp → Cabinet IR → Reverb → EQ
+            - generic [ref=f12e480]:
+              - generic [ref=f12e481]: Tube
+              - generic [ref=f12e482]: Vintage
+              - generic [ref=f12e483]: Cab IR
+            - generic [ref=f12e484]:
+              - generic [ref=f12e485]: .txp
+              - button "Download ToneX Black Tube" [ref=f12e486]: Download Patch
+          - generic [ref=f12e490] [cursor=pointer]:
+            - generic [ref=f12e497]:
+              - generic [ref=f12e499]: Line 6 HX Stomp XL
+              - generic [ref=f12e500]: .hlx
+            - heading "HX Haze Glow" [level=3] [ref=f12e501]
+            - paragraph [ref=f12e502]: Modulation → Lust Drive → Amp → Reverb
+            - generic [ref=f12e503]:
+              - generic [ref=f12e504]: Ambient
+              - generic [ref=f12e505]: Drive
+              - generic [ref=f12e506]: Mod
+            - generic [ref=f12e507]:
+              - generic [ref=f12e508]: .hlx
+              - button "Download HX Haze Glow" [ref=f12e509]: Download Patch
+          - generic [ref=f12e513] [cursor=pointer]:
+            - generic [ref=f12e520]:
+              - generic [ref=f12e522]: IK Multimedia ToneX
+              - generic [ref=f12e523]: .txp
+            - heading "ToneX Watt King" [level=3] [ref=f12e524]
+            - paragraph [ref=f12e525]: Amp Model → Cabinet → Delay → Chorus
+            - generic [ref=f12e526]:
+              - generic [ref=f12e527]: Power
+              - generic [ref=f12e528]: Amp Model
+              - generic [ref=f12e529]: Delay
+            - generic [ref=f12e530]:
+              - generic [ref=f12e531]: .txp
+              - button "Download ToneX Watt King" [ref=f12e532]: Download Patch
+      - generic [ref=f12e538]:
+        - generic [ref=f12e539]:
+          - generic [ref=f12e540]: 192 kHz
+          - generic [ref=f12e541]: Sample Rate
+        - generic [ref=f12e542]:
+          - generic [ref=f12e543]: 32-bit
+          - generic [ref=f12e544]: Bit Depth
+        - generic [ref=f12e545]:
+          - generic [ref=f12e546]: 126 dB
+          - generic [ref=f12e547]: Dynamic Range
+        - generic [ref=f12e548]:
+          - generic [ref=f12e549]: < 1 ms
+          - generic [ref=f12e550]: Round-Trip Latency
+      - generic [ref=f12e552]:
+        - heading "Track & Gear Context" [level=2] [ref=f12e555]
+        - generic [ref=f12e557]:
+          - generic [ref=f12e558]:
+            - heading "Active Track" [level=3] [ref=f12e559]
+            - generic [ref=f12e560]:
+              - generic [ref=f12e561]: Sidi Bouganga
+              - generic [ref=f12e562]: Fender Strat · TONEX Capture · HX Stomp XL
+              - generic [ref=f12e563]:
+                - generic [ref=f12e564]: 2:53 total
+                - generic [ref=f12e565]: ·
+                - generic [ref=f12e566]: 0:00 elapsed
+          - generic [ref=f12e567]:
+            - heading "Signal Notes" [level=3] [ref=f12e568]
+            - generic [ref=f12e569]:
+              - generic [ref=f12e570]: Guitar → 1/4" TRS balanced direct
+              - generic [ref=f12e573]: "TONEX Black Tube: vintage tube preamp model"
+              - generic [ref=f12e576]: "HX Stomp XL: stereo amp + modulation chain"
+              - generic [ref=f12e579]: "Interface USB-C: 192 kHz / 32-bit record path"
+              - generic [ref=f12e582]: "DAW: Cubase — stereo monitoring out"
+      - generic [ref=f12e587]:
+        - heading "Signal Chain" [level=3] [ref=f12e590]
+        - generic [ref=f12e593]:
+          - generic [ref=f12e601]:
+            - generic [ref=f12e602]: Guitar
+            - generic [ref=f12e603]: 1/4" TRS
+          - generic [ref=f12e613]:
+            - generic [ref=f12e614]: TONEX
+            - generic [ref=f12e615]: 192 kHz · 32-bit
+          - generic [ref=f12e626]:
+            - generic [ref=f12e627]: HX Stomp
+            - generic [ref=f12e628]: 4× Stereo Path
+          - generic [ref=f12e638]:
+            - generic [ref=f12e639]: Interface
+            - generic [ref=f12e640]: USB-C · ADAT
+          - generic [ref=f12e649]:
+            - generic [ref=f12e650]: DAW
+            - generic [ref=f12e651]: Stereo Out
+        - generic [ref=f12e652]:
+          - generic [ref=f12e653]: State · stopped
+          - generic [ref=f12e656]: 192 kHz / 32-bit
+          - generic [ref=f12e659]: Round-trip < 1 ms
+      - generic [ref=f12e668]:
+        - heading "Manual Layout Zone" [level=2] [ref=f12e669]
+        - paragraph [ref=f12e670]: Reserved space for manual content, documentation links, or additional gear information cards.
+        - generic [ref=f12e671]: Ready for Content
+    - region "Audio transport bar" [ref=f12e673]:
+      - generic [ref=f12e674]:
+        - generic [ref=f12e675]:
+          - button "Previous track" [ref=f12e676]
+          - button "Play" [ref=f12e679]
+          - button "Stop" [ref=f12e682]
+          - button "Next track" [ref=f12e685]
+        - generic [ref=f12e688]:
+          - button "Cover art for Sidi Bouganga — click to open track" [ref=f12e813] [cursor=pointer]:
+            - img "Sidi Bouganga" [ref=f12e814]
+          - generic [ref=f12e693]:
+            - generic [ref=f12e694]: Sidi Bouganga
+            - generic [ref=f12e695]: Fender Strat · TONEX Capture · HX Stomp XL
+          - generic "Cycle visualizer mode" [ref=f12e696] [cursor=pointer]
+        - generic [ref=f12e698]:
+          - generic [ref=f12e699]: 0:00
+          - slider "Seek" [ref=f12e701] [cursor=pointer]: "0"
+          - generic [ref=f12e703]: 2:53
+        - generic [ref=f12e704]:
+          - slider "Volume" [ref=f12e705] [cursor=pointer]: "0.85"
+          - button "Mute" [ref=f12e706]
+  - contentinfo [ref=f12e711]:
+    - generic [ref=f12e712]:
+      - paragraph [ref=f12e714]: © 2026 Medfender. All rights reserved.
+      - generic [ref=f12e715]:
+        - link "Audio" [ref=f12e716] [cursor=pointer]:
+          - /url: "#audio"
+        - link "Store" [ref=f12e717] [cursor=pointer]:
+          - /url: "#store"
+        - link "Media" [ref=f12e718] [cursor=pointer]:
+          - /url: "#media"
+        - link "Contact" [ref=f12e719] [cursor=pointer]:
+          - /url: "#contact"
+      - generic [ref=f12e720]:
+        - generic [ref=f12e721]: Support
+        - link "Installation & Setup →" [ref=f12e722] [cursor=pointer]:
+          - /url: /support/setup-guide
+      - generic [ref=f12e723]:
+        - link "YouTube" [ref=f12e724] [cursor=pointer]:
+          - /url: "#"
+          - text: ▶
+        - link "Instagram" [ref=f12e725] [cursor=pointer]:
+          - /url: "#"
+          - text: ◉
+        - link "GitHub" [ref=f12e726] [cursor=pointer]:
+          - /url: "#"
+          - text: ◈
+  - button "Open Next.js Dev Tools" [ref=f12e732] [cursor=pointer]
+  - alert [ref=f12e815]

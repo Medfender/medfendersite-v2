@@ -147,7 +147,7 @@ export default function VinylShowcase() {
               {playlist.length} tracks
             </span>
           </div>
-          <div className="flex flex-col gap-1.5 max-h-[260px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-1.5">
             {playlist.map((track) => {
               const isActive = (activeTrack as any)?.id === track.id;
               return (

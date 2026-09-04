@@ -7,6 +7,7 @@ import { CartProvider } from "@/lib/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import PageTransition from "@/components/layout/PageTransition";
+import AudioCanvasWrapper from "@/components/audio/AudioCanvasWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,11 +30,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-neutral-950 text-neutral-100 min-h-screen">
+      <body suppressHydrationWarning className="min-h-full flex flex-col bg-transparent text-neutral-100 min-h-screen">
         <CartProvider>
           <Navbar />
           <AudioProvider>
-            <PageTransition>{children}</PageTransition>
+            <AudioCanvasWrapper />
+            <div className="relative z-10">
+              <PageTransition>{children}</PageTransition>
+            </div>
           </AudioProvider>
         </CartProvider>
         <Footer />

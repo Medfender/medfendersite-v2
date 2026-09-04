@@ -1,0 +1,1025 @@
+[     321ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[     346ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[     623ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[     715ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.webp:0
+[     716ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.webp:0
+[     716ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.webp:0
+[     717ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.webp:0
+[     727ms] [LOG] [Fast Refresh] done in 214ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[     894ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.WEBP:0
+[     894ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.WEBP:0
+[     901ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.WEBP:0
+[     907ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.WEBP:0
+[    1006ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpg:0
+[    1007ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpg:0
+[    1028ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpg:0
+[    1038ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpg:0
+[    1049ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPG:0
+[    1050ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPG:0
+[    1053ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPG:0
+[    1056ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPG:0
+[    1067ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpeg:0
+[    1070ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpeg:0
+[    1071ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpeg:0
+[    1072ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpeg:0
+[    1082ms] [WARNING] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[    1119ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPEG:0
+[    1120ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPEG:0
+[    1149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPEG:0
+[    1149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPEG:0
+[    1204ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.png:0
+[    1208ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.png:0
+[    1215ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.png:0
+[    1216ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.png:0
+[    1236ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.PNG:0
+[    1243ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.PNG:0
+[    1250ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.PNG:0
+[    1251ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.PNG:0
+[    1257ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.webp:0
+[    1262ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.webp:0
+[    1268ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.WEBP:0
+[    1281ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.WEBP:0
+[    1294ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpg:0
+[    1309ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpg:0
+[    1336ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPG:0
+[    1338ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPG:0
+[    1360ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpeg:0
+[    1361ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpeg:0
+[    1375ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPEG:0
+[    1376ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPEG:0
+[    1388ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.png:0
+[    1391ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.png:0
+[    1406ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.PNG:0
+[    1407ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.PNG:0
+[    1428ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.webp:0
+[    1430ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.webp:0
+[    1431ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.webp:0
+[    1431ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.webp:0
+[    1452ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.WEBP:0
+[    1458ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.WEBP:0
+[    1466ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.WEBP:0
+[    1467ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.WEBP:0
+[    1478ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpg:0
+[    1484ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpg:0
+[    1495ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpg:0
+[    1496ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpg:0
+[    1505ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPG:0
+[    1514ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPG:0
+[    1533ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPG:0
+[    1536ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPG:0
+[    1541ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpeg:0
+[    1554ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpeg:0
+[    1560ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpeg:0
+[    1564ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpeg:0
+[    1568ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPEG:0
+[    1582ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPEG:0
+[    1591ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPEG:0
+[    1592ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPEG:0
+[    1595ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.png:0
+[    1608ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.png:0
+[    1624ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.png:0
+[    1625ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.png:0
+[    1629ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.PNG:0
+[    1644ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.PNG:0
+[    1660ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.PNG:0
+[    1662ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.PNG:0
+[    1663ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.webp:0
+[    1677ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.webp:0
+[    1690ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.webp:0
+[    1700ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.webp:0
+[    1702ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.WEBP:0
+[    1719ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.WEBP:0
+[    1736ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.WEBP:0
+[    1737ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.WEBP:0
+[    1740ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpg:0
+[    1744ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpg:0
+[    1797ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpg:0
+[    1799ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpg:0
+[    1805ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPG:0
+[    1807ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPG:0
+[    1818ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPG:0
+[    1819ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPG:0
+[    1823ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpeg:0
+[    1827ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpeg:0
+[    1849ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpeg:0
+[    1855ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpeg:0
+[    1857ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPEG:0
+[    1858ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPEG:0
+[    1880ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPEG:0
+[    1881ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPEG:0
+[    1886ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.png:0
+[    1887ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.png:0
+[    1911ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.png:0
+[    1912ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.png:0
+[    1918ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.PNG:0
+[    1919ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.PNG:0
+[    1942ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.PNG:0
+[    1943ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.PNG:0
+[   20372ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[   20547ms] [LOG] [Fast Refresh] done in 275ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  308554ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  308699ms] [LOG] [Fast Refresh] done in 136ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  308754ms] [LOG] [Fast Refresh] done in 136ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  308805ms] [LOG] [Fast Refresh] done in 136ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  309752ms] [LOG] [Fast Refresh] done in 1146ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  310725ms] [LOG] [Fast Refresh] done in 2150ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  311752ms] [LOG] [Fast Refresh] done in 3153ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  312756ms] [LOG] [Fast Refresh] done in 4159ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  313739ms] [LOG] [Fast Refresh] done in 247ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  313828ms] [LOG] [Fast Refresh] done in 247ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  314757ms] [LOG] [Fast Refresh] done in 1252ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  315757ms] [LOG] [Fast Refresh] done in 2257ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  316781ms] [LOG] [Fast Refresh] done in 3266ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  317784ms] [LOG] [Fast Refresh] done in 4272ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  318806ms] [LOG] [Fast Refresh] done in 5277ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  319791ms] [LOG] [Fast Refresh] done in 6281ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  320779ms] [LOG] [Fast Refresh] done in 7286ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  321800ms] [LOG] [Fast Refresh] done in 8290ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  322806ms] [LOG] [Fast Refresh] done in 9297ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  323815ms] [LOG] [Fast Refresh] done in 10300ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  324815ms] [LOG] [Fast Refresh] done in 11306ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  325818ms] [LOG] [Fast Refresh] done in 12311ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  326809ms] [LOG] [Fast Refresh] done in 13314ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  327824ms] [LOG] [Fast Refresh] done in 14319ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  328836ms] [LOG] [Fast Refresh] done in 15324ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  329833ms] [LOG] [Fast Refresh] done in 16327ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  330092ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  330118ms] [LOG] [Fast Refresh] done in 8ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  330841ms] [LOG] [Fast Refresh] done in 701ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  331853ms] [LOG] [Fast Refresh] done in 1706ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  332853ms] [LOG] [Fast Refresh] done in 2711ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  333854ms] [LOG] [Fast Refresh] done in 3714ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  334848ms] [LOG] [Fast Refresh] done in 4718ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  335856ms] [LOG] [Fast Refresh] done in 5722ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  336860ms] [LOG] [Fast Refresh] done in 6725ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  337909ms] [LOG] [Fast Refresh] done in 7744ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  338919ms] [LOG] [Fast Refresh] done in 8750ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  339886ms] [LOG] [Fast Refresh] done in 9756ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  340042ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  340125ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  340153ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  340899ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  341901ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  342922ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  343840ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  344066ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  344211ms] [ERROR] ./src/app/layout.tsx:40:27
+Error: Expected '</', got 'jsx text'
+  38 |             <div className="relative z-10">
+  39 |             <PageTransition>{children}</PageTransition>
+> 40 |           </AudioProvider>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         </CartProvider>
+     | ^^^^^^^^
+  42 |         <Footer />
+  43 |         <Script
+  44 |           src="https://assets.lemonsqueezy.com/lemon.js"
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  344212ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  347667ms] [ERROR] ./src/app/layout.tsx:40:27
+Error: Expected '</', got 'jsx text'
+  38 |             <div className="relative z-10">
+  39 |             <PageTransition>{children}</PageTransition>
+> 40 |           </AudioProvider>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         </CartProvider>
+     | ^^^^^^^^
+  42 |         <Footer />
+  43 |         <Script
+  44 |           src="https://assets.lemonsqueezy.com/lemon.js"
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  347668ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  347910ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  348172ms] [ERROR] ./src/app/layout.tsx:40:27
+Error: Expected '</', got 'jsx text'
+  38 |             <div className="relative z-10">
+  39 |             <PageTransition>{children}</PageTransition>
+> 40 |           </AudioProvider>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         </CartProvider>
+     | ^^^^^^^^
+  42 |         <Footer />
+  43 |         <Script
+  44 |           src="https://assets.lemonsqueezy.com/lemon.js"
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  348172ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  348376ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  348824ms] [ERROR] ./src/app/layout.tsx:40:27
+Error: Expected '</', got 'jsx text'
+  38 |             <div className="relative z-10">
+  39 |             <PageTransition>{children}</PageTransition>
+> 40 |           </AudioProvider>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         </CartProvider>
+     | ^^^^^^^^
+  42 |         <Footer />
+  43 |         <Script
+  44 |           src="https://assets.lemonsqueezy.com/lemon.js"
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  348824ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  349064ms] [ERROR] ./src/app/layout.tsx:40:27
+Error: Expected '</', got 'jsx text'
+  38 |             <div className="relative z-10">
+  39 |             <PageTransition>{children}</PageTransition>
+> 40 |           </AudioProvider>
+     |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 41 |         </CartProvider>
+     | ^^^^^^^^
+  42 |         <Footer />
+  43 |         <Script
+  44 |           src="https://assets.lemonsqueezy.com/lemon.js"
+
+Parsing ecmascript source code failed @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  349064ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  356450ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  356528ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  358195ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  358335ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  362778ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  362886ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  372488ms] [ERROR] ./src/components/audio/MorphParticles.tsx:165:16
+Error: Expression expected
+  163 |       />
+  164 |     </points>
+> 165 |     <DebugBox />
+      |                ^
+  166 |   );
+  167 | }
+  168 |
+
+Parsing ecmascript source code failed
+
+Import trace:
+  Client Component Browser:
+    ./src/components/audio/MorphParticles.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasImpl.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvas.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Client Component Browser]
+    ./src/components/audio/AudioCanvasWrapper.tsx [Server Component]
+    ./src/app/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[  372551ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  406496ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  406636ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  407456ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  407713ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.webp:0
+[  407788ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.webp:0
+[  407789ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.webp:0
+[  407790ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.webp:0
+[  407812ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.WEBP:0
+[  407829ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.WEBP:0
+[  407833ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.WEBP:0
+[  407836ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.WEBP:0
+[  407839ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpg:0
+[  407860ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpg:0
+[  407868ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpg:0
+[  407872ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  407874ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpg:0
+[  407875ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPG:0
+[  407886ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPG:0
+[  407887ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPG:0
+[  407894ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPG:0
+[  407895ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpeg:0
+[  407903ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpeg:0
+[  407904ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpeg:0
+[  407917ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpeg:0
+[  407918ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPEG:0
+[  407925ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPEG:0
+[  407926ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPEG:0
+[  407931ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPEG:0
+[  407939ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.png:0
+[  407941ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.png:0
+[  407945ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.png:0
+[  407954ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.png:0
+[  407960ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.PNG:0
+[  407964ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.PNG:0
+[  407969ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.PNG:0
+[  407975ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.PNG:0
+[  407977ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.webp:0
+[  407980ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.webp:0
+[  408007ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.WEBP:0
+[  408009ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.WEBP:0
+[  408022ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpg:0
+[  408023ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpg:0
+[  408050ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPG:0
+[  408053ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPG:0
+[  408082ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpeg:0
+[  408090ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpeg:0
+[  408101ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPEG:0
+[  408108ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPEG:0
+[  408119ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.png:0
+[  408121ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.png:0
+[  408134ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.PNG:0
+[  408135ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.PNG:0
+[  408149ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.webp:0
+[  408158ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.webp:0
+[  408159ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.webp:0
+[  408159ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.webp:0
+[  408167ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.WEBP:0
+[  408177ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.WEBP:0
+[  408181ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.WEBP:0
+[  408182ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.WEBP:0
+[  408183ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpg:0
+[  408199ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpg:0
+[  408200ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpg:0
+[  408201ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpg:0
+[  408202ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPG:0
+[  408226ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPG:0
+[  408228ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPG:0
+[  408230ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPG:0
+[  408248ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpeg:0
+[  408261ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpeg:0
+[  408262ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpeg:0
+[  408263ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpeg:0
+[  408264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPEG:0
+[  408272ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPEG:0
+[  408275ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPEG:0
+[  408282ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPEG:0
+[  408283ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.png:0
+[  408287ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.png:0
+[  408294ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.png:0
+[  408302ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.png:0
+[  408303ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.PNG:0
+[  408306ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.PNG:0
+[  408317ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.PNG:0
+[  408326ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.PNG:0
+[  408331ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.webp:0
+[  408332ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.webp:0
+[  408333ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.webp:0
+[  408351ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.webp:0
+[  408361ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.WEBP:0
+[  408362ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.WEBP:0
+[  408363ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.WEBP:0
+[  408369ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.WEBP:0
+[  408380ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpg:0
+[  408384ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpg:0
+[  408386ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpg:0
+[  408387ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpg:0
+[  408393ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPG:0
+[  408404ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPG:0
+[  408407ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPG:0
+[  408418ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPG:0
+[  408419ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpeg:0
+[  408426ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpeg:0
+[  408427ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpeg:0
+[  408431ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpeg:0
+[  408435ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPEG:0
+[  408450ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPEG:0
+[  408455ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPEG:0
+[  408457ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPEG:0
+[  408458ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.png:0
+[  408465ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.png:0
+[  408483ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.png:0
+[  408489ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.png:0
+[  408490ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.PNG:0
+[  408491ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.PNG:0
+[  408497ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.PNG:0
+[  408501ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.PNG:0
+[  459778ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  459924ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  508859ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  509240ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  563068ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  563523ms] [LOG] [Fast Refresh] done in 168ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  664665ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  664767ms] ReferenceError: DebugBox is not defined
+    at MorphParticles (http://localhost:3000/_next/static/chunks/src_13yr71j._.js?id=%255Bproject%255D/src/components/audio/MorphParticles.tsx+%255Bapp-client%255D+(ecmascript):160:448)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:13238:32)
+    at It (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:9107:25)
+    at ks (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:10227:374)
+    at tt (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:10558:32)
+    at B (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:7924:70)
+    at Ph (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12450:50)
+    at wh (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12367:36)
+    at Ff (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12358:21)
+    at Lf (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12129:75)
+    at Ap (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:8325:35)
+    at Wa (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:8269:165)
+    at Ls (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12222:51)
+    at Object.hu [as scheduleRefresh] (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:6622:71)
+    at http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:589:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:582:38)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:137:31)
+    at http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:145:13
+[  664831ms] ReferenceError: DebugBox is not defined
+    at MorphParticles (http://localhost:3000/_next/static/chunks/src_13yr71j._.js?id=%255Bproject%255D/src/components/audio/MorphParticles.tsx+%255Bapp-client%255D+(ecmascript):160:448)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:13238:32)
+    at It (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:9107:25)
+    at ks (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:10227:374)
+    at tt (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:10558:32)
+    at B (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:7924:70)
+    at Ph (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12450:50)
+    at wh (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12367:36)
+    at Ff (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12358:21)
+    at Lf (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12129:75)
+    at Ap (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:8325:35)
+    at Wa (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:8269:165)
+    at Ls (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:12222:51)
+    at Object.hu [as scheduleRefresh] (http://localhost:3000/_next/static/chunks/1rvs_%40react-three_fiber_dist_1qxcvpy._.js:6622:71)
+    at http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:589:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:582:38)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:137:31)
+    at http://localhost:3000/_next/static/chunks/1qpc_next_dist_compiled_1mf7k_3._.js:145:13
+[  664829ms] [LOG] [Fast Refresh] done in 36ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  665422ms] [LOG] THREE.WebGLRenderer: Context Lost. @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  682294ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  682295ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  682705ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  682732ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  683117ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.webp:0
+[  683118ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.webp:0
+[  683119ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.webp:0
+[  683120ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.webp:0
+[  683442ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.WEBP:0
+[  683443ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.WEBP:0
+[  683443ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.WEBP:0
+[  683444ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.WEBP:0
+[  683558ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpg:0
+[  683559ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpg:0
+[  683560ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpg:0
+[  683561ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpg:0
+[  683623ms] [WARNING] THREE.Clock: This module has been deprecated. Please use THREE.Timer instead. @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  683669ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPG:0
+[  683670ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPG:0
+[  683671ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPG:0
+[  683672ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPG:0
+[  683785ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpeg:0
+[  683787ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpeg:0
+[  683792ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpeg:0
+[  683793ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpeg:0
+[  683803ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.JPEG:0
+[  683804ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.JPEG:0
+[  683810ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.JPEG:0
+[  683811ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.JPEG:0
+[  683822ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.png:0
+[  683823ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.png:0
+[  683828ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.png:0
+[  683829ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.png:0
+[  683841ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.PNG:0
+[  683845ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.PNG:0
+[  683846ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.PNG:0
+[  683850ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.PNG:0
+[  683866ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.webp:0
+[  683867ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.webp:0
+[  683884ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.WEBP:0
+[  683885ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.WEBP:0
+[  683898ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpg:0
+[  683898ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpg:0
+[  683909ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPG:0
+[  683910ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPG:0
+[  683931ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpeg:0
+[  683933ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpeg:0
+[  683948ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.JPEG:0
+[  683949ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.JPEG:0
+[  683960ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.png:0
+[  683961ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.png:0
+[  683976ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.PNG:0
+[  683977ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.PNG:0
+[  683996ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.webp:0
+[  683997ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.webp:0
+[  684000ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.webp:0
+[  684001ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.webp:0
+[  684019ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.WEBP:0
+[  684020ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.WEBP:0
+[  684022ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.WEBP:0
+[  684023ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.WEBP:0
+[  684041ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpg:0
+[  684044ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpg:0
+[  684047ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpg:0
+[  684048ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpg:0
+[  684065ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPG:0
+[  684070ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPG:0
+[  684072ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPG:0
+[  684073ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPG:0
+[  684091ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpeg:0
+[  684097ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpeg:0
+[  684100ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpeg:0
+[  684101ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpeg:0
+[  684112ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.JPEG:0
+[  684128ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.JPEG:0
+[  684129ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.JPEG:0
+[  684130ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.JPEG:0
+[  684140ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.png:0
+[  684158ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.png:0
+[  684159ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.png:0
+[  684160ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.png:0
+[  684165ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.PNG:0
+[  684171ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.PNG:0
+[  684181ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.PNG:0
+[  684183ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.PNG:0
+[  684187ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.webp:0
+[  684198ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.webp:0
+[  684203ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.webp:0
+[  684206ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.webp:0
+[  684206ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.WEBP:0
+[  684234ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.WEBP:0
+[  684237ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.WEBP:0
+[  684239ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.WEBP:0
+[  684240ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpg:0
+[  684255ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpg:0
+[  684263ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpg:0
+[  684264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpg:0
+[  684264ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPG:0
+[  684276ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPG:0
+[  684281ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPG:0
+[  684286ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPG:0
+[  684287ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.jpeg:0
+[  684298ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.jpeg:0
+[  684298ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.jpeg:0
+[  684303ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.jpeg:0
+[  684304ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.JPEG:0
+[  684313ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.JPEG:0
+[  684318ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.JPEG:0
+[  684319ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.JPEG:0
+[  684319ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.png:0
+[  684324ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.png:0
+[  684336ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.png:0
+[  684339ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.png:0
+[  684340ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20NX%20Blue%20Drive.PNG:0
+[  684341ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20feat%20HX%20Haze%20Glow.PNG:0
+[  684345ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Black%20Tube.PNG:0
+[  684351ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20feat%20ToneX%20Watt%20King.PNG:0
+[  687142ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  687227ms] [LOG] [Fast Refresh] done in 115ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  687787ms] [LOG] THREE.WebGLRenderer: Context Lost. @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  705743ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  706077ms] [LOG] [Fast Refresh] done in 213ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[  725887ms] [LOG] [Fast Refresh] done in 213ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072148ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072201ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL] [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072239ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL] [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072241ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL] [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072243ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [rijal-allah, Rijal Allah, , , Gnaoua Trance · Modulated Reverb · HX Stomp] [rijal-allah, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072246ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [vices-et-bordel, Vices et Bordel, , , Acoustic Kora · IK ToneX Acoustic] [vices-et-bordel, /images/Thumbnails/Ousmane Cissokho.jpeg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072249ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [what-you-wont-do, What You Won't Do For Love, , , Smooth Jazz Rhodes · HX Stomp XL] [what-you-wont-do, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072254ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL] [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072256ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [rijal-allah, Rijal Allah, , , Gnaoua Trance · Modulated Reverb · HX Stomp] [rijal-allah, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072259ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [vices-et-bordel, Vices et Bordel, , , Acoustic Kora · IK ToneX Acoustic] [vices-et-bordel, /images/Thumbnails/Ousmane Cissokho.jpeg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072260ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [what-you-wont-do, What You Won't Do For Love, , , Smooth Jazz Rhodes · HX Stomp XL] [what-you-wont-do, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072264ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [, NX Blue Drive, , Line 6 HX Stomp XL, .hlx] [NX Blue Drive-Line 6 HX Stomp XL, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072267ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [, ToneX Black Tube, , IK Multimedia ToneX, .txp] [ToneX Black Tube-IK Multimedia ToneX, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072270ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [, HX Haze Glow, , Line 6 HX Stomp XL, .hlx] [HX Haze Glow-Line 6 HX Stomp XL, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072274ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [, ToneX Watt King, , IK Multimedia ToneX, .txp] [ToneX Watt King-IK Multimedia ToneX, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072279ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL] [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1072390ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.webp:0
+[ 1072391ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.webp:0
+[ 1072392ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.webp:0
+[ 1072393ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.webp:0
+[ 1072420ms] [LOG] [Fast Refresh] done in 28ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072420ms] [LOG] [Fast Refresh] done in 28ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072503ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpg:0
+[ 1072504ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpg:0
+[ 1072505ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpg:0
+[ 1072506ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpg:0
+[ 1072652ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.png:0
+[ 1072653ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.png:0
+[ 1072653ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.png:0
+[ 1072654ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.png:0
+[ 1072702ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072718ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/NX%20Blue%20Drive.jpeg:0
+[ 1072719ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Black%20Tube.jpeg:0
+[ 1072720ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/HX%20Haze%20Glow.jpeg:0
+[ 1072721ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/ToneX%20Watt%20King.jpeg:0
+[ 1072748ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.webp:0
+[ 1072749ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.webp:0
+[ 1072801ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpg:0
+[ 1072803ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpg:0
+[ 1072895ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.png:0
+[ 1072895ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.png:0
+[ 1072920ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL.jpeg:0
+[ 1072922ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX.jpeg:0
+[ 1072935ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.webp:0
+[ 1072937ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.webp:0
+[ 1072938ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.webp:0
+[ 1072939ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.webp:0
+[ 1072944ms] [LOG] [Fast Refresh] done in 351ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1072950ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpg:0
+[ 1072954ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpg:0
+[ 1072955ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpg:0
+[ 1072956ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpg:0
+[ 1072960ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.png:0
+[ 1072970ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.png:0
+[ 1072973ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.png:0
+[ 1072974ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.png:0
+[ 1072978ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20HX%20Haze%20Glow.jpeg:0
+[ 1072981ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/Line%206%20HX%20Stomp%20XL%20-%20NX%20Blue%20Drive.jpeg:0
+[ 1072989ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Watt%20King.jpeg:0
+[ 1072990ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/images/Thumbnails/IK%20Multimedia%20ToneX%20-%20ToneX%20Black%20Tube.jpeg:0
+[ 1386628ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1386733ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386780ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386781ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386782ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [rijal-allah, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] [rijal-allah, Rijal Allah, , , Gnaoua Trance · Modulated Reverb · HX Stomp, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386783ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [vices-et-bordel, /images/Thumbnails/Ousmane Cissokho.jpeg] [vices-et-bordel, Vices et Bordel, , , Acoustic Kora · IK ToneX Acoustic, /images/Thumbnails/Ousmane Cissokho.jpeg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386785ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [what-you-wont-do, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] [what-you-wont-do, What You Won't Do For Love, , , Smooth Jazz Rhodes · HX Stomp XL, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386788ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386789ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [rijal-allah, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] [rijal-allah, Rijal Allah, , , Gnaoua Trance · Modulated Reverb · HX Stomp, /images/Thumbnails/Rijal Allah feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386789ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [vices-et-bordel, /images/Thumbnails/Ousmane Cissokho.jpeg] [vices-et-bordel, Vices et Bordel, , , Acoustic Kora · IK ToneX Acoustic, /images/Thumbnails/Ousmane Cissokho.jpeg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386790ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [what-you-wont-do, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] [what-you-wont-do, What You Won't Do For Love, , , Smooth Jazz Rhodes · HX Stomp XL, /images/Thumbnails/Boby Caldwell - What You Won't Do For Love.webp] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386792ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [NX Blue Drive-Line 6 HX Stomp XL, ] [, NX Blue Drive, , Line 6 HX Stomp XL, .hlx, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386794ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [ToneX Black Tube-IK Multimedia ToneX, ] [, ToneX Black Tube, , IK Multimedia ToneX, .txp, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386796ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [HX Haze Glow-Line 6 HX Stomp XL, ] [, HX Haze Glow, , Line 6 HX Stomp XL, .hlx, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386797ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [ToneX Watt King-IK Multimedia ToneX, ] [, ToneX Watt King, , IK Multimedia ToneX, .txp, ] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386800ms] [ERROR] The final argument passed to %s changed size between renders. The order and size of this array must remain constant.
+
+Previous: %s
+Incoming: %s useEffect [sidi-bouganga, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] [sidi-bouganga, Sidi Bouganga, , , Fender Strat · TONEX Capture · HX Stomp XL, /images/Thumbnails/Sidi Bouganga feat Younes Hadir.jpg] @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:1052
+[ 1386879ms] [LOG] [Fast Refresh] done in 142ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1386879ms] [LOG] [Fast Refresh] done in 142ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776
+[ 1386972ms] [LOG] [Fast Refresh] done in 142ms @ http://localhost:3000/_next/static/chunks/1qpc_next_dist_14e2etx._.js:776

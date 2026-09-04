@@ -3,10 +3,10 @@
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import vertexShader from '@/shaders/morphParticles.vert?raw';
-import fragmentShader from '@/shaders/morphParticles.frag?raw';
 
 const PARTICLE_COUNT = 15000;
+
+import { vertexShader, fragmentShader } from '@/shaders/morphParticles';
 
 export interface FrequencyBands {
   high: number;
@@ -50,7 +50,6 @@ export default function MorphParticles({
       const x = (col - cols / 2 + 0.5) * spacing;
       const y = (row - rows / 2 + 0.5) * spacing;
       const z = (dep - depth / 2 + 0.5) * spacing;
-      // Undulate Y with sine + cosine for organic waveform feel
       const wave = Math.sin(col * 0.6) * 0.18 + Math.cos(row * 0.8) * 0.12;
       arr[i * 3] = x;
       arr[i * 3 + 1] = y + wave;
@@ -64,16 +63,13 @@ export default function MorphParticles({
     const arr = new Float32Array(PARTICLE_COUNT * 3);
     const radiusMax = 2.8;
     const rings = 40;
-    const grooveDetail = 12; // particles per ring
+    const grooveDetail = 12;
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const ring = i % rings;
       const seg = Math.floor(i / rings) % grooveDetail;
-      // Subtle radial jitter for organic feel
       const jitter = ((i / rings / grooveDetail) % 1) * 0.3 - 0.15;
       const r = (ring / rings) * radiusMax + jitter * 0.05;
-      // Alternate ring phase to create a groove helix
       const theta = (seg / grooveDetail) * Math.PI * 2 + (ring % 2) * 0.04;
-      // Every 3rd ring is a deeper groove ridge
       const grooveAmp = ring % 3 === 0 ? 0.06 : 0.02;
       arr[i * 3] = Math.cos(theta) * r;
       arr[i * 3 + 1] = Math.sin(theta) * r;
@@ -99,9 +95,11 @@ export default function MorphParticles({
   }, []);
 
   // Single BufferGeometry with all three position attributes.
-  // Custom attribute names match the shader's `attribute vec3 positionA/B/C` decls.
+  // NOTE: 'position' (lowercase) is required — THREE.Points reads it by default.
+  // positionA/B/C are additional custom attributes for the morph shader.
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positionA, 3));
     geo.setAttribute('positionA', new THREE.BufferAttribute(positionA, 3));
     geo.setAttribute('positionB', new THREE.BufferAttribute(positionB, 3));
     geo.setAttribute('positionC', new THREE.BufferAttribute(positionC, 3));
@@ -139,16 +137,10 @@ export default function MorphParticles({
   });
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={uniforms}
-        transparent
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
+    <>
+      <points geometry={geometry} frustumCulled={false}>
+        <pointsMaterial color="#00E5CC" size={8} sizeAttenuation transparent />
+      </points>
+    </>
   );
 }

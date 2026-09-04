@@ -114,7 +114,13 @@
       "Read(//usr/lib/**)",
       "Bash(ldconfig -p)",
       "Bash(sudo pacman -S v8)",
-      "Bash(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=\"$HOME/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome\" node *)"
+      "Bash(PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=\"$HOME/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome\" node *)",
+      "Read(//usr/bin/**)",
+      "Bash(dpkg -l)",
+      "Bash(sudo du -h --max-depth=1 /)",
+      "Bash(rm -rf /home/medfender/Downloads/CentOS-Stream-10-latest-x86_64-dvd1.iso)",
+      "Bash(rm -rf /home/medfender/.cache/*)",
+      "Bash(sudo pacman -Scc --noconfirm)"
     ]
   }
 }

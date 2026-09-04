@@ -66,23 +66,12 @@ export default function AudioCanvasImpl({ getFrequencyBands }: AudioCanvasProps)
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: 'auto',
-        // Prevent canvas from blocking mouse events (we rely on window listener)
-        // The forward UI elements will overlay above this with higher z-index.
-      }}
+      className="fixed inset-0 w-screen h-screen pointer-events-none z-0"
       aria-hidden="true"
     >
       <Canvas
-        style={{ position: 'absolute', inset: 0 }}
-        gl={{
-          antialias: true,
-          alpha: true,
-          powerPreference: 'high-performance',
-        }}
+        style={{ position: 'absolute', inset: 0, width: '100vw', height: '100vh', background: '#080808' }}
+        gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         dpr={[1, 2]}
       >
         <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={60} near={0.1} far={100} />

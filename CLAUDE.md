@@ -22,4 +22,9 @@
 - Verify build (`npm run build`) before finishing.
 - Capture screenshots via `node screenshot.mjs http://localhost:3000` when polishing.
 - **Visual QA (enforced):** After any CSS, Tailwind, or UI layout changes you MUST navigate the local dev server (`http://localhost:3000/audio` or relevant page), take a screenshot via Chrome DevTools / Playwright MCP, visually verify design compliance, and check the console for errors — see `docs/agents/visual-qa.md`. No exceptions.
+- **NEVER pass PNG files to the `Read` tool directly** — the active model lacks vision and returns 500. For visual judgment, save screenshot to `temp_screenshots/` then run `python tools/vision_check.py <png> --provider <ollama|openrouter|gemini|nvidia>`. See `docs/agents/visual-qa.md`.
 - Do not push to GitHub until explicitly instructed.
+
+## Permissions (permanently granted)
+- **Full, unrestricted permissions** for this project — modifications, model installations/removals, system configs, file creation, dependency changes, local services, no need to ask for confirmation.
+- All keys live in `.env` (gitignored): `OPENROUTER_API_KEY`, `GEMINI_KEY`, `NVIDIA_API_KEY`, `OMNIRouter_KEY`.

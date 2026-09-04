@@ -1,0 +1,320 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "Medfender Home" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - text: Medfender
+      - generic [ref=e5]:
+        - link "Audio" [ref=e6] [cursor=pointer]:
+          - /url: /audio
+        - link "Store" [ref=e8] [cursor=pointer]:
+          - /url: /store
+        - link "Media" [ref=e9] [cursor=pointer]:
+          - /url: /media
+        - link "Support" [ref=e10] [cursor=pointer]:
+          - /url: /support/setup-guide
+        - link "Contact" [ref=e11] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e12]:
+        - button "Toggle language" [ref=e13]: EN
+        - button "Open cart (0 items)" [ref=e14]
+  - generic [ref=e20]:
+    - main [ref=e21]:
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: Featured Audio
+            - generic [ref=e28]: Live ·
+          - generic [ref=e29]: Reference Monitoring
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - heading "Studio Engine In Motion." [level=1] [ref=e34]:
+              - text: Studio Engine
+              - generic [ref=e35]: In Motion.
+            - paragraph [ref=e36]: A real-time listening workstation built around a master turntable engine. Every preset, EQ curve, and signal-chain node below is driven by the same audio state — no parallel graphs, no double-renders.
+          - generic [ref=e37]:
+            - generic [ref=e38]:
+              - generic [ref=e39]: Now On Deck
+              - generic [ref=e42]: "Off"
+            - generic [ref=e45]: Studio Engine — Idle
+            - generic [ref=e46]: Medfender Signal Chain
+            - generic [ref=e47]:
+              - generic [ref=e48]: 192 kHz
+              - generic [ref=e51]: ·
+              - generic [ref=e52]: 32-bit
+              - generic [ref=e53]: ·
+              - generic [ref=e54]: 126 dB
+              - generic [ref=e55]: ·
+              - generic [ref=e56]: < 1 ms
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - heading "Tactile Listening" [level=2] [ref=e59]
+          - paragraph [ref=e60]: Vinyl Showcase
+        - generic [ref=e65]:
+          - img "Turntable deck" [ref=e67]:
+            - generic [ref=e227]:
+              - generic [ref=e263]: A-SKATE
+              - generic [ref=e272]: CUE
+            - generic [ref=e318] [cursor=pointer]:
+              - generic [ref=e321]: +8%
+              - generic [ref=e322]: "0"
+              - generic [ref=e323]: "-8%"
+              - generic [ref=e328]: PITCH
+          - generic [ref=e329]:
+            - generic [ref=e330]:
+              - button "Power on" [ref=e333]
+              - generic [ref=e335]: Power
+            - generic:
+              - button "Play"
+              - generic: Play
+            - generic:
+              - button "Stop"
+              - generic: STOP
+          - generic:
+            - generic:
+              - generic: BPM
+              - generic: "--"
+              - generic: ±0.0%
+            - generic: Tempo
+          - generic:
+            - button "33 RPM" [pressed] [ref=e336]: "33"
+            - button "45 RPM" [ref=e337]: "45"
+        - generic [ref=e341]:
+          - generic [ref=e342]:
+            - heading "Playlist" [level=3] [ref=e343]
+            - generic [ref=e344]: 0 tracks
+          - paragraph [ref=e346]: No tracks loaded.
+      - generic [ref=e348]:
+        - generic [ref=e349]:
+          - heading "Tactile Listening" [level=2] [ref=e350]
+          - paragraph [ref=e351]: Vinyl Showcase
+          - paragraph [ref=e352]: Pick a side. The spectrum pulses in real time, the master turntable spins above, and the docked bar takes over for transport.
+        - generic [ref=e353]:
+          - generic [ref=e354]:
+            - generic [ref=e355]:
+              - heading "Real-Time Spectrum" [level=3] [ref=e356]
+              - generic [ref=e357]:
+                - generic [ref=e358]:
+                  - button "Switch to bars mode" [ref=e359]: Bars
+                  - button "Switch to curve mode" [pressed] [ref=e360]: Curve
+                - generic [ref=e361]:
+                  - button "Cyan theme" [ref=e362]
+                  - button "Red theme" [ref=e363]
+                  - button "Green theme" [ref=e364]
+            - paragraph [ref=e367]: Logarithmic · 48 bars · peak hold
+          - generic [ref=e368]:
+            - generic [ref=e369]:
+              - heading "Tracklist" [level=3] [ref=e370]
+              - generic [ref=e371]: 0 tracks
+            - paragraph [ref=e373]: No tracks loaded.
+            - paragraph [ref=e374]: Transport handled by docked bar player
+      - generic [ref=e375]:
+        - generic [ref=e376]:
+          - heading "Profiling & Modeling" [level=2] [ref=e377]
+          - paragraph [ref=e378]: Gear Info
+        - generic [ref=e379]:
+          - generic [ref=e380]:
+            - img "TONEX"
+            - generic [ref=e381]:
+              - generic [ref=e388]:
+                - heading "IK Multimedia TONEX" [level=3] [ref=e389]
+                - paragraph [ref=e390]: Amplification & Cab IR
+              - generic [ref=e391]: Modeler
+            - paragraph [ref=e392]: AI-trained amplifier and cabinet impulse response modeling. TONEX captures the exact harmonic behavior of your favorite amps — from clean headroom to saturated drive — and replays them with 192 kHz / 32-bit precision.
+            - generic [ref=e393]:
+              - generic [ref=e394]:
+                - generic [ref=e395]: Resolution
+                - generic [ref=e396]: 192 kHz
+              - generic [ref=e397]:
+                - generic [ref=e398]: Bit Depth
+                - generic [ref=e399]: 32-bit
+              - generic [ref=e400]:
+                - generic [ref=e401]: SNR
+                - generic [ref=e402]: 126 dB
+              - generic [ref=e403]:
+                - generic [ref=e404]: Latency
+                - generic [ref=e405]: < 1 ms
+          - generic [ref=e406]:
+            - img "HX Stomp XL"
+            - generic [ref=e407]:
+              - generic [ref=e416]:
+                - heading "Line 6 HX Stomp XL" [level=3] [ref=e417]
+                - paragraph [ref=e418]: Multi-Effects & Processing
+              - generic [ref=e419]: Multi-FX
+            - paragraph [ref=e420]: Next-generation HX modeling processor with four stereo signal processing paths. Run up to eight simultaneous effects chains, including amplifier models, drive stages, modulations, delays, and reverbs — all with ultra-low latency.
+            - generic [ref=e421]:
+              - generic [ref=e422]:
+                - generic [ref=e423]: Processing
+                - generic [ref=e424]: 4× Stereo
+              - generic [ref=e425]:
+                - generic [ref=e426]: Paths
+                - generic [ref=e427]: 8 Simultaneous
+              - generic [ref=e428]:
+                - generic [ref=e429]: DSP
+                - generic [ref=e430]: SHARC × 2
+              - generic [ref=e431]:
+                - generic [ref=e432]: Looper
+                - generic [ref=e433]: Up to 2 min
+      - generic [ref=e435]:
+        - generic [ref=e436]:
+          - heading "Preset & Patch Browser" [level=2] [ref=e441]
+          - generic [ref=e442]: 4 patches
+        - generic [ref=e443]:
+          - generic [ref=e444] [cursor=pointer]:
+            - generic [ref=e451]:
+              - generic [ref=e453]: Line 6 HX Stomp XL
+              - generic [ref=e454]: .hlx
+            - heading "NX Blue Drive" [level=3] [ref=e455]
+            - paragraph [ref=e456]: Drive → Amp Capture → Stereo Delay → IR
+            - generic [ref=e457]:
+              - generic [ref=e458]: Overdrive
+              - generic [ref=e459]: Clean Amp
+              - generic [ref=e460]: Stereo
+            - generic [ref=e461]:
+              - generic [ref=e462]: .hlx
+              - button "Download NX Blue Drive" [ref=e463]: Download Patch
+          - generic [ref=e467] [cursor=pointer]:
+            - generic [ref=e474]:
+              - generic [ref=e476]: IK Multimedia ToneX
+              - generic [ref=e477]: .txp
+            - heading "ToneX Black Tube" [level=3] [ref=e478]
+            - paragraph [ref=e479]: Tube Preamp → Cabinet IR → Reverb → EQ
+            - generic [ref=e480]:
+              - generic [ref=e481]: Tube
+              - generic [ref=e482]: Vintage
+              - generic [ref=e483]: Cab IR
+            - generic [ref=e484]:
+              - generic [ref=e485]: .txp
+              - button "Download ToneX Black Tube" [ref=e486]: Download Patch
+          - generic [ref=e490] [cursor=pointer]:
+            - generic [ref=e497]:
+              - generic [ref=e499]: Line 6 HX Stomp XL
+              - generic [ref=e500]: .hlx
+            - heading "HX Haze Glow" [level=3] [ref=e501]
+            - paragraph [ref=e502]: Modulation → Lust Drive → Amp → Reverb
+            - generic [ref=e503]:
+              - generic [ref=e504]: Ambient
+              - generic [ref=e505]: Drive
+              - generic [ref=e506]: Mod
+            - generic [ref=e507]:
+              - generic [ref=e508]: .hlx
+              - button "Download HX Haze Glow" [ref=e509]: Download Patch
+          - generic [ref=e513] [cursor=pointer]:
+            - generic [ref=e520]:
+              - generic [ref=e522]: IK Multimedia ToneX
+              - generic [ref=e523]: .txp
+            - heading "ToneX Watt King" [level=3] [ref=e524]
+            - paragraph [ref=e525]: Amp Model → Cabinet → Delay → Chorus
+            - generic [ref=e526]:
+              - generic [ref=e527]: Power
+              - generic [ref=e528]: Amp Model
+              - generic [ref=e529]: Delay
+            - generic [ref=e530]:
+              - generic [ref=e531]: .txp
+              - button "Download ToneX Watt King" [ref=e532]: Download Patch
+      - generic [ref=e538]:
+        - generic [ref=e539]:
+          - generic [ref=e540]: 192 kHz
+          - generic [ref=e541]: Sample Rate
+        - generic [ref=e542]:
+          - generic [ref=e543]: 32-bit
+          - generic [ref=e544]: Bit Depth
+        - generic [ref=e545]:
+          - generic [ref=e546]: 126 dB
+          - generic [ref=e547]: Dynamic Range
+        - generic [ref=e548]:
+          - generic [ref=e549]: < 1 ms
+          - generic [ref=e550]: Round-Trip Latency
+      - generic [ref=e552]:
+        - heading "Track & Gear Context" [level=2] [ref=e555]
+        - generic [ref=e557]:
+          - generic [ref=e558]:
+            - heading "Active Track" [level=3] [ref=e559]
+            - generic [ref=e560]:
+              - generic [ref=e561]: —
+              - generic [ref=e562]: No track selected
+              - generic [ref=e563]:
+                - generic [ref=e564]: 0:00 total
+                - generic [ref=e565]: ·
+                - generic [ref=e566]: 0:00 elapsed
+          - generic [ref=e567]:
+            - heading "Signal Notes" [level=3] [ref=e568]
+            - generic [ref=e569]:
+              - generic [ref=e570]: Guitar → 1/4" TRS balanced direct
+              - generic [ref=e573]: "TONEX Black Tube: vintage tube preamp model"
+              - generic [ref=e576]: "HX Stomp XL: stereo amp + modulation chain"
+              - generic [ref=e579]: "Interface USB-C: 192 kHz / 32-bit record path"
+              - generic [ref=e582]: "DAW: Cubase — stereo monitoring out"
+      - generic [ref=e587]:
+        - heading "Signal Chain" [level=3] [ref=e590]
+        - generic [ref=e593]:
+          - generic [ref=e601]:
+            - generic [ref=e602]: Guitar
+            - generic [ref=e603]: 1/4" TRS
+          - generic [ref=e613]:
+            - generic [ref=e614]: TONEX
+            - generic [ref=e615]: 192 kHz · 32-bit
+          - generic [ref=e626]:
+            - generic [ref=e627]: HX Stomp
+            - generic [ref=e628]: 4× Stereo Path
+          - generic [ref=e638]:
+            - generic [ref=e639]: Interface
+            - generic [ref=e640]: USB-C · ADAT
+          - generic [ref=e649]:
+            - generic [ref=e650]: DAW
+            - generic [ref=e651]: Stereo Out
+        - generic [ref=e652]:
+          - generic [ref=e653]: State · stopped
+          - generic [ref=e656]: 192 kHz / 32-bit
+          - generic [ref=e659]: Round-trip < 1 ms
+      - generic [ref=e668]:
+        - heading "Manual Layout Zone" [level=2] [ref=e669]
+        - paragraph [ref=e670]: Reserved space for manual content, documentation links, or additional gear information cards.
+        - generic [ref=e671]: Ready for Content
+    - region "Audio transport bar" [ref=e673]:
+      - generic [ref=e674]:
+        - generic [ref=e675]:
+          - button "Previous track" [ref=e676]
+          - button "Play" [ref=e679]
+          - button "Stop" [ref=e682]
+          - button "Next track" [ref=e685]
+        - generic [ref=e688]:
+          - button "Cover art for No track — click to open track" [ref=e689] [cursor=pointer]
+          - generic [ref=e693]:
+            - generic [ref=e694]: No track
+            - generic [ref=e695]: —
+          - generic "Cycle visualizer mode" [ref=e696] [cursor=pointer]
+        - generic [ref=e698]:
+          - generic [ref=e699]: 0:00
+          - slider "Seek" [ref=e701] [cursor=pointer]: "0"
+          - generic [ref=e703]: 0:00
+        - generic [ref=e704]:
+          - slider "Volume" [ref=e705] [cursor=pointer]: "0.85"
+          - button "Mute" [ref=e706]
+  - contentinfo [ref=e711]:
+    - generic [ref=e712]:
+      - paragraph [ref=e714]: © 2026 Medfender. All rights reserved.
+      - generic [ref=e715]:
+        - link "Audio" [ref=e716] [cursor=pointer]:
+          - /url: "#audio"
+        - link "Store" [ref=e717] [cursor=pointer]:
+          - /url: "#store"
+        - link "Media" [ref=e718] [cursor=pointer]:
+          - /url: "#media"
+        - link "Contact" [ref=e719] [cursor=pointer]:
+          - /url: "#contact"
+      - generic [ref=e720]:
+        - generic [ref=e721]: Support
+        - link "Installation & Setup →" [ref=e722] [cursor=pointer]:
+          - /url: /support/setup-guide
+      - generic [ref=e723]:
+        - link "YouTube" [ref=e724] [cursor=pointer]:
+          - /url: "#"
+          - text: ▶
+        - link "Instagram" [ref=e725] [cursor=pointer]:
+          - /url: "#"
+          - text: ◉
+        - link "GitHub" [ref=e726] [cursor=pointer]:
+          - /url: "#"
+          - text: ◈
+  - button "Open Next.js Dev Tools" [ref=e732] [cursor=pointer]

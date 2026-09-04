@@ -98,6 +98,26 @@ export default function StickyTransport() {
   const [miniMode, setMiniMode] = useState<"bars" | "curve" | "waveform">("bars");
   const [vinylVisible, setVinylVisible] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
+  const [volumeOpen, setVolumeOpen] = useState(false);
+  const volumePopRef = useRef<HTMLDivElement | null>(null);
+
+  // Close volume popover on outside tap / Escape
+  useEffect(() => {
+    if (!volumeOpen) return;
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (!volumePopRef.current) return;
+      if (!volumePopRef.current.contains(e.target as Node)) setVolumeOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setVolumeOpen(false); };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("touchstart", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("touchstart", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [volumeOpen]);
 
   useEffect(() => {
     let lastY = typeof window !== "undefined" ? window.scrollY : 0;
@@ -191,26 +211,22 @@ export default function StickyTransport() {
       aria-label="Audio transport bar"
       aria-hidden={isHidden}
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 py-2 flex items-center gap-3 sm:gap-4 min-w-0">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 py-2 flex items-center gap-1.5 sm:gap-3 md:gap-4 min-w-0 justify-between">
         {/* ── Transport Controls (left) ──────────────────────────────────── */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
           <button
             onClick={() => playPrevious?.()}
             aria-label="Previous track"
-            className="w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 flex items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
           >
             <SkipBack size={14} />
           </button>
           <button
             onClick={() => {
-              // Same play/pause toggle as the turntable's play/pause button — delegates
-              // to deckControls so the tonearm choreography fires. The registered
-              // handlers handle: powered-off → power on + play, playing → paused,
-              // paused/stopped → playing. Never goes to stopped.
               deckControls.toggle();
             }}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="relative w-11 h-11 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
+            className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
             style={{
               aspectRatio: "1/1",
               boxShadow:
@@ -221,9 +237,9 @@ export default function StickyTransport() {
             }}
           >
             {isPlaying ? (
-              <Pause size={18} className="shrink-0 text-slate-950" />
+              <Pause size={16} className="shrink-0 text-slate-950" />
             ) : (
-              <Play size={18} className="shrink-0 ml-0.5 text-slate-950" />
+              <Play size={16} className="shrink-0 ml-0.5 text-slate-950" />
             )}
           </button>
           <button
@@ -233,21 +249,21 @@ export default function StickyTransport() {
               deckControls.stop();
             }}
             aria-label="Stop"
-            className="w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 flex items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
           >
             <Square size={12} className="fill-current" />
           </button>
           <button
             onClick={() => playNext?.()}
             aria-label="Next track"
-            className="w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 flex items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
           >
             <SkipForward size={14} />
           </button>
         </div>
 
         {/* ── Album cover card (amp-style, floating, clickable) ─────────── */}
-        <div className="flex items-center gap-3 shrink min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0 flex-1 sm:flex-initial">
           {/* Amp-style floating card — amber-stroked, spinning ring when playing */}
           <CoverCard
             src={coverSrc}
@@ -255,12 +271,20 @@ export default function StickyTransport() {
             isPlaying={isPlaying}
             onClick={() => setIsReviewOpen(true)}
           />
-          {/* Track metadata */}
-          <div className="hidden sm:flex flex-col min-w-0 shrink-1" style={{ width: 160, minWidth: 160, maxWidth: 160 }}>
+          {/* Track metadata — compact pill on mobile, full on sm+ */}
+          <div className="flex-1 sm:hidden flex flex-col min-w-0">
+            <span className="text-[11px] font-bold text-white truncate leading-tight max-w-[160px] sm:max-w-[200px]">
+              {trackName}
+            </span>
+            <span className="text-[8px] font-mono text-cyan-400/70 uppercase tracking-wider truncate max-w-[160px] sm:max-w-[200px]">
+              {trackArtist}
+            </span>
+          </div>
+          <div className="hidden sm:flex flex-col min-w-0 shrink max-w-[160px] lg:max-w-[260px]">
             <span className="text-sm font-bold text-white truncate leading-tight">
               {trackName}
             </span>
-            <span className="text-[10px] font-mono text-cyan-400/70 uppercase tracking-wider truncate">
+            <span className="text-[9px] font-mono text-cyan-400/70 uppercase tracking-wider truncate">
               {trackArtist}
             </span>
           </div>
@@ -282,9 +306,9 @@ export default function StickyTransport() {
           </div>
         </div>
 
-        {/* ── Progress scrubber + timestamps (center) ────────────────────── */}
-        <div className="flex-1 flex items-center gap-2 min-w-[120px] sm:min-w-[160px] md:min-w-[200px] max-w-sm">
-          <span className="text-[10px] font-mono text-neutral-500 tabular-nums w-8 text-right shrink-0">
+        {/* ── Progress scrubber (hidden timestamps on xs, shown sm+) ──────── */}
+        <div className="flex-1 flex items-center gap-1.5 sm:gap-2 min-w-0 sm:min-w-[160px] md:min-w-[200px] max-w-sm">
+          <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-500 tabular-nums w-8 text-right shrink-0">
             {fmt(currentTime)}
           </span>
           <div
@@ -316,24 +340,14 @@ export default function StickyTransport() {
               }}
             />
           </div>
-          <span className="text-[10px] font-mono text-neutral-500 tabular-nums w-8 shrink-0">
+          <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-500 tabular-nums w-8 shrink-0">
             {fmt(duration)}
           </span>
         </div>
 
-        {/* ── Volume + mute (right) ──────────────────────────────────────── */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={toggleMute}
-            aria-label={isMuted ? "Unmute" : "Mute"}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${
-              isMuted
-                ? "text-red-400 bg-red-500/10"
-                : "text-cyan-400 hover:text-white"
-            }`}
-          >
-            {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
-          </button>
+        {/* ── Volume (right) — popover on mobile, inline slider on sm+ ── */}
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative" ref={volumePopRef}>
+          {/* Desktop: inline slider */}
           <input
             type="range"
             min="0"
@@ -341,7 +355,7 @@ export default function StickyTransport() {
             step="0.01"
             value={volume}
             onChange={(e) => setVolume(Number(e.target.value))}
-            className="w-16 sm:w-20 md:w-24 h-1 bg-white/[0.08] rounded-full appearance-none cursor-pointer accent-cyan-400"
+            className="hidden sm:block w-16 sm:w-20 md:w-24 h-1 bg-white/[0.08] rounded-full appearance-none cursor-pointer accent-cyan-400"
             style={{
               background: `linear-gradient(to right, #00d8f6 0%, #00d8f6 ${
                 volume * 100
@@ -349,6 +363,52 @@ export default function StickyTransport() {
             }}
             aria-label="Volume"
           />
+          {/* Mute toggle — all viewports */}
+          <button
+            onClick={() => { toggleMute(); setVolumeOpen(false); }}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${
+              isMuted
+                ? "text-red-400 bg-red-500/10"
+                : "text-cyan-400 hover:text-white"
+            }`}
+          >
+            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+          </button>
+          {/* Mobile: tap-to-open volume popover trigger (vertical bars icon) */}
+          <button
+            onClick={() => setVolumeOpen((o) => !o)}
+            aria-label="Open volume control"
+            aria-expanded={volumeOpen}
+            className="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white transition-all active:scale-90"
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
+              <rect x="1" y="5" width="2" height="4" rx="1" fill="currentColor" opacity="0.6"/>
+              <rect x="4" y="3" width="2" height="8" rx="1" fill="currentColor" opacity="0.85"/>
+              <rect x="7" y="1" width="2" height="12" rx="1" fill="currentColor"/>
+            </svg>
+          </button>
+          {/* Volume popover — vertical slider above the bar */}
+          {volumeOpen && (
+            <div className="absolute bottom-full right-0 mb-2 flex flex-col items-center gap-2 p-3 rounded-xl bg-[#111]/95 backdrop-blur-md border border-white/[0.1] shadow-[0_-4px_20px_rgba(0,0,0,0.6)] z-[60]">
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={volume}
+                onChange={(e) => setVolume(Number(e.target.value))}
+                className="w-1 h-24 rounded-full appearance-none cursor-pointer accent-cyan-400"
+                style={{
+                  background: `linear-gradient(to top, #00d8f6 0%, #00d8f6 ${volume * 100}%, rgba(255,255,255,0.1) ${volume * 100}%, rgba(255,255,255,0.1) 100%)`,
+                  writingMode: "vertical-lr" as any,
+                  direction: "rtl",
+                }}
+                aria-label="Volume"
+              />
+              <span className="text-[9px] font-mono text-neutral-400">{Math.round(volume * 100)}%</span>
+            </div>
+          )}
         </div>
       </div>
 

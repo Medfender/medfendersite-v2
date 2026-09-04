@@ -10,7 +10,6 @@ import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
-import AudioCanvas from "@/components/audio/AudioCanvas";
 
 import { deckControls } from "@/lib/audio/DeckControls";
 
@@ -27,7 +26,6 @@ export default function AudioClient() {
     togglePlay,
     stop: ctxStop,
     pause,
-    getFrequencyBands,
   } = useAudio();
 
   const handleTogglePlay = () => togglePlay();
@@ -56,7 +54,6 @@ export default function AudioClient() {
 
   return (
     <>
-      <AudioCanvas getFrequencyBands={getFrequencyBands ?? (() => ({ high: 0, mid: 0, low: 0 }))} />
       <main
         className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden"
         style={{ background: 'transparent' }}

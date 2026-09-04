@@ -1,9 +1,9 @@
-declare module '*.vert?raw' {
+declare module '*.vert.glsl' {
   const value: string;
   export default value;
 }
 
-declare module '*.frag?raw' {
+declare module '*.frag.glsl' {
   const value: string;
   export default value;
 }

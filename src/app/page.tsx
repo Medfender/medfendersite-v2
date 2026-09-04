@@ -6,9 +6,9 @@ export default function Home() {
   const featured = packs.slice(0, 3);
 
   return (
-    <main className="min-h-screen w-full bg-[url('/images/gallery/Me%20Guitar%203.png')] bg-cover bg-center bg-no-repeat relative">
+    <main className="min-h-screen w-full bg-transparent relative">
       {/* Dark overlay — sits in front of the image, behind all content */}
-      <div className="absolute inset-0 bg-black/50 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-black/30 z-0" />
+      <div className="absolute inset-0 bg-black/30 bg-gradient-to-t from-zinc-950/40 via-transparent to-black/20 z-0" />
 
       {/* All page content — stacked above the overlay */}
       <div className="relative z-10 flex flex-col">

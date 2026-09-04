@@ -784,15 +784,15 @@ export default function Turntable({
   else if (transportState === 'playing') displayAngle = PLAY_ANGLE + (currentProgress * (INNER_ANGLE - PLAY_ANGLE));
   else displayAngle = frozenAngleRef.current;
 
-  const PITCH_X = 720; const PITCH_Y = 90; const PITCH_LEN = 230;
+  const PITCH_X = 660; const PITCH_Y = 90; const PITCH_LEN = 230;
   const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (
-    <div className={`relative flex-shrink-0 ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))', width: '100%', maxWidth: 'clamp(380px, 48vw, 600px)', aspectRatio: '720 / 480', maxHeight: 'clamp(220px, 32vw, 340px)' }}>
+    <div className={`relative flex-shrink-0 ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))', width: '100%', maxWidth: 'min(520px, 92vw)', minWidth: '280px', aspectRatio: '720 / 480', minHeight: 'min(180px, 52vw)' }}>
       <div className="relative w-full h-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
         <div className="relative w-full h-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)" }}>
-          <div className="relative w-full h-full overflow-hidden" style={{ aspectRatio: "720 / 480", maxHeight: "inherit" }}>
-          <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block" }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
+          <div className="relative w-full h-full overflow-hidden" style={{ aspectRatio: "720 / 480" }}>
+          <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block", maxHeight: '100%' }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
             <defs>
               <linearGradient id="anodized-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#2a2e38"/><stop offset="40%" stopColor="#1c1f28"/><stop offset="100%" stopColor="#0e1015"/></linearGradient>
               <linearGradient id="brushed-al" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#5a6070"/><stop offset="8%" stopColor="#7a8298"/><stop offset="16%" stopColor="#5a6070"/><stop offset="24%" stopColor="#7a8298"/><stop offset="32%" stopColor="#5a6070"/><stop offset="40%" stopColor="#7a8298"/><stop offset="48%" stopColor="#5a6070"/><stop offset="56%" stopColor="#7a8298"/><stop offset="64%" stopColor="#5a6070"/><stop offset="72%" stopColor="#7a8298"/><stop offset="80%" stopColor="#5a6070"/><stop offset="88%" stopColor="#7a8298"/><stop offset="96%" stopColor="#5a6070"/><stop offset="100%" stopColor="#4a5068"/></linearGradient>
@@ -1248,12 +1248,12 @@ export default function Turntable({
           </svg>
           </div>
 
-          {/* Bottom-left: Power + Play transport */}
-          <div className="absolute left-3 bottom-3 z-30 flex items-end gap-3 pointer-events-auto">
+          {/* Bottom-left: Power + Play transport — scaled down for narrow mobile */}
+          <div className="absolute left-1 bottom-1 z-30 flex items-end gap-1 origin-bottom-left transition-transform duration-300 sm:left-2 sm:bottom-2 md:scale-100" style={{ transform: 'scale(0.65)' }}>
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
-                <div className="w-9 h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                  <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-6 h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
+                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
+                  <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
                     background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
                     boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
                     filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',
@@ -1265,7 +1265,7 @@ export default function Turntable({
               <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
             </div>
             <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-11 h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-8 h-8 sm:w-11 sm:h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
                 {localTransport === 'playing' ? (
                   <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                 ) : (
@@ -1279,7 +1279,7 @@ export default function Turntable({
               <button
                 onClick={isPowered ? handleDeckStop : undefined}
                 aria-label="Stop"
-                className="w-6 h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+                className="w-4 h-4 sm:w-6 sm:h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
                 style={{
                   background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
                   boxShadow: !isPlaying
@@ -1299,29 +1299,24 @@ export default function Turntable({
             </div>
           </div>
 
-          {/* Bottom-right: BPM/Tempo */}
-          <div className={`absolute right-3 bottom-3 z-30 flex flex-col items-center gap-1 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-            <div className="relative w-20 h-12 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-1 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+          {/* Bottom-right: BPM/Tempo — scaled down for narrow mobile */}
+          <div className={`absolute right-1 bottom-1 z-30 flex flex-col items-center gap-0.5 pointer-events-auto origin-bottom-right transition-transform duration-300 sm:right-2 sm:bottom-2 md:scale-100 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`} style={{ transform: 'scale(0.65)', transformOrigin: '100% 100%' }}>
+            <div className="relative w-12 h-7 sm:w-16 sm:h-10 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-0.5 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
               {/* Status LED — flashes when RPM changes to show hardware linkage */}
               <span aria-hidden="true" className={`absolute top-1 right-1 w-1 h-1 rounded-full ${rpmFlash ? "bg-cyan-300 shadow-[0_0_6px_2px_rgba(0,216,246,0.9)]" : "bg-zinc-700"}`} />
-              <span className={`text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
-              <span className={`text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
+              <span className={`text-[6px] sm:text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
+              <span className={`text-[9px] sm:text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
                 {liveBpmDisplay}
               </span>
-              <span className={`text-[9px] font-mono leading-none tabular-nums transition-opacity duration-300 ${pitch === 0 ? 'opacity-0' : (isPowered ? (pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30')}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
+              <span className={`text-[7px] sm:text-[9px] font-mono leading-none tabular-nums transition-opacity duration-300 ${pitch === 0 ? 'opacity-0' : (isPowered ? (pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30')}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
                 {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
               </span>
             </div>
             <span className={`text-[7px] font-mono tracking-[0.15em] uppercase ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>Tempo</span>
           </div>
 
-          {/* RPM — left of BPM screen. Buttons are LOCKED OUT while the
-              transport is playing, paused, or anywhere other than a full
-              stop. They only commit the new RPM target when the turntable
-              is fully stopped (!isPlaying && currentTime === 0). The actual
-              motor speed then accelerates / decelerates via the rAF lerp —
-              it never snaps instantly. */}
-          <div className={`absolute bottom-6 right-32 z-30 flex gap-2 pointer-events-auto ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
+          {/* RPM — left of BPM screen. Scaled for narrow mobile */}
+          <div className={`absolute bottom-2 right-16 z-30 flex gap-1 pointer-events-auto origin-bottom-right transition-transform duration-300 sm:bottom-5 sm:right-28 md:scale-100 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`} style={{ transform: 'scale(0.65)', transformOrigin: '100% 100%' }}>
             {[33, 45].map((r) => {
               // Locked out unless the deck is in a full stop state.
               const isFullStop = !isPlaying && currentTime === 0;
@@ -1344,7 +1339,7 @@ export default function Turntable({
                   aria-pressed={speed === r}
                   aria-disabled={isLocked}
                   title={isLocked ? "Stop the deck before changing speed" : `${r} RPM`}
-                  className={`w-9 h-5 rounded text-[9px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300 ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
+                  className={`w-7 h-4 sm:w-9 sm:h-5 rounded text-[9px] sm:text-[10px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300 ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
                   style={{
                     background: speed === r ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)",
                     boxShadow: speed === r ? "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)",
