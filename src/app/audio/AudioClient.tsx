@@ -74,8 +74,8 @@ export default function AudioClient() {
             </div>
 
             {/* Right Panel: Integrated Playlist Card */}
-            <aside className="w-full lg:max-w-[340px] lg:ml-auto">
-              <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]" style={{ height: 'clamp(220px, 32vw, 340px)', maxHeight: 'clamp(220px, 32vw, 340px)' }}>
+            <aside className="w-full lg:max-w-[320px] lg:ml-auto">
+              <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]" style={{ height: 'clamp(260px, 30vw, 380px)', maxHeight: 'clamp(260px, 30vw, 380px)' }}>
                 {/* Playlist */}
                 <PlaylistPanel />
               </div>

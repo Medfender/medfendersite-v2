@@ -84,7 +84,8 @@ export default function PlaylistPanel() {
         <span className="text-[10px] font-mono text-neutral-600">{playlist.length} tracks</span>
       </div>
       {/* Invisible escalator: hidden scrollbar, scrollable via mouse wheel / trackpad / touch */}
-      <div className="flex flex-col gap-1.5 overflow-y-auto max-h-[360px] pr-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      {/* Playlist rows — taller card with tighter spacing */}
+      <div className="flex flex-col gap-1 overflow-y-auto max-h-[260px] pr-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {playlist.map((track) => {
           const isActive = (activeTrack as any)?.id === track.id;
           return (
