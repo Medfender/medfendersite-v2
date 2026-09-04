@@ -3,6 +3,7 @@ export interface ToneItem {
   name: string;
   gearTag: string;
   audioUrl: string;
+  thumbnail?: string;
 }
 
 export type PackType = "TONEX" | "HX Stomp";

@@ -14,6 +14,7 @@ const toToneItem = (t: any): ToneItem => ({
   name: t.name,
   gearTag: t.gearTag || t.artist || "",
   audioUrl: t.audioUrl,
+  thumbnail: t.thumbnail || t.coverUrl || undefined,
 });
 
 type TrackInfo = ToneItem;
@@ -391,6 +392,16 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       audioRef.current.muted = false;
       audioRef.current.volume = 1.0;
+      // MASTER RULE: music never plays unless headshell is on vinyl.
+      // The turntable sets _headshellOnDisk = true only when cuePhase === 'onDisk'.
+      // Let the gate stay closed so audio.play() is blocked; the turntable
+      // choreography calls this again via onPlay after the arm lands.
+      const headshellOnDisk = (audioRef.current as any)._headshellOnDisk;
+      if (headshellOnDisk === false || headshellOnDisk === undefined) {
+        console.log("[MasterRule] Play blocked: needle not on vinyl");
+        logTransport("PLAY_BLOCKED_HEADSHELL", { from: "playTrack" });
+        return; // Audio blocked; turntable calls playTrack again via onPlay after landing
+      }
       const promise = audioRef.current.play();
       if (promise !== undefined) {
         playPromiseRef.current = promise;

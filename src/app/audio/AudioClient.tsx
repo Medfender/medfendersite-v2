@@ -115,6 +115,7 @@ export default function AudioClient() {
       id: track.id || track.title || `patch-${Date.now()}`,
       name: track.name || track.title || track.name,
       audioUrl: track.url || track.audioUrl || "/audio/featured/01.mp3",
+      thumbnail: track.thumbnail || track.coverUrl || track.thumbnail || undefined,
     };
     if (playTrack) playTrack(candidate);
   };

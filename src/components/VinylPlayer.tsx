@@ -36,7 +36,9 @@ export function VinylPlayer() {
   // ─── Center label thumbnail (mirrors TrackThumbnailCard preloader) ───
   const rawName = (currentTrack as any)?.name || (currentTrack as any)?.title || "";
   const rawArtist =
-    (currentTrack as any)?.artist || (currentTrack as any)?.gearTag || (currentTrack as any)?.author || "";
+    (currentTrack as any)?.artist || (currentTrack as any)?.author || "";
+  const explicitLabelThumb =
+    (currentTrack as any)?.thumbnail || (currentTrack as any)?.coverUrl || null;
   const resolvedTrackName = clean(rawName);
 
   const [resolvedLabelSrc, setResolvedLabelSrc] = useState<string | null>(null);
@@ -44,6 +46,13 @@ export function VinylPlayer() {
   const cancelLabelRef = useRef<{ cancelled: boolean }>({ cancelled: false });
 
   useEffect(() => {
+    // Prefer explicit thumbnail URL (from track data) over pattern guessing
+    if (explicitLabelThumb) {
+      setLabelFailed(false);
+      setResolvedLabelSrc(explicitLabelThumb);
+      return;
+    }
+
     if (!rawName && !rawArtist) {
       setResolvedLabelSrc(null);
       setLabelFailed(false);
@@ -101,7 +110,7 @@ export function VinylPlayer() {
     return () => {
       session.cancelled = true;
     };
-  }, [rawName, rawArtist]);
+  }, [rawName, rawArtist, explicitLabelThumb]);
 
   // Reconcile turntable power when external playback triggers it
   // (e.g. vinyl player play button). Keeps physical button in sync.

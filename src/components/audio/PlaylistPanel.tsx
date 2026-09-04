@@ -56,6 +56,7 @@ export default function PlaylistPanel() {
       name: track.name || track.title,
       gearTag: track.gearTag || track.artist,
       audioUrl: track.audioUrl || track.url || track.src,
+      thumbnail: track.thumbnail || track.coverUrl || undefined,
     };
     playTrack(candidate as any);
   };

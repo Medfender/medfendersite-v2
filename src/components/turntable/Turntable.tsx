@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useAudio } from "@/context/AudioContext";
 import { useAudioTick } from "@/lib/audio/useAudioTick";
+import { deckControls } from "@/lib/audio/DeckControls";
+import { featuredArtists } from "@/data/trackList";
 import { Disc3 } from "lucide-react";
 
 const ARM_LAND_DELAY_MS = 1000; // headshell-gate: music waits for arm to land
@@ -255,6 +257,59 @@ export default function Turntable({
   // OFF → ON: power on, arm stays at rest, no playback triggered.
   // ON  → OFF: power off (with rest animation if currently playing/paused).
   // ═══════════════════════════════════════════════════════════════════════════
+  // Register with shared singleton so StickyTransport, PlaylistPanel buttons route here.
+  useEffect(() => {
+    deckControls.register({
+      play: () => {
+        if (!isPowered) {
+          setIsPowered(true);
+          if (currentTrack == null && playTrack) {
+            const first = featuredArtists[0];
+            playTrack({
+              id: first.id,
+              name: first.name,
+              gearTag: first.gearTag,
+              audioUrl: first.audioUrl,
+              thumbnail: first.thumbnail,
+            } as any);
+          }
+          setLocalTransport('playing');
+        }
+      },
+      pause: () => {
+        if (localTransport !== 'stopped') {
+          setLocalTransport('stopped');
+        }
+      },
+      toggle: () => {
+        if (!isPowered) {
+          setIsPowered(true);
+          if (currentTrack == null && playTrack) {
+            const first = featuredArtists[0];
+            playTrack({
+              id: first.id,
+              name: first.name,
+              gearTag: first.gearTag,
+              audioUrl: first.audioUrl,
+              thumbnail: first.thumbnail,
+            } as any);
+          }
+          setLocalTransport('playing');
+        } else if (localTransport === 'stopped') {
+          setLocalTransport('playing');
+        } else {
+          setLocalTransport('stopped');
+        }
+      },
+      stop: () => {
+        if (isPowered) {
+          setLocalTransport('stopped');
+        }
+      },
+    });
+    return () => deckControls.unregister();
+  }, [isPowered, currentTrack, playTrack, localTransport]);
+
   const handleCueSwitchToggle = useCallback(() => {
     // OFF → ON: power on + start play.
     // If no track is active, fall back to the first playlist entry so the
@@ -262,12 +317,16 @@ export default function Turntable({
     if (!isPowered) {
       setIsPowered(true);
       if (currentTrack == null && playTrack) {
-        // No track loaded: load the canonical featured track so the
+        // No track loaded: load the first canonical featured track so the
         // animation + audio stay in sync (master-source-of-truth).
+        // Use the real track id so the playlist row highlights.
+        const first = featuredArtists[0];
         playTrack({
-          id: "featured",
-          name: "Sidi Bouganga feat Younes Hadir",
-          audioUrl: "/audio/featured-artists/Sidi Bouganga feat Younes Hadir.mp3",
+          id: first.id,
+          name: first.name,
+          gearTag: first.gearTag,
+          audioUrl: first.audioUrl,
+          thumbnail: first.thumbnail,
         } as any);
       }
       setLocalTransport('playing');
@@ -525,12 +584,25 @@ export default function Turntable({
     }
   }, [cuePhase, audioRef]);
 
+  // ── MASTER RULE: Music only when needle drops onto black vinyl ────────────
+  // When isLifted goes true → false, the needle has physically dropped from
+  // the lifted position onto the vinyl surface. That's the only valid trigger.
+  // No pre-check, no delayed timer — the drop itself is the gate.
+  const prevIsLiftedRef = useRef(isLifted);
+  useEffect(() => {
+    const wasUp = prevIsLiftedRef.current;
+    const nowDown = isLifted;
+    prevIsLiftedRef.current = nowDown;
+    if (wasUp && !nowDown && cuePhase === 'onDisk') {
+      // Needle dropped into the black vinyl. Music starts now — not before, not after.
+      if (onPlay) onPlay();
+      else if (onTogglePlay) onTogglePlay();
+    }
+  }, [isLifted, cuePhase, onPlay, onTogglePlay]);
+
   // ── Headshell-onDisk event bridge → parent transport ──────────────────────
-  // The Turntable is the choreographer: when cuePhase flips to 'onDisk' the
-  // headshell has physically touched the vinyl. But the drop animation isn't
-  // finished yet (CSS transition 0.6s rotation + 0.4s lift). We MUST wait
-  // for the animation to complete before calling onPlay so music resumes
-  // exactly when the needle is visually settled in the groove.
+  // Not used for start — start is driven only by the isLifted drop rule above.
+  // Kept for state tracking and debug logging only.
   const dropTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCuePhaseRef = useRef<CuePhase>(cuePhase);
   useEffect(() => {
@@ -545,17 +617,9 @@ export default function Turntable({
       dropTimerRef.current = null;
     }
 
-    if (curr === 'onDisk' && prev !== 'onDisk') {
-      // Headshell physically on vinyl, but drop animation still in progress.
-      // For quick resume (0.22s CSS), use a tighter delay. Default full drop
-      // keeps 650ms (covers 1.2s rotation + 0.4s lift).
-      const waitMs = isQuickLiftRef.current ? 240 : 650;
-      dropTimerRef.current = setTimeout(() => {
-        dropTimerRef.current = null;
-        if (onPlay) onPlay();
-        else if (onTogglePlay) onTogglePlay();
-      }, waitMs);
-    } else if (curr === 'killing' && prev === 'onDisk') {
+    // Music starts ONLY on isLifted true→false + cuePhase onDisk (new rule).
+    // This block handles only pause/stop/lifting, never play start.
+    if (curr === 'killing' && prev === 'onDisk') {
       // Headshell lifted from disk → pause audio immediately (don't wait)
       if (onPause) onPause();
     } else if (curr === 'rest' && (prev === 'onDisk' || prev === 'killing')) {
@@ -695,15 +759,17 @@ export default function Turntable({
       setCuePhase('cueing');
       rotateTimer = setTimeout(() => {
         setArmAngle(38);             // 2. Rotate to disk (while lifted)
+        // 3. DROP needle at exactly the moment the CSS rotation completes
+        //    (2500ms = rotation duration). Needle touches black vinyl here.
         dropTimer = setTimeout(() => {
-          setIsLifted(false);        // 3. DROP needle
-          setCuePhase('onDisk');     // → headshell effect fires onPlay()
+          setIsLifted(false);        // Drop animation starts
+          setCuePhase('onDisk');     // → headshell touches disk = sound fires
           if (audio) {
             (audio as any)._gagged = false;
             audio.muted = false;
             audio.playbackRate = 1;
           }
-        }, 400);
+        }, 2500);
       }, 600);
       prevLocalTransportRef.current = curr;
       return;
@@ -1048,7 +1114,7 @@ export default function Turntable({
               {/* WRAPPER: Handles strictly the vertical lift illusion (shadow + translation) */}
               <g id="tonearm-lift-wrapper" style={{ transformOrigin: '490px 75px', transform: isLifted ? 'scale(1.03)' : 'scale(1)', filter: isLifted ? 'drop-shadow(15px 25px 12px rgba(0,0,0,0.35))' : 'drop-shadow(4px 6px 4px rgba(0,0,0,0.6))', transition: (isPowered || isResting) ? 'transform 1.4s ease-in-out, filter 1.4s ease-in-out' : 'none' }}>
                 {/* INNER GROUP: Handles strictly the rotation, locked to 490,75 */}
-                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform ' + (isQuickLift ? '0.22s' : '1.2s') + ' cubic-bezier(0.34, 1.1, 0.64, 1)' : 'none' }}>
+                <g id="tonearm-assembly" style={{ transform: `rotate(${(isPowered || isResting) ? armAngle : 0}deg)`, transformOrigin: '490px 75px', transition: (isPowered || isResting) ? 'transform ' + (isQuickLift ? '0.22s' : '2.5s') + ' cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none' }}>
                 {/* Bearing carrier (rotates with arm — visually inside the
                     static pivot housing ring). */}
                 <g id="tonearm-bearing-carrier" filter="url(#shadow-sm)">
