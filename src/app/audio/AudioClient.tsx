@@ -2,16 +2,13 @@
 
 import React from "react";
 import { useAudio } from "@/context/AudioContext";
-import { audioTickController } from "@/lib/audio/AudioTickController";
 import Turntable from "@/components/turntable/Turntable";
-import StudioAnalyzer from "@/components/audio/SpectrumAnalyzerPanel";
 import PatchBrowser from "@/components/audio/PatchBrowser";
 import PlaylistPanel from "@/components/audio/PlaylistPanel";
 import StickyTransport from "@/components/audio/StickyTransport";
 import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
-import { EQDockToolbar } from "@/components/audio/EQDockToolbar";
 
 function WaveformDivider() {
   const { isPlaying, currentBpm } = useAudio();
@@ -76,7 +73,6 @@ function WaveformDivider() {
 }
 
 export default function AudioClient() {
-  const [selectedBandId, setSelectedBandId] = React.useState<number | null>(null);
   const {
     transportState,
     isPowered,
@@ -90,13 +86,6 @@ export default function AudioClient() {
     stop: ctxStop,
     pause,
   } = useAudio();
-
-  // Resolve active filter type for the selected band (used by EQDockToolbar)
-  const activeType: import("@/lib/audio/AudioTickController").FilterType | null = (() => {
-    if (selectedBandId == null) return null;
-    const band = audioTickController.eqBands.find((b: any) => b.id === selectedBandId);
-    return band?.type ?? null;
-  })();
 
   const handleTogglePlay = () => togglePlay();
   const handleTurntablePlay = () => {
@@ -161,20 +150,6 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
-        {/* ── Section 4b: Studio Analyzer Pro ──────────────────────────── */}
-        <section className="w-full z-10 pt-4 md:pt-6">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-4">
-            <StudioAnalyzer
-              selectedBandId={selectedBandId}
-              setSelectedBandId={setSelectedBandId}
-            />
-            <EQDockToolbar
-              selectedBandId={selectedBandId}
-              setSelectedBandId={setSelectedBandId}
-              activeType={activeType}
-            />
-          </div>
-        </section>
 
         {/* ── Section 5: Waveform SVG Divider ──────────────────────────────── */}
         <WaveformDivider />
