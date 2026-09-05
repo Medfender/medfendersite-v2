@@ -120,7 +120,11 @@
       "Bash(sudo du -h --max-depth=1 /)",
       "Bash(rm -rf /home/medfender/Downloads/CentOS-Stream-10-latest-x86_64-dvd1.iso)",
       "Bash(rm -rf /home/medfender/.cache/*)",
-      "Bash(sudo pacman -Scc --noconfirm)"
+      "Bash(sudo pacman -Scc --noconfirm)",
+      "Bash(pdftotext -l 3 'Downloads/Mohamed Hamza Ennakhai_Resume_2026.pdf' -)",
+      "Bash(sudo pacman -S --needed poppler)",
+      "Bash(pdftotext -l 3 '/home/medfender/Downloads/Mohamed Hamza Ennakhai_Resume_2026.pdf' -)",
+      "mcp__plugin_playwright_playwright__browser_tabs"
     ]
   }
 }

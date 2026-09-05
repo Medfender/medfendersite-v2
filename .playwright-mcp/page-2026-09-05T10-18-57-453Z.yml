@@ -1,0 +1,111 @@
+- generic [active] [ref=f1e1]:
+  - navigation [ref=f1e5]:
+    - generic [ref=f1e6]:
+      - link "Medfender Home" [ref=f1e7] [cursor=pointer]:
+        - /url: /
+        - text: Medfender
+      - generic [ref=f1e8]:
+        - link "Audio" [ref=f1e9] [cursor=pointer]:
+          - /url: /audio
+        - link "Store" [ref=f1e10] [cursor=pointer]:
+          - /url: /store
+        - link "Media" [ref=f1e11] [cursor=pointer]:
+          - /url: /media
+        - link "Support" [ref=f1e12] [cursor=pointer]:
+          - /url: /support/setup-guide
+        - link "Contact" [ref=f1e13] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f1e14]:
+        - button "Toggle language" [ref=f1e15]: EN
+        - button "Open cart (0 items)" [ref=f1e16]
+  - main [ref=f1e24]:
+    - generic [ref=f1e26]:
+      - generic [ref=f1e27]:
+        - heading "Boutique Tube Tone Reimagined" [level=1] [ref=f1e28]
+        - paragraph [ref=f1e29]: Engineered specifically for IK Multimedia ToneX and Line 6 HX Stomp XL / Helix.
+        - generic [ref=f1e30]:
+          - link "EXPLORE STORE" [ref=f1e31] [cursor=pointer]:
+            - /url: /store
+          - link "LISTEN TO SHOWCASE" [ref=f1e34] [cursor=pointer]:
+            - /url: /audio
+      - generic [ref=f1e36]:
+        - generic [ref=f1e37]:
+          - generic [ref=f1e38]: 4 Snapshots
+          - generic [ref=f1e39]: Per HX Preset
+        - generic [ref=f1e40]:
+          - generic [ref=f1e41]: Tube Sweet-Spots
+          - generic [ref=f1e42]: ToneX Captures
+        - generic [ref=f1e43]:
+          - generic [ref=f1e44]: 96kHz / 24-Bit
+          - generic [ref=f1e45]: Studio Resolution
+        - generic [ref=f1e46]:
+          - generic [ref=f1e47]: Instant Download
+          - generic [ref=f1e48]: Universal ZIP
+      - generic [ref=f1e49]:
+        - heading "Featured Tone Packs" [level=2] [ref=f1e50]
+        - generic [ref=f1e51]:
+          - link "SRV Ultimate Amp Capture TONEX • HX Stomp $7.99 VIEW DETAILS" [ref=f1e52] [cursor=pointer]:
+            - /url: /store/srv-ultimate-amp-capture-pack
+            - generic [ref=f1e55]:
+              - heading "SRV Ultimate Amp Capture" [level=3] [ref=f1e56]
+              - generic [ref=f1e57]:
+                - generic [ref=f1e58]: TONEX
+                - generic [ref=f1e59]: •
+                - generic [ref=f1e60]: HX Stomp
+              - generic [ref=f1e61]:
+                - generic [ref=f1e62]: $7.99
+                - generic [ref=f1e63]: VIEW DETAILS
+          - 'link "The Smooth Sustain: Santana Signature Tone TONEX • HX Stomp $7.99 VIEW DETAILS" [ref=f1e64] [cursor=pointer]':
+            - /url: /store/the-smooth-sustain-santana-signature
+            - generic [ref=f1e67]:
+              - 'heading "The Smooth Sustain: Santana Signature Tone" [level=3] [ref=f1e68]'
+              - generic [ref=f1e69]:
+                - generic [ref=f1e70]: TONEX
+                - generic [ref=f1e71]: •
+                - generic [ref=f1e72]: HX Stomp
+              - generic [ref=f1e73]:
+                - generic [ref=f1e74]: $7.99
+                - generic [ref=f1e75]: VIEW DETAILS
+          - 'link "Purple Majesty: Prince Funk & Solo Rig TONEX • HX Stomp $8.99 VIEW DETAILS" [ref=f1e76] [cursor=pointer]':
+            - /url: /store/purple-majesty-prince-funk-solo
+            - generic [ref=f1e79]:
+              - 'heading "Purple Majesty: Prince Funk & Solo Rig" [level=3] [ref=f1e80]'
+              - generic [ref=f1e81]:
+                - generic [ref=f1e82]: TONEX
+                - generic [ref=f1e83]: •
+                - generic [ref=f1e84]: HX Stomp
+              - generic [ref=f1e85]:
+                - generic [ref=f1e86]: $8.99
+                - generic [ref=f1e87]: VIEW DETAILS
+      - generic [ref=f1e89]:
+        - heading "Sound Philosophy" [level=2] [ref=f1e90]
+        - paragraph [ref=f1e91]: Every preset is rigorously tested through gain-staging with real tube amp captures, then balanced for gig-ready tone — not studio-only. We dial for touch, not volume, so your rig responds the way your hands expect.
+        - link "SETUP GUIDE" [ref=f1e92] [cursor=pointer]:
+          - /url: /support/setup-guide
+  - contentinfo [ref=f1e95]:
+    - generic [ref=f1e96]:
+      - paragraph [ref=f1e98]: © 2026 Medfender. All rights reserved.
+      - generic [ref=f1e99]:
+        - link "Audio" [ref=f1e100] [cursor=pointer]:
+          - /url: "#audio"
+        - link "Store" [ref=f1e101] [cursor=pointer]:
+          - /url: "#store"
+        - link "Media" [ref=f1e102] [cursor=pointer]:
+          - /url: "#media"
+        - link "Contact" [ref=f1e103] [cursor=pointer]:
+          - /url: "#contact"
+      - generic [ref=f1e104]:
+        - generic [ref=f1e105]: Support
+        - link "Installation & Setup →" [ref=f1e106] [cursor=pointer]:
+          - /url: /support/setup-guide
+      - generic [ref=f1e107]:
+        - link "YouTube" [ref=f1e108] [cursor=pointer]:
+          - /url: "#"
+          - text: ▶
+        - link "Instagram" [ref=f1e109] [cursor=pointer]:
+          - /url: "#"
+          - text: ◉
+        - link "GitHub" [ref=f1e110] [cursor=pointer]:
+          - /url: "#"
+          - text: ◈
+  - button "Open Next.js Dev Tools" [ref=f1e116] [cursor=pointer]
