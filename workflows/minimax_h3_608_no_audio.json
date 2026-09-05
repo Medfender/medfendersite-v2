@@ -1,0 +1,132 @@
+{
+  "1": {
+    "class_type": "CheckpointLoaderSimple",
+    "inputs": {
+      "checkpoint_name": "minimax_h3_fl2va_pruned_int8_convrot.safetensors"
+    }
+  },
+  "2": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "studio engine, dark glassmorphism, cinematic lighting, cyan accent",
+      "clip": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "text": "blurry, low quality, artifact, watermark",
+      "clip": [
+        "1",
+        0
+      ]
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3TextEncoderLoader",
+    "inputs": {
+      "text_encoder_name": "qwen3vl_32b_minimax_h3_int4_convrot.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "MiniMaxH3VideoVAE",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "6": {
+    "class_type": "EmptyLatentAV",
+    "inputs": {
+      "width": 608,
+      "height": 352,
+      "length": 124,
+      "batch_size": 1
+    }
+  },
+  "7": {
+    "class_type": "MiniMaxH3",
+    "inputs": {
+      "model": [
+        "10",
+        0
+      ],
+      "clip": [
+        "4",
+        0
+      ],
+      "vae": [
+        "5",
+        0
+      ],
+      "positive": [
+        "2",
+        0
+      ],
+      "negative": [
+        "3",
+        0
+      ],
+      "latent_image": [
+        "6",
+        0
+      ],
+      "width": 608,
+      "height": 352
+    },
+    "widgets_values": [
+      12345,
+      "fixed",
+      4,
+      7.5,
+      0.5,
+      "euler",
+      "normal",
+      1.0
+    ]
+  },
+  "8": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "7",
+        0
+      ],
+      "vae": [
+        "5",
+        0
+      ]
+    }
+  },
+  "9": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "filename_prefix": "minimax_h3_608_4step",
+      "images": [
+        "8",
+        0
+      ]
+    },
+    "widgets_values": [
+      "minimax_h3_608_4step",
+      "video/webm",
+      8,
+      true,
+      false
+    ]
+  },
+  "10": {
+    "class_type": "LoRAApply",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3_fl2v_turbo_8step_v1.0_comfyui_bf16.safetensors",
+      "strength_model": 0.75,
+      "strength_clip": 1.0
+    }
+  }
+}

@@ -22,7 +22,8 @@
 - Verify build (`npm run build`) before finishing.
 - Capture screenshots via `node screenshot.mjs http://localhost:3000` when polishing.
 - **Visual QA (enforced):** After any CSS, Tailwind, or UI layout changes you MUST navigate the local dev server (`http://localhost:3000/audio` or relevant page), take a screenshot via Chrome DevTools / Playwright MCP, visually verify design compliance, and check the console for errors — see `docs/agents/visual-qa.md`. No exceptions.
-- **NEVER pass PNG files to the `Read` tool directly** — the active model lacks vision and returns 500. For visual judgment, save screenshot to `temp_screenshots/` then run `python tools/vision_check.py <png> --provider <ollama|openrouter|gemini|nvidia>`. See `docs/agents/visual-qa.md`.
+- **NEVER pass PNG files to the `Read` tool directly** — the active model lacks vision and returns 500. For visual judgment, save screenshot to `temp_screenshots/` then run `python tools/vision_check.py <png> --provider ollama`. See `docs/agents/visual-qa.md`.
+- **VISION IS LOCAL-ONLY (permanent user rule):** Never call remote vision APIs (gemini, openrouter, nvidia) directly via tool calls, MCP, or API — they repeatedly fail with HTTP 400 catalog errors that block work. Use `tools/vision_check.py --provider ollama` (or with no `--provider`, which defaults to ollama). `vision_check.py` handles VRAM freeing and model loading automatically.
 - Do not push to GitHub until explicitly instructed.
 
 ## Permissions (permanently granted)

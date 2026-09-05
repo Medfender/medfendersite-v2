@@ -55,8 +55,7 @@ export default function AudioClient() {
   return (
     <>
       <main
-        className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden"
-        style={{ background: 'transparent' }}
+        className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden bg-[#0a0a0c]"
       >
         {/* ── Section 1: Featured Audio Hero Banner ─────────────────────────── */}
         <FeaturedAudioSection />

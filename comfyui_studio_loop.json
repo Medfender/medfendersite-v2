@@ -1,0 +1,98 @@
+{
+  "prompt": "Studio Engine — seamless AnimateDiff loop (32 frames @ 512px, VRAM-safe RTX 3070 8GB)",
+  "workflow": "studio_loop_v1",
+  "last_node_id": 9,
+  "last_link_id": 0,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "CheckpointLoaderSimple",
+      "pos": [0, 0],
+      "size": [300, 100],
+      "properties": {},
+      "widgets_values": ["sd15_pruned.safetensors"]
+    },
+    {
+      "id": 2,
+      "type": "ADE_LoopedUniformContextOptions",
+      "pos": [350, 200],
+      "size": [400, 200],
+      "properties": {},
+      "widgets_values": [32, 1, 4, true, "flat", false]
+    },
+    {
+      "id": 3,
+      "type": "ADE_AnimateDiffLoaderGen1",
+      "pos": [350, 0],
+      "size": [400, 200],
+      "properties": {},
+      "widgets_values": ["mm_sd_v15_v2.ckpt", "autoselect"]
+    },
+    {
+      "id": 4,
+      "type": "LoadVideoPath",
+      "pos": [0, 250],
+      "size": [350, 200],
+      "properties": {},
+      "widgets_values": ["/home/medfender/projects/medfendersite-v2/public/Videos/Background videos/Studio-hd_1920_1080_25fps.mp4", 0, 0, 0, 32, 0, 1]
+    },
+    {
+      "id": 5,
+      "type": "ImageScale",
+      "pos": [400, 250],
+      "size": [300, 150],
+      "properties": {},
+      "widgets_values": [512, 512, "lanczos"]
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [0, 550],
+      "size": [400, 100],
+      "properties": {},
+      "widgets_values": ["studio engine, dark glassmorphism, cinematic lighting, cyan accent, abstract studio texture, seamless loop, moody atmosphere"]
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [0, 700],
+      "size": [400, 100],
+      "properties": {},
+      "widgets_values": ["blurry, low quality, artifact, watermark, error, deformed"]
+    },
+    {
+      "id": 8,
+      "type": "KSampler",
+      "pos": [800, 100],
+      "size": [350, 250],
+      "properties": {},
+      "widgets_values": [12345, "fixed", 20, 7.5, 0.5, "euler", "normal", 1.0]
+    },
+    {
+      "id": 9,
+      "type": "VAEDecode",
+      "pos": [1200, 100],
+      "size": [300, 100],
+      "properties": {},
+      "widgets_values": []
+    },
+    {
+      "id": 10,
+      "type": "VideoCombine",
+      "pos": [1550, 100],
+      "size": [400, 250],
+      "properties": {},
+      "widgets_values": ["studio_engine_loop", "image/webm", 8, 0, false, true]
+    }
+  ],
+  "links": [],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}

@@ -1,30 +1,39 @@
-# Visual QA Rule — OFFLINE / LOCAL VISION ONLY
+# Visual QA — LOCAL VISION ONLY
 
-> **User rule (enforced): always use only local model visions when a vision function is needed.**
-> Remote APIs (gemini/openrouter/nvidia) cause recurring HTTP 400 errors (deprecated model IDs, schema mismatches, unavailable catalogs). Only `ollama` (local) is used for vision. If you need to override (emergency only), pass `--allow-remote` to `vision_check.py`.
+> **Permanent user rule:** Vision is 100% local (Ollama gemma4:12b on RTX 3070). Remote
+> vision APIs (gemini, openrouter, nvidia) are BLOCKED by default. They repeatedly return
+> HTTP 400 with "not available in active live catalog" and schema mismatch errors — they block
+> work and waste time. There is no scenario where remote vision is preferred over local.
 
-## Two-Step Visual QA (Snapshot First, Vision on Demand)
-
-**Step 1 — Structural check (always):** use `take_snapshot` (Chrome DevTools MCP) to get the text accessibility tree. Verify component presence, text content, and hierarchy. No vision needed.
-
-**Step 2 — Visual judgment (only when needed):** if the snapshot isn't enough to judge color, gradients, alignment, glow effects, or layout proportions, save a screenshot + run the vision tool:
+## Quick Command
 
 ```bash
-# Preferred: local Ollama ONLY (gemma4:12b — local GPU/CPU, free, no API errors)
+# ONE safe path — local only, VRAM managed automatically
 python tools/vision_check.py temp_screenshots/<name>.png --provider ollama
 
-# Remote providers are BLOCKED by default (see user rule above). Never call them.
-# Only pass --provider openrouter/gemini/nvidia together with --allow-remote (emergency / never routine).
-# vision_check.py guards deprecated IDs (gemini-3.1-flash-tts-preview, gemma-3.5-flash, nvidia/meta/...) and auto-falls back to ollama.
+# No args also defaults to ollama
+python tools/vision_check.py temp_screenshots/<name>.png
 ```
 
-**Never pass PNG files to Claude's `Read` tool directly** — it lacks vision support and returns a 500 error.
+## Two-Step Visual QA
 
-## Enforcement
+**Step 1 — Structural check (always):** use `take_snapshot` (Chrome DevTools MCP) to get the
+text accessibility tree. Verify component presence, text content, and hierarchy. No vision needed.
 
-- If the dev server is not running, ask the user to start it before proceeding.
-- `take_snapshot` is always available — never skip it.
-- `take_screenshot` + `vision_check.py` only when snapshot is insufficient.
+**Step 2 — Visual judgment (only when needed):** if the snapshot isn't enough to judge color,
+gradients, alignment, glow effects, or layout proportions, take a screenshot and run vision:
+
+```bash
+python tools/vision_check.py temp_screenshots/<name>.png --provider ollama
+```
+
+The script will:
+1. Probe Ollama for an installed vision model.
+2. Free VRAM by unloading non-vision models if needed.
+3. Warm-load the vision model.
+4. Run the prompt and return the analysis.
+
+**Never pass PNG files to Claude's `Read` tool directly** — it lacks vision and returns 500.
 
 ## Console Check
 
@@ -32,18 +41,38 @@ python tools/vision_check.py temp_screenshots/<name>.png --provider ollama
 - Flag any `Error`-level console messages as blocking.
 - `Warning`-level messages are informational but should be noted.
 
-## Offline Agent Fallback Rule
+## What `vision_check.py` Does (Full Pipeline)
 
-**Always use local Ollama vision — never remote vision APIs.** Remote providers (gemini/openrouter/nvidia) are blocked by default; they repeatedly return HTTP 400 errors with deprecated model IDs, schema mismatches, and "model not in live catalog" failures. There is no scenario where calling them is preferred over local Ollama.
+```
+1. ensure_local_vision()          → probe Ollama /api/tags for vision model
+                                    → if none: pull gemma4:12b
+                                    → unload other models to free VRAM
+                                    → warm-load vision model
+
+2. ollama_describe()              → POST to /api/chat with base64 PNG + prompt
+                                    → returns text analysis
+
+3. (remote, --allow-remote only) → try gemini/openrouter/nvidia
+                                    → on transient error: fallback to Ollama
+```
+
+Remote providers (gemini/openrouter/nvidia) are **only reachable** with `--allow-remote` and
+**only for emergencies** — they are never preferred. They fail with HTTP 400 catalog errors:
+- `gemini-3.1-flash-tts-preview` — TTS-only, no image input
+- `gemini-3.5-flash` — schema mismatch on function declarations
+- `meta/llama-3.2-90b-vision-instruct` — wrong prefix (nvidia/), not in NVIDIA catalog
+- `nvidia/...` — wrong prefix everywhere
+
+`vision_check.py` has hard guards: if you pass `--provider gemini` without `--allow-remote`,
+it exits with code 3 and prints a clear error message.
+
+## If Ollama Is Not Running
 
 ```bash
-# Explicit offline path — only path allowed (free, no API key, no 400 errors)
+ollama serve &
+# then retry:
 python tools/vision_check.py temp_screenshots/<name>.png --provider ollama
-
-# vision_check.py also auto-detects any non-ollama attempt and forces ollama
-# (see vision_check.py lines enforced by --provider guard + --allow-remote gate).
 ```
-**Never block a visual QA step on a paid/remote API error — offline agents complete it.**
 
 ## File Changes
 
