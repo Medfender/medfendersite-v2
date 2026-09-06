@@ -305,12 +305,12 @@ function Footer() {
           <Link href="/audio" className="hover:text-white transition-colors duration-200">
             AUDIO
           </Link>
-          <Link href="/support" className="hover:text-white transition-colors duration-200">
+          <Link href="/support/setup-guide" className="hover:text-white transition-colors duration-200">
             SUPPORT
           </Link>
         </div>
         <Link
-          href="mailto:contact@medfender.com"
+          href="/contact"
           className="group flex items-center gap-3 text-[0.6rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] hover:text-amber-300 transition-colors duration-200"
         >
           BOOK A SESSION

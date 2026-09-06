@@ -75,14 +75,16 @@ export default function Navbar() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-8">
-          {/* ── Brand ── */}
-          <Link
+          {/* ── Brand + Browse Store button ── */}
+          <div className="flex items-center gap-6 shrink-0">
+            <Link
             href="/"
             className="text-xl font-bold tracking-[0.2em] text-white uppercase shrink-0 hover:text-zinc-200 transition-colors"
             aria-label="MEDFENDER Home"
           >
             Medfender
           </Link>
+          </div>
 
           {/* ── Center: Desktop Nav with Gliding Underline ── */}
           <div
