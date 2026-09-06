@@ -213,18 +213,14 @@ function SoundPhilosophy() {
   const isInView = useInView(scrollRef, { once: true, margin: "0px 0px -20% 0px" });
 
   return (
-    <section className="relative bg-[#050505]">
-      {/* Section header */}
-      <div className="border-t border-zinc-900 pt-20 pb-12 px-6">
-        <p className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-zinc-700">
-          SOUND PHILOSOPHY
-        </p>
-      </div>
-
+    <section className="relative bg-[#050505] border-t border-zinc-900 pt-20">
       {/* Sticky + scrollable layout */}
       <div className="max-w-7xl mx-auto flex gap-16 px-6 py-24 pb-32">
         {/* Left: sticky heading */}
         <div className="w-2/5 sticky top-24 h-fit shrink-0">
+          <p className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-[#E5A93C] mb-4">
+            SOUND PHILOSOPHY
+          </p>
           <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-[1.05] text-white uppercase">
             Built on trust.
             <br />
