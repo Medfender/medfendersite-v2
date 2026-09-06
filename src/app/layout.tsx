@@ -5,7 +5,6 @@ import "./globals.css";
 import { AudioProvider } from "@/context/AudioContext";
 import { CartProvider } from "@/lib/CartContext";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import AudioNavigationGuard from "@/components/layout/AudioNavigationGuard";
 import PageTransition from "@/components/layout/PageTransition";
 import GalaxyBackgroundClient from "@/components/GalaxyBackgroundClient";
@@ -43,7 +42,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </div>
           </AudioProvider>
         </CartProvider>
-        <Footer />
         <Script
           src="https://assets.lemonsqueezy.com/lemon.js"
           strategy="afterInteractive"
