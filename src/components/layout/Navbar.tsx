@@ -1,143 +1,254 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
 import CartDrawer from "./CartDrawer";
 
+/* ════════════════════════════════════════════════════
+   NAVIGATION LINKS
+═══════════════════════════════════════════════════ */
+const navLinks = [
+  { label: "AUDIO", href: "/audio" },
+  { label: "STORE", href: "/store" },
+  { label: "MEDIA", href: "/media" },
+  { label: "SUPPORT", href: "/support/setup-guide" },
+];
+
+/* ════════════════════════════════════════════════════
+   NAVBAR — UFC-style magic-line underline via layoutId
+═══════════════════════════════════════════════════ */
 export default function Navbar() {
-  const [lang, setLang] = useState("EN");
-  const [cartOpen, setCartOpen] = useState(false);
   const pathname = usePathname();
   const { itemCount } = useCart();
 
-  const navLinks = [
-    { label: "Home", href: "/" },
-    { label: "Audio", href: "/audio" },
-    { label: "Store", href: "/store" },
-    { label: "Media", href: "/media" },
-    { label: "Support", href: "/support/setup-guide" },
-    { label: "Contact", href: "/contact" },
-  ];
-
+  const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const isActive = (href: string) => pathname === href;
+  const [hidden, setHidden] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // ── Scroll hide/reveal + transparent → solid ──
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const previous = scrollY.getPrevious() ?? 0;
+
+    // Hide on scroll down past 80px
+    if (latest > previous && latest > 80) {
+      setHidden(true);
+    } else {
+      setHidden(false);
+    }
+
+    // Solid brutalist background past 50px
+    setIsScrolled(latest > 50);
+  });
+
+  // ── Lock body scroll when mobile menu is open ──
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-black/45 border-b border-zinc-800/40">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-2">
-          {/* Logo */}
-          <Link href="/" className="text-lg md:text-2xl font-extrabold tracking-tight text-white group shrink-0" aria-label="Medfender Home">
-            <span className="text-cyan-300 group-hover:text-cyan-200 transition-colors">Med</span>fender
+      {/* ── Main Header ── */}
+      <motion.nav
+        variants={{
+          visible: { y: 0 },
+          hidden: { y: "-120%" },
+        }}
+        animate={hidden ? "hidden" : "visible"}
+        transition={{ duration: 0.35, ease: "easeInOut" }}
+        className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
+          isScrolled ? "bg-zinc-950 border-b border-zinc-900" : "bg-zinc-950/0 border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-8">
+          {/* ── Brand ── */}
+          <Link
+            href="/"
+            className="text-xl font-bold tracking-[0.2em] text-white uppercase shrink-0 hover:text-zinc-200 transition-colors"
+            aria-label="MEDFENDER Home"
+          >
+            Medfender
           </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
-            {navLinks.map((l) => (
-              <Link
-                key={l.href}
-                href={l.href}
-                className={[
-                  "text-sm font-bold tracking-widest uppercase transition-colors relative",
-                  isActive(l.href)
-                    ? "text-cyan-300"
-                    : "text-zinc-400 hover:text-cyan-200",
-                  l.href === "/" ? "hidden" : "",
-                ].join(" ")}
-                aria-current={isActive(l.href) ? "page" : undefined}
+          {/* ── Center: Desktop Nav with Gliding Underline ── */}
+          <div
+            className="hidden md:flex items-center space-x-8 h-full relative"
+            onMouseLeave={() => setHoveredIndex(null)}
+            aria-label="Main navigation"
+          >
+            {navLinks.map((link, i) => (
+              <div
+                key={link.href}
+                className="relative flex items-center h-full px-2"
+                onMouseEnter={() => setHoveredIndex(i)}
               >
-                {l.label}
-                {isActive(l.href) && (
-                  <span className="absolute -bottom-[22px] left-0 right-0 h-[2px] bg-cyan-400 shadow-[0_0_12px_rgba(0,216,246,0.5)]" />
-                )}
-              </Link>
+                <Link
+                  href={link.href}
+                  className={[
+                    "text-xs tracking-[0.2em] font-bold uppercase transition-colors z-10",
+                    pathname.startsWith(link.href) ? "text-white" : "text-zinc-300 hover:text-white",
+                  ].join(" ")}
+                >
+                  {link.label}
+                </Link>
+
+                {/* Magic line — single shared layoutId */}
+                <AnimatePresence>
+                  {hoveredIndex === i && (
+                    <motion.div
+                      layoutId="nav-underline"
+                      className="absolute bottom-4 left-0 right-0 h-[3px] bg-[#E5A93C]"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+              </div>
             ))}
           </div>
 
-          {/* Controls: lang + cart (desktop) */}
-          <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={() => setLang((prev) => (prev === "EN" ? "FR" : "EN"))}
-              className="text-xs font-extrabold uppercase tracking-widest border border-zinc-600/40 rounded-full px-3 py-1 text-zinc-300 hover:border-cyan-400/60 hover:text-cyan-200 transition bg-zinc-900/40 backdrop-blur-sm"
-              aria-label="Toggle language"
-            >
-              {lang}
-            </button>
+          {/* ── Right: Cart + CTA ── */}
+          <div className="flex items-center gap-4">
+            {/* Cart */}
             <button
               onClick={() => setCartOpen(true)}
               aria-label={`Open cart (${itemCount} items)`}
-              className="relative w-10 h-10 rounded-full bg-zinc-900/80 border border-zinc-700/60 hover:border-cyan-400/60 hover:bg-zinc-900 flex items-center justify-center text-zinc-300 hover:text-cyan-300 transition-all shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
+              className="relative w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
             >
-              <ShoppingCart size={16} />
+              <ShoppingCart size={18} strokeWidth={2} />
               {itemCount > 0 && (
-                <span aria-hidden="true" className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[9px] font-black flex items-center justify-center shadow-[0_0_8px_rgba(239,68,68,0.7)] ring-2 ring-zinc-950">
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0 right-0 -mt-1 -mr-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E5A93C] text-black text-[9px] font-black flex items-center justify-center"
+                >
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
               )}
             </button>
-          </div>
 
-          {/* Mobile: hamburger + overlay drawer */}
-          <div className="flex md:hidden items-center gap-2">
-            <button
-              onClick={() => setLang((prev) => (prev === "EN" ? "FR" : "EN"))}
-              className="text-[10px] font-extrabold uppercase tracking-widest border border-zinc-600/40 rounded-full px-2 py-0.5 text-zinc-300 hover:border-cyan-400/60 hover:text-cyan-200 transition bg-zinc-900/40"
-              aria-label="Toggle language"
+            {/* BOOK A SESSION CTA */}
+            <Link
+              href="mailto:contact@medfender.com"
+              className="hidden md:flex items-center bg-[#E5A93C] text-black font-black uppercase text-xs tracking-widest px-6 py-3 hover:bg-white transition-colors duration-150"
             >
-              {lang}
-            </button>
+              BOOK A SESSION
+            </Link>
+
+            {/* Mobile: Hamburger */}
             <button
-              onClick={() => setCartOpen(true)}
-              aria-label={`Cart (${itemCount} items)`}
-              className="relative w-8 h-8 rounded-full bg-zinc-900/80 border border-zinc-700/60 flex items-center justify-center text-zinc-300"
-            >
-              <ShoppingCart size={13} />
-              {itemCount > 0 && (
-                <span aria-hidden="true" className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-white text-[8px] font-black flex items-center justify-center">
-                  {itemCount > 9 ? "9+" : itemCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setMobileOpen((o) => !o)}
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
               aria-expanded={mobileOpen}
-              className="w-8 h-8 rounded-md border border-zinc-700/60 bg-zinc-900/80 flex flex-col items-center justify-center gap-1.5 hover:border-cyan-400/40 transition"
+              className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px] text-zinc-400 hover:text-white transition-colors"
             >
-              <span className={`block w-4 h-px bg-zinc-300 transition-all ${mobileOpen ? "rotate-45 translate-y-[5px]" : ""}`} />
-              <span className={`block w-4 h-px bg-zinc-300 transition-all ${mobileOpen ? "opacity-0" : ""}`} />
-              <span className={`block w-4 h-px bg-zinc-300 transition-all ${mobileOpen ? "-rotate-45 -translate-y-[5px]" : ""}`} />
+              <span className="block w-6 h-[2px] bg-current" />
+              <span className="block w-6 h-[2px] bg-current" />
+              <span className="block w-4 h-[2px] bg-current" />
             </button>
           </div>
         </div>
+      </motion.nav>
 
-        {/* Mobile menu drawer */}
+      {/* ── Mobile: Full-Screen Overlay ── */}
+      <AnimatePresence>
         {mobileOpen && (
-          <div className="md:hidden border-t border-white/[0.06] bg-black/95 backdrop-blur-md">
-            <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-1">
-              {navLinks.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={[
-                    "py-2.5 px-3 rounded-md text-sm font-bold tracking-widest uppercase transition-colors",
-                    isActive(l.href)
-                      ? "text-cyan-300 bg-cyan-500/10"
-                      : "text-zinc-400 hover:text-white hover:bg-white/[0.04]",
-                  ].join(" ")}
-                  aria-current={isActive(l.href) ? "page" : undefined}
-                >
-                  {l.label}
-                </Link>
-              ))}
+          <motion.div
+            className="fixed inset-0 z-[60] bg-zinc-950 flex flex-col"
+            initial={{ opacity: 0, y: "-100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "-100%" }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Header bar */}
+            <div className="flex items-center justify-between px-6 h-20 border-b border-zinc-900">
+              <span className="text-xl font-bold uppercase tracking-[0.2em] text-white">
+                Medfender
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                aria-label="Close menu"
+                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                  <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" />
+                </svg>
+              </button>
             </div>
-          </div>
+
+            {/* Nav links — blocky, massive */}
+            <nav className="flex-1 flex flex-col justify-center px-6 gap-1" aria-label="Mobile navigation">
+              {navLinks.map((link, i) => (
+                <motion.div
+                  key={link.href}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    aria-current={pathname.startsWith(link.href) ? "page" : undefined}
+                    className={[
+                      "block text-5xl md:text-6xl font-black uppercase tracking-tight leading-none py-3 transition-colors",
+                      pathname.startsWith(link.href) ? "text-white" : "text-zinc-600 hover:text-white",
+                    ].join(" ")}
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+
+              {/* CTA */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + navLinks.length * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                className="mt-6"
+              >
+                <Link
+                  href="mailto:contact@medfender.com"
+                  onClick={() => setMobileOpen(false)}
+                  className="inline-block bg-[#E5A93C] text-black font-black uppercase text-lg tracking-widest px-8 py-4 hover:bg-white transition-colors duration-150"
+                >
+                  BOOK A SESSION
+                </Link>
+              </motion.div>
+            </nav>
+
+            {/* Bottom bar */}
+            <div className="border-t border-zinc-900 px-6 py-6 flex gap-8">
+              <Link href="/contact" onClick={() => setMobileOpen(false)} className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors">
+                Contact
+              </Link>
+              <Link href="/" onClick={() => setMobileOpen(false)} className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors">
+                Home
+              </Link>
+            </div>
+          </motion.div>
         )}
-      </nav>
+      </AnimatePresence>
+
+      {/* ── Cart Drawer ── */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );

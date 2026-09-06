@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import React from "react";
 
 export default function Footer() {
@@ -10,14 +11,14 @@ export default function Footer() {
           <p className="text-sm font-semibold text-neutral-400">© {new Date().getFullYear()} Medfender. All rights reserved.</p>
         </div>
         <div className="flex items-center gap-6 text-sm font-medium text-neutral-300">
-          <a href="#audio" className="hover:text-cyan-300 transition">Audio</a>
-          <a href="#store" className="hover:text-cyan-300 transition">Store</a>
-          <a href="#media" className="hover:text-cyan-300 transition">Media</a>
-          <a href="#contact" className="hover:text-cyan-300 transition">Contact</a>
+          <Link href="/audio" className="hover:text-cyan-300 transition">Audio</Link>
+          <Link href="/store" className="hover:text-cyan-300 transition">Store</Link>
+          <Link href="/media" className="hover:text-cyan-300 transition">Media</Link>
+          <Link href="/contact" className="hover:text-cyan-300 transition">Contact</Link>
         </div>
         <div className="flex flex-col md:items-end gap-1 text-sm text-zinc-400">
           <span className="text-xs font-black uppercase tracking-[0.25em] text-zinc-500">Support</span>
-          <a href="/support/setup-guide" className="hover:text-cyan-400 transition font-medium">Installation & Setup →</a>
+          <Link href="/support/setup-guide" className="hover:text-cyan-400 transition font-medium">Installation & Setup →</Link>
         </div>
         <div className="flex items-center gap-4">
           <a href="#" aria-label="YouTube" className="text-neutral-400 hover:text-cyan-300 transition text-lg">▶</a>

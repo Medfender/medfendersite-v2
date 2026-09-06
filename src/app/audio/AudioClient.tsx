@@ -55,7 +55,7 @@ export default function AudioClient() {
   return (
     <>
       <main
-        className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden bg-[#0a0a0c]"
+        className="min-h-screen flex flex-col text-neutral-100 relative overflow-x-hidden bg-transparent"
       >
         {/* ── Section 1: Featured Audio Hero Banner ─────────────────────────── */}
         <FeaturedAudioSection />
@@ -89,7 +89,7 @@ export default function AudioClient() {
 
           {/* Playlist: below the turntable section */}
           <div className="mt-6">
-            <div className="bg-[#111111] border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]">
+            <div className="bg-transparent/60 border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]">
               <PlaylistPanel />
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function AudioClient() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* IK Multimedia TONEX */}
             <div
-              className="group relative overflow-hidden rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-amber-500/30 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)]"
+              className="group relative overflow-hidden rounded-2xl bg-transparent/60 border border-white/[0.06] p-6 transition-all hover:border-amber-500/30 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)]"
             >
               {/* Small product thumbnail — placed in corner, not dominant */}
               <img
@@ -163,7 +163,7 @@ export default function AudioClient() {
                   { label: "SNR", value: "126 dB" },
                   { label: "Latency", value: "< 1 ms" },
                 ].map((spec) => (
-                  <div key={spec.label} className="rounded-lg bg-[#0a0a0a] border border-white/[0.04] p-2.5">
+                  <div key={spec.label} className="rounded-lg bg-transparent/40 border border-white/[0.04] p-2.5">
                     <div className="text-[10px] font-mono text-neutral-600 uppercase tracking-[0.15em]">{spec.label}</div>
                     <div className="text-sm font-mono text-white mt-0.5">{spec.value}</div>
                   </div>
@@ -173,7 +173,7 @@ export default function AudioClient() {
 
             {/* Line 6 HX Stomp XL */}
             <div
-              className="group relative overflow-hidden rounded-2xl bg-[#111111] border border-white/[0.06] p-6 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_40px_rgba(0,216,246,0.08)]"
+              className="group relative overflow-hidden rounded-2xl bg-transparent/60 border border-white/[0.06] p-6 transition-all hover:border-cyan-500/30 hover:shadow-[0_0_40px_rgba(0,216,246,0.08)]"
             >
               {/* Small product thumbnail */}
               <img
@@ -225,7 +225,7 @@ export default function AudioClient() {
                   { label: "DSP", value: "SHARC × 2" },
                   { label: "Looper", value: "Up to 2 min" },
                 ].map((spec) => (
-                  <div key={spec.label} className="rounded-lg bg-[#0a0a0a] border border-white/[0.04] p-2.5">
+                  <div key={spec.label} className="rounded-lg bg-transparent/40 border border-white/[0.04] p-2.5">
                     <div className="text-[10px] font-mono text-neutral-600 uppercase tracking-[0.15em]">{spec.label}</div>
                     <div className="text-sm font-mono text-white mt-0.5">{spec.value}</div>
                   </div>
@@ -241,7 +241,7 @@ export default function AudioClient() {
         </section>
 
         {/* ── Section 7: Technical Specs Row ────────────────────────────────── */}
-        <section className="w-full bg-[#090b10] border-y border-white/[0.04] py-6">
+        <section className="w-full bg-transparent/30 border-y border-white/[0.04] py-6">
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
@@ -273,7 +273,7 @@ export default function AudioClient() {
 
         {/* ── Section 8: Playlist & Details Description Block ──────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
-          <div className="rounded-2xl bg-[#111111] border border-white/[0.06] p-6 md:p-8 shadow-[0_0_60px_rgba(0,216,246,0.04)]">
+          <div className="rounded-2xl bg-transparent/60 border border-white/[0.06] p-6 md:p-8 shadow-[0_0_60px_rgba(0,216,246,0.04)]">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
               <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
@@ -286,7 +286,7 @@ export default function AudioClient() {
               {/* Track context */}
               <div>
                 <h3 className="text-sm font-bold text-white mb-3">Active Track</h3>
-                <div className="rounded-xl bg-[#0a0a0a] border border-white/[0.04] p-4">
+                <div className="rounded-xl bg-transparent/40 border border-white/[0.04] p-4">
                   <div className="text-base font-semibold text-white truncate">
                     {(activeTrack as any)?.name || (activeTrack as any)?.title || "—"}
                   </div>
@@ -304,7 +304,7 @@ export default function AudioClient() {
               {/* Gear notes */}
               <div>
                 <h3 className="text-sm font-bold text-white mb-3">Signal Notes</h3>
-                <div className="rounded-xl bg-[#0a0a0a] border border-white/[0.04] p-4 space-y-2.5">
+                <div className="rounded-xl bg-transparent/40 border border-white/[0.04] p-4 space-y-2.5">
                   {[
                     "Guitar → 1/4\" TRS balanced direct",
                     "TONEX Black Tube: vintage tube preamp model",
@@ -334,7 +334,7 @@ export default function AudioClient() {
             <div
               className="min-h-[400px] rounded-2xl border border-white/[0.05] flex flex-col items-center justify-center gap-6 relative overflow-hidden"
               style={{
-                background: "linear-gradient(180deg, rgba(11,15,25,0.5) 0%, rgba(15,20,32,0.5) 100%)",
+                background: "linear-gradient(180deg, rgba(11,15,25,0.2) 0%, rgba(15,20,32,0.2) 100%)",
               }}
             >
               {/* Subtle grid background */}

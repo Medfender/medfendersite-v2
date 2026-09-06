@@ -20,9 +20,10 @@
 }
 
 body {
-  background: #080808;
+  background: #0a0a0a;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden;
 }
 
 /* Invisible scrollbar for playlist escalator */

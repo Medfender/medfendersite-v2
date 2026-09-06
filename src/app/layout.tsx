@@ -6,8 +6,9 @@ import { AudioProvider } from "@/context/AudioContext";
 import { CartProvider } from "@/lib/CartContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import SpiralGalaxyBackground from "@/components/SpiralGalaxy";
+import AudioNavigationGuard from "@/components/layout/AudioNavigationGuard";
 import PageTransition from "@/components/layout/PageTransition";
+import GalaxyBackgroundClient from "@/components/GalaxyBackgroundClient";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,22 +31,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col bg-[#0a0a0c] text-neutral-100 min-h-screen">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          className="fixed inset-0 w-full h-full object-cover -z-20 opacity-40 pointer-events-none"
-        >
-          <source src="/Videos/Background%20videos/studio-seamless-loop.mp4" type="video/mp4" />
-        </video>
-        {/* Spiral Galaxy background (z-index -10, behind main content z-10) */}
-        <SpiralGalaxyBackground />
+      <body suppressHydrationWarning className="min-h-full flex flex-col text-neutral-100 min-h-screen bg-transparent">
+        {/* Spiral Galaxy background (z-index -10, behind main content z-10) — client-only */}
+        <GalaxyBackgroundClient />
         <CartProvider>
           <Navbar />
           <AudioProvider>
+            <AudioNavigationGuard />
             <div className="relative z-10">
               <PageTransition>{children}</PageTransition>
             </div>

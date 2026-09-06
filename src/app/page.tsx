@@ -2,15 +2,27 @@
 
 import Link from 'next/link';
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
 /* ════════════════════════════════════════════════════
    COPY & ASSETS
 ═══════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════
+   MARQUEE DATA
+═══════════════════════════════════════════════════ */
+const marqueeItems = [
+  { label: 'TONEX CAPTURES', href: '/store/tonex', accent: 'NEW' },
+  { label: 'HX STOMP XL PRESETS', href: '/store/hx-stomp', accent: null },
+  { label: 'HYBRID GNAWA FUSION', href: '/store/gnawa', accent: null },
+  { label: 'CUSTOM IMPULSE RESPONSES', href: '/store/irs', accent: 'NEW' },
+  { label: 'AMP PROFILES', href: '/store/profiles', accent: null },
+  { label: 'STOMP RIGS', href: '/store/stomps', accent: null },
+  { label: 'STUDIO SESSIONS', href: '/store/sessions', accent: 'NEW' },
+];
+
 const MARQUEE_TEXT = 'TONEX CAPTURES • HX STOMP XL PRESETS • HYBRID GNAWA FUSION • CUSTOM IMPULSE RESPONSES •';
 
-const HERO_IMG =
-  'https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=2000&q=80';
+const HERO_IMG = '/images/gallery/IMG_7742.JPG';
 
 const PHILOSOPHY_IMGS = [
   'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1400&q=80',
@@ -51,31 +63,54 @@ const fadeUp: any = {
    MARQUEE COMPONENT
 ═══════════════════════════════════════════════════ */
 function Marquee() {
-  const { scrollYProgress } = useScroll();
-  // Subtle scroll-reactive speed: scroll direction nudges marquee speed
-  const speedMult = useTransform(scrollYProgress, [0, 0.3], [1, 0.4]);
+  const tripleItems = [...marqueeItems, ...marqueeItems, ...marqueeItems];
 
   return (
-    <div className="relative w-full overflow-hidden border-y border-zinc-900 py-5 bg-[#050505]">
-      <motion.div
-        className="flex items-center whitespace-nowrap"
-        animate={{ x: ['0%', '-50%'] }}
-        transition={{
-          x: { repeat: Infinity, duration: 28, ease: 'linear' },
-        }}
-        style={{ x: speedMult, willChange: 'transform' }}
-      >
-        {/* Duplicate for seamless loop */}
-        {[...Array(6)].map((_, i) => (
-          <span
-            key={i}
-            className="flex items-center text-[0.7rem] font-black uppercase tracking-[0.22em] text-zinc-600"
-          >
-            {MARQUEE_TEXT}
-            <span className="mx-8 text-amber-500/40">◆</span>
+    <div className="relative w-full overflow-hidden border-y border-zinc-900 py-6 bg-[#050505] group">
+      {/* Edge fades for cinematic entry/exit */}
+      <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10" />
+      <div className="pointer-events-none absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10" />
+
+      <style jsx>{`
+        @keyframes marquee-scroll {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee-scroll 18s linear infinite;
+          will-change: transform;
+        }
+        .group:hover .marquee-track {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      <div className="marquee-track flex items-center whitespace-nowrap w-max">
+        {tripleItems.map((item, i) => (
+          <span key={i} className="flex items-center shrink-0">
+            {item.accent && (
+              <span
+                className={[
+                  "mr-3 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-widest",
+                  item.accent === 'NEW'
+                    ? "bg-[#E5A93C] text-black"
+                    : "border border-zinc-700 text-zinc-500"
+                ].join(" ")}
+              >
+                {item.accent}
+              </span>
+            )}
+            <Link
+              href={item.href}
+              className="text-[0.85rem] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-[#E5A93C] transition-colors duration-200"
+            >
+              {item.label}
+            </Link>
+            {/* Vertical separator */}
+            <span className="mx-8 w-px h-4 bg-zinc-800 shrink-0" aria-hidden="true" />
           </span>
         ))}
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -91,50 +126,32 @@ function Hero() {
   });
 
   // Hero image parallax: moves up as user scrolls
-  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
+  const imgY = useTransform(scrollYProgress, [0, 1], ['-10%', '8%']);
 
   return (
-    <section ref={ref} className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-[#050505]">
-      {/* ── Display Text: MEDFENDER (mask-reveal) ── */}
-      <div className="relative z-10 flex flex-col items-center px-6 overflow-hidden">
-        <div className="overflow-hidden">
-          <motion.h1
-            className="text-[14vw] font-black tracking-[-0.04em] leading-[0.88] text-white"
-            variants={wordVariant}
+    <section ref={ref} className="relative min-h-[120vh] w-full flex flex-col items-center overflow-hidden bg-[url('/images/gallery/IMG_7742.JPG')] bg-cover bg-center pt-28">
+      {/* Fade-in gradient overlay: top of image softly blends to black */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[28rem] bg-gradient-to-b from-[#050505] via-[#050505]/50 to-transparent z-10" />
+      {/* ── Display Text: sub-text only ── */}
+      <div className="relative z-10 flex flex-col items-center text-center px-6 mt-auto mb-16">
+        {/* Sub-text: Audio Architecture */}
+        <div className="overflow-hidden mt-4">
+          <motion.p
+            className="text-[1rem] font-black uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+            variants={fadeUp}
             initial="hidden"
             animate="visible"
+            custom={1}
           >
-            MEDFENDER
-          </motion.h1>
+            SOUND ARCHITECTURE & LIVE SESSIONS
+          </motion.p>
         </div>
 
-        {/* Sub: DIGITAL TONE ARCHITECTURE */}
-        <motion.div
-          className="overflow-hidden mt-3"
-          variants={fadeUp}
-          initial="hidden"
-          animate="visible"
-        >
-          <p className="text-[0.65rem] font-black uppercase tracking-[0.35em] text-[#E5A93C]">
-            DIGITAL TONE ARCHITECTURE
-          </p>
-        </motion.div>
       </div>
 
-      {/* ── Hero image container: parallax on scroll ── */}
-      <motion.div
-        className="absolute inset-0 z-0"
-        style={{ y: imgY }}
-      >
-        <div className="absolute inset-0 bg-[#050505]/60" />
-        <img
-          src={HERO_IMG}
-          alt="Recording studio console"
-          className="w-full h-full object-cover opacity-50"
-        />
-      </motion.div>
+      {/* Parallax image handled via section bg */}
 
-      {/* ── Scroll indicator ── */}
+      {/* ── Scroll indicator: minimalist track + animated dot ── */}
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
         variants={fadeUp}
@@ -142,11 +159,16 @@ function Hero() {
         animate="visible"
         custom={3}
       >
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-[0.55rem] uppercase tracking-[0.3em] text-zinc-600 font-black">
-            SCROLL
-          </span>
-          <div className="w-px h-8 bg-gradient-to-b from-zinc-600 to-transparent" />
+        <div className="relative w-[1px] h-10 bg-zinc-800 overflow-hidden">
+          <motion.div
+            className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E5A93C]"
+            animate={{ top: ['0%', '100%'] }}
+            transition={{
+              duration: 1.6,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          />
         </div>
       </motion.div>
     </section>
@@ -178,9 +200,18 @@ const cards = [
       'Precision audio engineering backed by stem separation, multi-band analysis, and gain-staging at 96kHz / 24-bit. Every impulse response and capture is verified against the original before release. We don\'t ship until the comparison is airtight.',
     img: PHILOSOPHY_IMGS[2],
   },
+  {
+    num: '04',
+    title: 'The Stage',
+    body: 'Translating studio-grade tone to the live environment. Whether it is an intimate solo arrangement or a high-energy Gnawa fusion trio, the digital architecture is built to cut through the mix, adapt to any venue, and command the room.',
+    img: '/images/gallery/So Lounge.JPG',
+  },
 ];
 
 function SoundPhilosophy() {
+  const scrollRef = useRef(null);
+  const isInView = useInView(scrollRef, { once: true, margin: "0px 0px -20% 0px" });
+
   return (
     <section className="relative bg-[#050505]">
       {/* Section header */}
@@ -191,7 +222,7 @@ function SoundPhilosophy() {
       </div>
 
       {/* Sticky + scrollable layout */}
-      <div className="max-w-7xl mx-auto flex gap-16 px-6 pb-32">
+      <div className="max-w-7xl mx-auto flex gap-16 px-6 py-24 pb-32">
         {/* Left: sticky heading */}
         <div className="w-2/5 sticky top-24 h-fit shrink-0">
           <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-[1.05] text-white uppercase">
@@ -201,10 +232,10 @@ function SoundPhilosophy() {
           </h2>
           <div className="mt-10 flex flex-col gap-3">
             {cards.map((c) => (
-              <div key={c.num} className="flex items-center gap-4 text-zinc-700">
+              <div key={c.num} className="flex items-center gap-4 text-zinc-400">
                 <span className="text-[0.55rem] font-black tracking-widest">{c.num}</span>
                 <div className="h-px flex-1 bg-zinc-900" />
-                <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-700">
+                <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-400">
                   {c.title}
                 </span>
               </div>
@@ -213,18 +244,17 @@ function SoundPhilosophy() {
         </div>
 
         {/* Right: scrollable cards */}
-        <div className="w-3/5 space-y-10 pt-2">
+        <div ref={scrollRef} className="w-3/5 space-y-10 pt-8 pb-8">
           {cards.map((card, i) => (
             <motion.div
               key={card.num}
               className="group flex gap-8 items-start"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-80px' }}
+              initial={false}
+              animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: 60, y: 40 }}
               transition={{
-                delay: i * 0.1,
                 duration: 0.7,
-                ease: [0.16, 1, 0.3, 1],
+                delay: i * 0.15,
+                ease: [0.21, 0.47, 0.32, 0.98],
               }}
             >
               {/* Card text side */}
@@ -247,9 +277,9 @@ function SoundPhilosophy() {
                   <img
                     src={card.img}
                     alt={card.title}
-                    className="w-full h-full object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/30 to-transparent" />
                 </div>
               </div>
             </motion.div>
@@ -301,13 +331,6 @@ function Footer() {
         </Link>
       </div>
 
-      {/* Edge-to-edge wordmark */}
-      <div className="overflow-hidden border-t border-zinc-900 py-4">
-        <h3 className="text-[18vw] font-black tracking-[-0.05em] leading-none text-white uppercase text-center select-none">
-          MEDFENDER
-        </h3>
-      </div>
-
       {/* Legal */}
       <div className="border-t border-zinc-900 py-5 text-center text-[0.55rem] font-light text-zinc-800 tracking-wider">
         © {new Date().getFullYear()} Medfender — Digital Tone Architecture
@@ -321,7 +344,7 @@ function Footer() {
 ═══════════════════════════════════════════════════ */
 export default function Home() {
   return (
-    <main className="bg-[#050505] text-white antialiased">
+    <main className="bg-zinc-950 text-white antialiased">
       <Hero />
       <Marquee />
       <SoundPhilosophy />

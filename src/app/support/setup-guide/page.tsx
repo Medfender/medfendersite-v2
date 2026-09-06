@@ -1,4 +1,5 @@
 import Head from "next/head";
+import SpiralGalaxyBackground from "../../../components/SpiralGalaxy";
 
 export default function SetupGuidePage() {
   return (
@@ -7,7 +8,8 @@ export default function SetupGuidePage() {
         <title>Installation & Setup Guides — Medfender</title>
         <meta name="description" content="Everything you need to load your Medfender tones into your DSP ecosystem." />
       </Head>
-      <main className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-cyan-500/30">
+      <main className="relative min-h-screen text-neutral-100 selection:bg-cyan-500/30">
+        <SpiralGalaxyBackground />
         {/* ═══════════════════════════════════════════════════════════════ */}
         {/* Header — Boutique Support Desk                                 */}
         {/* ═══════════════════════════════════════════════════════════════ */}
@@ -36,13 +38,13 @@ export default function SetupGuidePage() {
             <p className="text-zinc-400 mb-8 max-w-2xl leading-relaxed">These captures are fully compatible with the IK Multimedia ToneX ecosystem. Follow the steps below to import your new boutique tones.</p>
 
             {/* Hardware photo placeholder */}
-            <div className="w-full aspect-video bg-zinc-900 border border-zinc-800 rounded-none flex items-center justify-center mb-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)]">
+            <div className="w-full aspect-video bg-transparent border border-zinc-800 rounded-none flex items-center justify-center mb-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)]">
               <span className="text-zinc-600 font-mono text-sm tracking-widest uppercase">[Insert High-Res Hardware Photo Here]</span>
             </div>
 
             {/* Step-by-step numbered cards */}
             <div className="space-y-4">
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">01</span>
                   <div>
@@ -52,7 +54,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">02</span>
                   <div>
@@ -62,7 +64,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">03</span>
                   <div>
@@ -72,7 +74,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">04</span>
                   <div>
@@ -98,13 +100,13 @@ export default function SetupGuidePage() {
             <p className="text-zinc-400 mb-8 max-w-2xl leading-relaxed">These .hlx files are designed for the full Line 6 DSP architecture. Follow the steps below to load them safely into an empty user preset slot.</p>
 
             {/* Hardware photo placeholder */}
-            <div className="w-full aspect-video bg-zinc-900 border border-zinc-800 rounded-none flex items-center justify-center mb-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)]">
+            <div className="w-full aspect-video bg-transparent border border-zinc-800 rounded-none flex items-center justify-center mb-8 shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)]">
               <span className="text-zinc-600 font-mono text-sm tracking-widest uppercase">[Insert High-Res Hardware Photo Here]</span>
             </div>
 
             {/* Step-by-step numbered cards */}
             <div className="space-y-4">
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">01</span>
                   <div>
@@ -114,7 +116,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">02</span>
                   <div>
@@ -124,7 +126,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">03</span>
                   <div>
@@ -134,7 +136,7 @@ export default function SetupGuidePage() {
                 </div>
               </div>
 
-              <div className="bg-zinc-950 border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
+              <div className="bg-transparent border-l-2 border-cyan-500 p-6 shadow-[0_0_20px_rgba(0,216,246,0.05)]">
                 <div className="flex gap-4">
                   <span className="text-cyan-400 font-black text-xl shrink-0 w-7">04</span>
                   <div>

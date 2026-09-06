@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function MediaPage() {
   return (
-    <main className="min-h-screen flex flex-col bg-neutral-950 text-neutral-100">
+    <main className="min-h-screen flex flex-col text-neutral-100">
       <MediaSection />
     </main>
   );
