@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
 /* ════════════════════════════════════════════════════
@@ -175,6 +175,153 @@ function Hero() {
   );
 }
 
+import { useCart } from '@/lib/CartContext';
+import { packs } from '@/data/storeData';
+
+/* ════════════════════════════════════════════════════
+   PRESET CARD — compact audio preview card
+═══════════════════════════════════════════════════ */
+interface Preset {
+  id: string;
+  title: string;
+  genre: string;
+  price: string;
+  href: string;
+  img?: string;
+}
+
+const presets: Preset[] = [
+  {
+    id: 'gnawa-blues-deluxe',
+    title: 'GNAWA BLUES DELUXE',
+    genre: 'Blues / Fusion',
+    price: '$29',
+    href: '/store/gnawa-blues-deluxe',
+    img: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=200&q=80',
+  },
+  {
+    id: 'tube-crunch-studio',
+    title: 'TUBE CRUNCH STUDIO',
+    genre: 'Rock / Crunch',
+    price: '$24',
+    href: '/store/tube-crunch-studio',
+    img: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=200&q=80',
+  },
+];
+
+function PlayIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M3 2.5v11l10-5.5L3 2.5z" />
+    </svg>
+  );
+}
+
+function StopIcon() {
+  return (
+    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+      <rect x="2" y="2" width="8" height="8" rx="1" />
+    </svg>
+  );
+}
+
+function PresetCard({ preset, isLastAdded }: { preset: Preset; isLastAdded?: boolean }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showAdded, setShowAdded] = useState(false);
+  const { addToCart } = useCart();
+
+  // Map preset to closest PackData for cart integration
+  const packForCart = packs.find(
+    (pk) => pk.title === preset.title || pk.slug.includes(preset.title.toLowerCase().replace(/\s+/g, '-'))
+  ) || {
+    id: preset.href,
+    slug: preset.href,
+    title: preset.title,
+    price: parseFloat(preset.price.replace('$', '')) || 0,
+    badge: preset.genre,
+    type: 'TONEX' as const,
+    description: preset.title,
+    toneModels: [],
+    tones: [],
+  } as any;
+
+  return (
+    <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-3 w-full flex flex-col">
+      {/* Thumbnail + info row */}
+      <div className="flex gap-3 items-start">
+        <div className="w-16 h-16 shrink-0 rounded-md bg-zinc-800 border border-zinc-700 overflow-hidden">
+          <img
+            src={preset.img || '/images/gallery/IMG_7742.JPG'}
+            alt={preset.title}
+            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-black uppercase tracking-tight text-white leading-tight truncate">
+            {preset.title}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-[0.55rem] font-medium text-zinc-400 uppercase tracking-wider">{preset.genre}</span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-sm font-black text-[#E5A93C]">{preset.price}</p>
+            <button
+              onClick={() => {
+                addToCart(packForCart);
+                setShowAdded(true);
+                setTimeout(() => setShowAdded(false), 2000);
+              }}
+              className="text-[0.55rem] font-black uppercase tracking-widest bg-[#E5A93C] hover:bg-[#d4942e] text-black px-2.5 py-0.5 rounded-md border border-[#E5A93C]/30 hover:border-[#E5A93C]/60 transition-all duration-200 shadow-[0_0_6px_rgba(229,169,60,0.15)] hover:shadow-[0_0_10px_rgba(229,169,60,0.35)]"
+            >
+              {showAdded ? 'ADDED ✓' : 'ADD'}
+            </button>
+            {isLastAdded && (
+              <Link
+                href="/checkout"
+                aria-label="Checkout"
+                className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/50 hover:border-zinc-600 text-[#00d8f6] hover:text-[#00d8f6]/90 transition-colors duration-200"
+              >
+                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="5" cy="12" r="1.5" />
+                  <circle cx="11" cy="12" r="1.5" />
+                  <path d="M2 2h2.5l1.5 7h7l1.5-3H5.5" />
+                </svg>
+              </Link>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Mini-player */}
+      <button
+        onClick={() => setIsPlaying(!isPlaying)}
+        className="flex items-center justify-between w-full bg-zinc-900/50 p-2 rounded-lg mt-3 border border-zinc-700/30 hover:border-zinc-600/50 transition-colors duration-200"
+      >
+        <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-300">
+          {isPlaying ? 'STOP PREVIEW' : 'PLAY PREVIEW'}
+        </span>
+        {isPlaying ? <StopIcon /> : <PlayIcon />}
+      </button>
+
+      {/* Bottom action buttons */}
+      <div className="flex gap-2 w-full mt-auto pt-3">
+        <Link
+          href={preset.href}
+          className="flex-1 text-center py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/50 text-zinc-300 rounded-lg transition-colors duration-200"
+        >
+          EXPLORE
+        </Link>
+        <Link
+          href={`${preset.href}#details`}
+          className="flex-1 text-center py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-[#00d8f6]/10 hover:bg-[#00d8f6]/20 border border-[#00d8f6]/30 text-[#00d8f6] rounded-lg transition-colors duration-200"
+        >
+          DETAILS
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 /* ════════════════════════════════════════════════════
    SOUND PHILOSOPHY — sticky left + scrollable right
 ═══════════════════════════════════════════════════ */
@@ -211,6 +358,22 @@ const cards = [
 function SoundPhilosophy() {
   const scrollRef = useRef(null);
   const isInView = useInView(scrollRef, { once: true, margin: "0px 0px -20% 0px" });
+  const { itemCount, cartItems } = useCart();
+  const [showNotif, setShowNotif] = useState(false);
+  const prevCount = useRef(itemCount);
+
+  // Show notification when cart gains an item, auto-hide after 2.5s
+  useEffect(() => {
+    if (itemCount > prevCount.current) {
+      setShowNotif(true);
+      const t = setTimeout(() => setShowNotif(false), 2500);
+      return () => clearTimeout(t);
+    }
+    prevCount.current = itemCount;
+  }, [itemCount]);
+
+  // Determine which preset was last added to cart
+  const lastAddedId = cartItems.length > 0 ? cartItems[cartItems.length - 1].pack.id : null;
 
   return (
     <section className="relative bg-[#050505] border-t border-zinc-900 pt-20">
@@ -235,6 +398,28 @@ function SoundPhilosophy() {
                   {c.title}
                 </span>
               </div>
+            ))}
+          </div>
+          {/* Notification banner — cart confirmation */}
+          <div
+            className={`mb-3 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2.5 transition-all duration-300 ${
+              showNotif ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C] animate-pulse" />
+            <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-300">
+              Added to your cart — <span className="text-[#E5A93C]">presets ready for checkout</span>
+            </p>
+          </div>
+
+          {/* Two preset cards — below index list */}
+          <div className="w-full grid grid-cols-1 xl:grid-cols-2 gap-3">
+            {presets.map((p) => (
+              <PresetCard
+                key={p.id}
+                preset={p}
+                isLastAdded={p.id === lastAddedId || (lastAddedId && p.href.includes(lastAddedId))}
+              />
             ))}
           </div>
         </div>
