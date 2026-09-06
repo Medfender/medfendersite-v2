@@ -387,61 +387,64 @@ function SoundPhilosophy({ onPresetSelect }: { onPresetSelect: (preset: any) => 
   const lastAddedId = cartItems.length > 0 ? cartItems[cartItems.length - 1].pack.id : null;
 
   return (
-    <section className="relative bg-[#050505] border-t border-zinc-900 pt-20">
+    <section className="relative bg-[#050505] border-t border-zinc-900 pt-20 pb-24">
       {/* Sticky + scrollable layout */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start px-6 py-24 pb-32">
-        {/* Left: sticky heading */}
-        <div className="lg:col-span-5 sticky top-24 h-fit shrink-0 pt-18">
-          <p className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-[#E5A93C] mb-4">
-            SOUND PHILOSOPHY
-          </p>
-          <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-[1.05] text-white uppercase">
-            Built on trust.
-            <br />
-            Driven by tone.
-          </h2>
-          <div className="mt-10 flex flex-col gap-3">
-            {cards.map((c) => (
-              <div key={c.num} className="flex items-center gap-4 text-zinc-400">
-                <span className="text-[0.55rem] font-black tracking-widest">{c.num}</span>
-                <div className="h-px flex-1 bg-zinc-900" />
-                <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-400">
-                  {c.title}
-                </span>
-              </div>
-            ))}
-          </div>
-          {/* Notification banner — cart confirmation */}
-          <div
-            className={`mb-3 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2.5 transition-all duration-300 ${
-              showNotif ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C] animate-pulse" />
-            <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-300">
-              Added to your cart — <span className="text-[#E5A93C]">presets ready for checkout</span>
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 px-6 py-24">
+        {/* Left: outer grid cell — stretches full height */}
+        <div className="lg:col-span-5 relative h-full">
+          {/* Inner sticky wrapper */}
+          <div className="sticky top-24 space-y-6">
+            <p className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-[#E5A93C] mb-4">
+              SOUND PHILOSOPHY
             </p>
-          </div>
+            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-[1.05] text-white uppercase">
+              Built on trust.
+              <br />
+              Driven by tone.
+            </h2>
+            <div className="mt-10 flex flex-col gap-3">
+              {cards.map((c) => (
+                <div key={c.num} className="flex items-center gap-4 text-zinc-400">
+                  <span className="text-[0.55rem] font-black tracking-widest">{c.num}</span>
+                  <div className="h-px flex-1 bg-zinc-900" />
+                  <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-400">
+                    {c.title}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {/* Notification banner — cart confirmation */}
+            <div
+              className={`mb-3 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2.5 transition-all duration-300 ${
+                showNotif ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
+              }`}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C] animate-pulse" />
+              <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-300">
+                Added to your cart — <span className="text-[#E5A93C]">presets ready for checkout</span>
+              </p>
+            </div>
 
-          {/* Two preset cards — below index list */}
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-            {presets.map((p) => (
-              <PresetCard
-                key={p.id}
-                preset={p}
-                isLastAdded={!!(p.id === lastAddedId || (lastAddedId && p.href.includes(lastAddedId)))}
-                onPresetSelect={onPresetSelect}
-              />
-            ))}
+            {/* Two preset cards — below index list */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+              {presets.map((p) => (
+                <PresetCard
+                  key={p.id}
+                  preset={p}
+                  isLastAdded={!!(p.id === lastAddedId || (lastAddedId && p.href.includes(lastAddedId)))}
+                  onPresetSelect={onPresetSelect}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Right: scrollable cards */}
-        <div ref={scrollRef} className="lg:col-span-7 space-y-10 pb-8">
+        <div ref={scrollRef} className="lg:col-span-7 space-y-24">
           {cards.map((card, i) => (
             <motion.div
               key={card.num}
-              className="group flex gap-8 items-start"
+              className="group flex gap-8 items-start min-h-[200px]"
               initial={false}
               animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: 60, y: 40 }}
               transition={{
