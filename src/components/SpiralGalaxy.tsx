@@ -4,7 +4,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const STAR_COUNT = 18_000;
+const STAR_COUNT = 35_000;
 
 function generateStarfield() {
   const pos = new Float32Array(STAR_COUNT * 3);
@@ -26,7 +26,7 @@ function generateStarfield() {
     pos[i * 3 + 2] = (Math.random() - 0.5) * 3.0;
 
     const isGiant = Math.random() < 0.008;
-    sz[i] = isGiant ? (0.8 + Math.random() * 1.2) : (0.15 + Math.pow(Math.random(), 5) * 0.6);
+    sz[i] = isGiant ? (0.6 + Math.random() * 0.9) : (0.08 + Math.pow(Math.random(), 5) * 0.4);
 
     const roll = Math.random();
     let c: THREE.Color;

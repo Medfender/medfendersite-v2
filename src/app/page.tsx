@@ -129,9 +129,9 @@ function Hero() {
   const imgY = useTransform(scrollYProgress, [0, 1], ['-10%', '8%']);
 
   return (
-    <section ref={ref} className="relative min-h-[120vh] w-full flex flex-col items-center overflow-hidden bg-[url('/images/gallery/IMG_7742.JPG')] bg-cover bg-center pt-28">
-      {/* Fade-in gradient overlay: top of image softly blends to black */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[28rem] bg-gradient-to-b from-[#050505] via-[#050505]/50 to-transparent z-10" />
+    <section ref={ref} className="relative min-h-[120vh] w-full flex flex-col items-center overflow-hidden bg-[url('/images/gallery/IMG_7742.JPG')] bg-cover bg-bottom pt-28">
+      {/* Top-dark mask — moderate fade, keeps image visible */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[20rem] bg-gradient-to-b from-[#050505] to-transparent z-10" />
       {/* ── Display Text: sub-text only ── */}
       <div className="relative z-10 flex flex-col items-center text-center px-6 mt-auto mb-16">
         {/* Sub-text: Audio Architecture */}
@@ -151,7 +151,7 @@ function Hero() {
 
       {/* Parallax image handled via section bg */}
 
-      {/* ── Scroll invitation: a quiet glowing breath, not a pointer ── */}
+      {/* ── Scroll invitation: a quiet glowing breath ── */}
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
         variants={fadeUp}
@@ -159,37 +159,39 @@ function Hero() {
         animate="visible"
         custom={3}
       >
-        <div className="relative flex flex-col items-center gap-2">
-          {/* Thin vertical hairline */}
-          <div className="relative w-px h-10 overflow-hidden">
-            <motion.div
-              className="absolute left-1/2 top-0 w-[1px] h-6 -translate-x-1/2"
-              animate={{
-                top: ["-40%", "60%", "60%", "-40%"],
-                opacity: [0.15, 0.6, 0.6, 0.15],
-              }}
-              transition={{
-                duration: 3.2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                times: [0, 0.45, 0.55, 1],
-              }}
-              style={{
-                background: "linear-gradient(to bottom, transparent, #E5A93C 45%, #E5A93C 55%, transparent)",
-                boxShadow: "0 0 8px rgba(229, 169, 60, 0.3)",
-              }}
-            />
+        <div className="relative flex flex-col items-center gap-3">
+          {/* Three drifting amber motes — like embers above a signal chain */}
+          <div className="relative w-28 h-8 flex items-center justify-center">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="absolute w-2.5 h-2.5 rounded-full"
+                style={{
+                  background: '#E5A93C',
+                  boxShadow: '0 0 8px rgba(229, 169, 60, 0.8), 0 0 16px rgba(229, 169, 60, 0.4), 0 0 28px rgba(229, 169, 60, 0.15)',
+                }}
+                animate={{
+                  x: [(-16 + i * 16), (16 - i * 16), (-16 + i * 16)],
+                  opacity: [0.35, 1, 0.35],
+                  scale: [0.8, 1.4, 0.8],
+                }}
+                transition={{
+                  duration: 2.6 + i * 0.35,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: i * 0.35,
+                }}
+              />
+            ))}
           </div>
-          {/* Small amber orb — gentle pulse, no arrow, no label */}
-          <motion.div
-            className="w-1.5 h-1.5 rounded-full"
-            animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.9, 0.4] }}
+          {/* Subtle "scroll" wordmark */}
+          <motion.span
+            className="text-[0.55rem] font-black uppercase tracking-[0.4em] text-zinc-500"
+            animate={{ opacity: [0.4, 0.7, 0.4] }}
             transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-            style={{
-              background: "radial-gradient(circle at 50% 50%, #E5A93C, rgba(229, 169, 60, 0))",
-              boxShadow: "0 0 6px rgba(229, 169, 60, 0.5), 0 0 12px rgba(229, 169, 60, 0.2)",
-            }}
-          />
+          >
+            Scroll
+          </motion.span>
         </div>
       </motion.div>
     </section>
@@ -351,11 +353,6 @@ function PresetCard({ preset, isLastAdded, onPresetSelect }: { preset: Preset; i
           href={`${preset.href}#details`}
           className="group/details flex-1 relative inline-flex items-center justify-center gap-1.5 py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-[#00d8f6]/10 hover:bg-[#00d8f6]/20 border border-[#00d8f6]/30 text-[#00d8f6] rounded-lg transition-all duration-200 overflow-hidden"
         >
-          <svg className="relative z-10 w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="6" cy="6" r="4.5" />
-            <line x1="6" y1="4.5" x2="6" y2="6.5" />
-            <circle cx="6" cy="8" r="0.5" fill="currentColor" />
-          </svg>
           <span className="relative z-10">DETAILS</span>
           <span className="absolute inset-0 bg-[#00d8f6]/0 group-hover/details:bg-[#00d8f6]/5 transition-colors duration-200" />
         </Link>
@@ -751,15 +748,45 @@ function ExpandedTracklist({
   playingTrackId,
   onTrackToggle,
   onClose,
+  onSeek,
+  expandedTrackId: expandedTrackIdProp,
+  currentTime = 0,
 }: {
   demo: any;
   playingTrackId: string | null;
   onTrackToggle: (id: string) => void;
   onClose: () => void;
+  onSeek?: (trackId: string, time: number) => void;
+  expandedTrackId?: string | null;
+  currentTime?: number;
 }) {
+  const [internalExpandedId, setInternalExpandedId] = useState<string | null>(null);
+  const expandedTrackId = expandedTrackIdProp ?? internalExpandedId;
+
+  const WAVEFORM_BARS = 250;
+
+  // Seeded pseudo-random heights for realistic amplitude peaks
+  function seededRandom(seed: number): number {
+    const x = Math.sin(seed * 9301 + 49297) * 233280;
+    return x - Math.floor(x);
+  }
+
+  function getWaveHeights(id: string): number[] {
+    const seed = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    return Array.from({ length: WAVEFORM_BARS }, (_, i) => {
+      const r = seededRandom(seed * 1000 + i);
+      const peak = 0.2 + r * 0.8; // 20%–100% height variation
+      const trans = seededRandom(seed * 3000 + i) > 0.88 ? 0.3 : 1; // transient dips
+      return Math.round(peak * trans * 100);
+    });
+  }
+
   const tracks = demo.tracks || [];
-  const playingTrack = tracks.find((t: any) => t.id === playingTrackId);
-  const isAnyPlaying = playingTrackId !== null;
+
+  function handleTrackClick(trackId: string) {
+    setInternalExpandedId(trackId);
+    onTrackToggle(trackId);
+  }
 
   return (
     <motion.div
@@ -790,80 +817,76 @@ function ExpandedTracklist({
         <div className="space-y-1">
           {tracks.map((track: any, idx: number) => {
             const isPlaying = track.id === playingTrackId;
-            const bars = getTrackWave(track.id);
+            const isExpanded = expandedTrackId === track.id;
+            const dur = (() => {
+              const [m, s] = (track.duration || '1:34').split(':').map(Number);
+              return (m || 1) * 60 + (s || 34);
+            })();
+            const progressPct = Math.min(100, Math.max(0, (currentTime / dur) * 100));
 
             return (
               <div
                 key={track.id}
-                className={`group flex items-center gap-5 px-4 py-3 rounded-xl transition-colors duration-200 ${
-                  isPlaying ? 'bg-zinc-900/80' : 'hover:bg-zinc-900/30'
-                }`}
+                className="w-full flex flex-col py-6 border-b border-zinc-900/50 last:border-0 transition-all duration-500"
               >
-                {/* Index */}
-                <span className="font-mono text-[10px] text-zinc-600 w-7 text-right shrink-0 tabular-nums">
-                  {track.id}
-                </span>
-
-                {/* Play / Pause circle */}
-                <button
-                  onClick={() => onTrackToggle(track.id)}
-                  className={`w-8 h-8 rounded-full border flex items-center justify-center shrink-0 transition-all duration-200 ${
-                    isPlaying
-                      ? 'border-[#E5A93C] bg-[#E5A93C]/10 text-[#E5A93C]'
-                      : 'border-zinc-700 bg-zinc-800/60 text-zinc-400 hover:border-zinc-500 hover:text-white'
-                  }`}
-                  aria-label={isPlaying ? 'Pause' : 'Play'}
-                >
-                  {isPlaying ? (
-                    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="2.5" width="3" height="7" rx="0.5"/><rect x="6.5" y="2.5" width="3" height="7" rx="0.5"/></svg>
-                  ) : (
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5L4 2.5z"/></svg>
-                  )}
-                </button>
-
-                {/* Title */}
-                <div className="min-w-0 w-52 shrink-0">
-                  <p className={`text-[11px] font-medium uppercase tracking-[0.15em] truncate transition-colors ${
-                    isPlaying ? 'text-[#E5A93C]' : 'text-zinc-300 group-hover:text-white'
-                  }`}>
-                    {track.title}
-                  </p>
+                {/* Top control bar — 3-column grid, edge-to-edge */}
+                <div className="w-full grid grid-cols-3 items-center">
+                  <div className="flex items-center gap-6 md:gap-12">
+                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600">{String(idx + 1).padStart(3, '0')}</span>
+                    <span className={`text-sm md:text-lg font-light tracking-[0.3em] uppercase transition-colors ${isPlaying ? 'text-white' : isExpanded ? 'text-zinc-200' : 'text-zinc-500'}`}>
+                      {track.title}
+                    </span>
+                  </div>
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleTrackClick(track.id)}
+                      aria-label={isPlaying ? 'Pause' : 'Play'}
+                      className="w-12 h-12 rounded-full border border-zinc-600 flex items-center justify-center text-zinc-400 hover:text-white hover:border-white transition-all duration-300"
+                    >
+                      {isPlaying ? (
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M10 9v6m4-6v6" /></svg>
+                      ) : (
+                        <svg className="w-3.5 h-3.5 ml-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2.5v11l9-5.5L4 2.5z"/></svg>
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex justify-end">
+                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600">{isPlaying ? '0:42 / 1:34' : `${track.duration} / 1:34`}</span>
+                  </div>
                 </div>
 
-                {/* Waveform scrubber */}
-                <div className="flex-1 flex items-center gap-[2px] h-8">
-                  {bars.map((h, i) => {
-                    const filled = isPlaying && i / TRACK_BARS < 0.45;
-                    return (
-                      <motion.div
-                        key={i}
-                        className="flex-1 rounded-full"
-                        style={{ height: h }}
-                        animate={isPlaying ? { scaleY: [1, 0.6, 1.15, 1] } : { scaleY: 1 }}
-                        transition={isPlaying
-                          ? { duration: 0.35 + (i % 4) * 0.08, repeat: Infinity, ease: 'easeInOut', delay: i * 0.015 }
-                          : { duration: 0.25 }
-                        }
-                        initial={false}
-                      >
-                        <div
-                          className={`w-full h-full rounded-full transition-colors duration-300 ${
-                            filled
-                              ? 'bg-gradient-to-t from-[#E5A93C] to-[#00d8f6]'
-                              : isPlaying
-                              ? 'bg-zinc-600/60'
-                              : 'bg-zinc-700/40'
-                          }`}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </div>
-
-                {/* Duration */}
-                <span className="font-mono text-[9px] text-zinc-600 w-10 text-right shrink-0 tabular-nums">
-                  {isPlaying ? '0:42' : track.duration}
-                </span>
+                {/* Waveform — visible for EXPANDED track, regardless of play/pause */}
+                {isExpanded && (
+                  <div
+                    className="w-full h-12 relative flex items-center justify-between mt-6 cursor-pointer"
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const clickX = e.clientX - rect.left;
+                      const pct = Math.max(0, Math.min(1, clickX / rect.width));
+                      onSeek?.(track.id, pct * dur);
+                    }}
+                  >
+                    {/* 250 hyper-dense, 1px wide bars */}
+                    <div className="flex items-center justify-between w-full h-full">
+                      {getWaveHeights(track.id).map((h, i) => {
+                        const barPct = (i / WAVEFORM_BARS) * 100;
+                        const played = barPct <= progressPct;
+                        return (
+                          <div
+                            key={i}
+                            className={`w-[1px] rounded-none transition-colors duration-75 ${played ? 'bg-zinc-300' : 'bg-zinc-800'}`}
+                            style={{ height: `${Math.max(15, h)}%` }}
+                          />
+                        );
+                      })}
+                    </div>
+                    {/* Razor playhead */}
+                    <div
+                      className="absolute top-0 bottom-0 w-[1px] bg-white z-10 pointer-events-none transition-all duration-75"
+                      style={{ left: `${progressPct}%`, boxShadow: '0 0 4px rgba(255,255,255,0.7)' }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -879,14 +902,33 @@ function ExpandedTracklist({
 export default function Home() {
   const [activeDemo, setActiveDemo] = useState<any | null>(null);
   const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
+  const [trackProgress, setTrackProgress] = useState({ id: '', time: 0, dur: 94 });
+
+  // Simulate progress ticker when a track is playing
+  useEffect(() => {
+    if (!playingTrackId) return;
+    const interval = setInterval(() => {
+      setTrackProgress(p => {
+        if (p.id !== playingTrackId) return { id: playingTrackId, time: 0, dur: 94 };
+        const next = p.time + 0.8;
+        return { ...p, time: next > p.dur ? 0 : next };
+      });
+    }, 800);
+    return () => clearInterval(interval);
+  }, [playingTrackId]);
 
   const handleTrackToggle = (trackId: string) => {
     setPlayingTrackId(prev => prev === trackId ? null : trackId);
   };
 
+  const handleSeek = (trackId: string, time: number) => {
+    setTrackProgress(p => ({ id: trackId, time, dur: 94 }));
+  };
+
   const handleClose = () => {
     setActiveDemo(null);
     setPlayingTrackId(null);
+    setTrackProgress({ id: '', time: 0, dur: 94 });
   };
 
   const playingTrack = activeDemo?.tracks?.find((t: any) => t.id === playingTrackId);
@@ -908,6 +950,8 @@ export default function Home() {
             playingTrackId={playingTrackId}
             onTrackToggle={handleTrackToggle}
             onClose={handleClose}
+            onSeek={handleSeek}
+            currentTime={trackProgress.id === playingTrackId ? trackProgress.time : 0}
           />
         )}
       </AnimatePresence>
