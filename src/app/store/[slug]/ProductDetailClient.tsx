@@ -259,7 +259,7 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
             )}
 
             {/* Technical Specs — minimalist table */}
-            <article>
+            <article id="details">
               <header className="flex items-center gap-4 mb-8">
                 <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-300 shrink-0">Technical Specifications</h2>
                 <div className="h-px flex-1 bg-zinc-800" />

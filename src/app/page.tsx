@@ -151,7 +151,7 @@ function Hero() {
 
       {/* Parallax image handled via section bg */}
 
-      {/* ── Scroll indicator: minimalist track + animated dot ── */}
+      {/* ── Scroll invitation: a quiet glowing breath, not a pointer ── */}
       <motion.div
         className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
         variants={fadeUp}
@@ -159,14 +159,35 @@ function Hero() {
         animate="visible"
         custom={3}
       >
-        <div className="relative w-[1px] h-10 bg-zinc-800 overflow-hidden">
+        <div className="relative flex flex-col items-center gap-2">
+          {/* Thin vertical hairline */}
+          <div className="relative w-px h-10 overflow-hidden">
+            <motion.div
+              className="absolute left-1/2 top-0 w-[1px] h-6 -translate-x-1/2"
+              animate={{
+                top: ["-40%", "60%", "60%", "-40%"],
+                opacity: [0.15, 0.6, 0.6, 0.15],
+              }}
+              transition={{
+                duration: 3.2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                times: [0, 0.45, 0.55, 1],
+              }}
+              style={{
+                background: "linear-gradient(to bottom, transparent, #E5A93C 45%, #E5A93C 55%, transparent)",
+                boxShadow: "0 0 8px rgba(229, 169, 60, 0.3)",
+              }}
+            />
+          </div>
+          {/* Small amber orb — gentle pulse, no arrow, no label */}
           <motion.div
-            className="absolute left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E5A93C]"
-            animate={{ top: ['0%', '100%'] }}
-            transition={{
-              duration: 1.6,
-              repeat: Infinity,
-              ease: 'easeInOut',
+            className="w-1.5 h-1.5 rounded-full"
+            animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              background: "radial-gradient(circle at 50% 50%, #E5A93C, rgba(229, 169, 60, 0))",
+              boxShadow: "0 0 6px rgba(229, 169, 60, 0.5), 0 0 12px rgba(229, 169, 60, 0.2)",
             }}
           />
         </div>
@@ -317,16 +338,26 @@ function PresetCard({ preset, isLastAdded, onPresetSelect }: { preset: Preset; i
       {/* Bottom action buttons */}
       <div className="flex gap-2 w-full mt-auto pt-3">
         <Link
-          href={preset.href}
-          className="flex-1 text-center py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/50 text-zinc-300 rounded-lg transition-colors duration-200"
+          href="/store"
+          className="group/explore flex-1 relative inline-flex items-center justify-center gap-1.5 py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/50 text-zinc-300 rounded-lg transition-all duration-200 overflow-hidden"
         >
-          EXPLORE
+          <span className="relative z-10">EXPLORE</span>
+          <svg className="relative z-10 w-3 h-3 transition-transform duration-200 group-hover/explore:translate-x-0.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 6h8M7 3l3 3-3 3" />
+          </svg>
+          <span className="absolute inset-0 -translate-x-full group-hover/explore:translate-x-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent transition-transform duration-500" />
         </Link>
         <Link
           href={`${preset.href}#details`}
-          className="flex-1 text-center py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-[#00d8f6]/10 hover:bg-[#00d8f6]/20 border border-[#00d8f6]/30 text-[#00d8f6] rounded-lg transition-colors duration-200"
+          className="group/details flex-1 relative inline-flex items-center justify-center gap-1.5 py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-[#00d8f6]/10 hover:bg-[#00d8f6]/20 border border-[#00d8f6]/30 text-[#00d8f6] rounded-lg transition-all duration-200 overflow-hidden"
         >
-          DETAILS
+          <svg className="relative z-10 w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="6" cy="6" r="4.5" />
+            <line x1="6" y1="4.5" x2="6" y2="6.5" />
+            <circle cx="6" cy="8" r="0.5" fill="currentColor" />
+          </svg>
+          <span className="relative z-10">DETAILS</span>
+          <span className="absolute inset-0 bg-[#00d8f6]/0 group-hover/details:bg-[#00d8f6]/5 transition-colors duration-200" />
         </Link>
       </div>
     </div>
