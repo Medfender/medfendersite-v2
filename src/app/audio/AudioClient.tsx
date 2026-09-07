@@ -27,7 +27,13 @@ export default function AudioClient() {
     togglePlay,
     stop: ctxStop,
     pause,
+    seek,
   } = useAudio();
+
+  // Click-to-seek: convert a 0..1 waveform percent into an absolute time on the active track.
+  const handlePlaylistSeek = (percent: number) => {
+    if (duration > 0) seek(percent * duration);
+  };
 
   const handleTogglePlay = () => togglePlay();
   const handleTurntablePlay = () => {
@@ -97,11 +103,9 @@ export default function AudioClient() {
               </div>
             </div>
 
-          {/* Playlist: below the turntable section */}
+          {/* Playlist: flat horizontal-line aesthetic, no card/box framing */}
           <div className="mt-6">
-            <div className="bg-transparent/60 border border-white/[0.08] rounded-2xl p-4 shadow-[0_0_60px_rgba(0,216,246,0.06)]">
-              <PlaylistPanel />
-            </div>
+            <PlaylistPanel onSeek={handlePlaylistSeek} />
           </div>
         </section>
 
