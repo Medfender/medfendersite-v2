@@ -95,7 +95,7 @@ export default function PlaylistPanel({ onSeek }: { onSeek?: (percentage: number
     <div className="flex flex-col h-full">
       {/* Active-track hero — minimal, flat, no box */}
       {activeTrack && (
-        <div className="flex items-center gap-3 px-2 py-3 border-b border-white/[0.06]">
+        <div className="flex items-center gap-3 px-2 py-3 border-b border-zinc-900/50">
           <Thumbnail src={activeCoverSrc} size={48} accent="amber" />
           <div className="min-w-0 flex-1">
             <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em]">Active</div>
@@ -171,7 +171,7 @@ function PlaylistRow({
   return (
     <div
       onClick={onClick}
-      className="w-full flex flex-col border-b border-white/[0.05] py-4 lg:py-5 transition-colors hover:bg-white/[0.02] cursor-pointer group"
+      className="w-full flex flex-col border-b border-zinc-900/40 py-3 transition-colors hover:bg-white/[0.02] cursor-pointer group"
     >
       {/* Row info line */}
       <div className="flex items-center justify-between w-full px-2">
@@ -194,7 +194,7 @@ function PlaylistRow({
             onClick={(e) => { e.stopPropagation(); onClick(); }}
             className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
               isActive
-                ? "border-cyan-400/60 text-cyan-300 opacity-100"
+                ? "border-zinc-400 text-zinc-200"
                 : "border-zinc-700 text-zinc-400 opacity-0 group-hover:opacity-100 hover:border-zinc-500 hover:text-white"
             }`}
           >
@@ -207,7 +207,7 @@ function PlaylistRow({
       {/* Dense waveform — only when this track is active. Click-to-seek. */}
       {isActive && (
         <div
-          className="w-full h-10 relative flex items-center justify-between gap-[1px] mt-6 mb-2 px-2 cursor-pointer"
+          className="w-full h-6 relative flex items-center justify-between gap-[1px] mt-3 mb-1 px-2 cursor-pointer group"
           onClick={(e) => {
             if (!onSeek) return;
             const rect = e.currentTarget.getBoundingClientRect();
@@ -223,7 +223,7 @@ function PlaylistRow({
                 <div
                   key={i}
                   className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-zinc-300" : "bg-zinc-800"}`}
-                  style={{ height: `${Math.max(15, h)}%` }}
+                  style={{ height: `${Math.max(30, h * 0.7)}%` }}
                 />
               );
             })}

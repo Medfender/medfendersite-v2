@@ -349,13 +349,13 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
       <div
         style={{
           position: "absolute",
-          top: 36,
+          top: 3,
           right: 16,
           zIndex: 20,
           pointerEvents: "auto",
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 8,
         }}
       >
         {(["curve", "bars"] as const).map((m) => (
@@ -380,6 +380,7 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
           </button>
         ))}
         <div style={{ width: 1, background: "rgba(148,163,184,0.2)", height: 14 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 6, transform: "translateX(8px)" }}>
         {(["cyan", "neon", "emerald"] as const).map((c) => (
           <button
             key={c}
@@ -399,6 +400,7 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
             }}
           />
         ))}
+        </div>
       </div>
 
     </div>

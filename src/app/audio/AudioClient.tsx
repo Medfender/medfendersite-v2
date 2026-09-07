@@ -287,7 +287,7 @@ export default function AudioClient() {
 
         {/* ── Section 8: Playlist & Details Description Block ──────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
-          <div className="rounded-2xl bg-transparent/60 border border-white/[0.06] p-6 md:p-8 shadow-[0_0_60px_rgba(0,216,246,0.04)]">
+          <div className="rounded-2xl bg-transparent/60 border-none p-6 md:p-8">
             <div className="flex items-center gap-3 mb-5">
               <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
               <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
@@ -300,7 +300,7 @@ export default function AudioClient() {
               {/* Track context */}
               <div>
                 <h3 className="text-sm font-bold text-white mb-3">Active Track</h3>
-                <div className="rounded-xl bg-transparent/40 border border-white/[0.04] p-4">
+                <div className="rounded-xl bg-transparent/40 border-none p-4">
                   <div className="text-base font-semibold text-white truncate">
                     {(activeTrack as any)?.name || (activeTrack as any)?.title || "—"}
                   </div>
@@ -318,7 +318,7 @@ export default function AudioClient() {
               {/* Gear notes */}
               <div>
                 <h3 className="text-sm font-bold text-white mb-3">Signal Notes</h3>
-                <div className="rounded-xl bg-transparent/40 border border-white/[0.04] p-4 space-y-2.5">
+                <div className="rounded-xl bg-transparent/40 border-none p-4 space-y-2.5">
                   {[
                     "Guitar → 1/4\" TRS balanced direct",
                     "TONEX Black Tube: vintage tube preamp model",

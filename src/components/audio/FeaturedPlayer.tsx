@@ -57,7 +57,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
     const emptyMsg = "No audio — add files to /public/audio/featured";
     return (
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+        className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-zinc-900 backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
           isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
         }`}
       >
@@ -76,7 +76,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-cyan-500/20 backdrop-blur-xl text-white z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] transition-all duration-500 ease-in-out ${
+      className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-zinc-900 backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
         isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
       }`}
     >
@@ -84,14 +84,14 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
         {/* ── Left: transport + thumbnail + track info ───────────────────────── */}
         <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-          {/* Transport buttons */}
+          {/* Transport buttons — GATT / industrial wireframe */}
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={playPrevious}
               aria-label="Previous track"
-              className="w-8 h-8 rounded-full bg-neutral-800/80 text-cyan-400 flex items-center justify-center hover:text-white hover:bg-neutral-700/80 transition shrink-0"
+              className="text-zinc-500 hover:text-zinc-200 p-1 transition-colors active:scale-95"
             >
-              <SkipBack size={14} />
+              <SkipBack size={13} strokeWidth={1.2} />
             </button>
 
             <button
@@ -99,23 +99,23 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
                 console.log("[FeaturedPlayer] PLAY BUTTON CLICK — togglePlay called", { playingState: isPlaying, track: (currentTrack as any)?.name || (currentTrack as any)?.title || null });
                 togglePlay();
               }}
-              className="relative w-10 h-10 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center shadow-[0_0_14px_rgba(0,216,246,0.3)] hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0 overflow-hidden"
+              className="relative w-8 h-8 rounded-full border border-zinc-500 hover:border-white flex items-center justify-center text-zinc-200 hover:text-white transition-colors shrink-0 overflow-hidden"
               aria-label={isPlaying ? "Pause" : "Play"}
               style={{ aspectRatio: "1 / 1" }}
             >
               <span className="flex items-center justify-center w-full h-full">
                 {isPlaying
-                  ? <Pause size={18} className="shrink-0" />
-                  : <Play size={18} className="shrink-0 ml-0.5" />}
+                  ? <Pause size={13} strokeWidth={1.2} />
+                  : <Play size={13} strokeWidth={1.2} className="ml-[1px]" />}
               </span>
             </button>
 
             <button
               onClick={playNext}
               aria-label="Next track"
-              className="w-8 h-8 rounded-full bg-neutral-800/80 text-cyan-400 flex items-center justify-center hover:text-white hover:bg-neutral-700/80 transition shrink-0"
+              className="text-zinc-500 hover:text-zinc-200 p-1 transition-colors active:scale-95"
             >
-              <SkipForward size={14} />
+              <SkipForward size={13} strokeWidth={1.2} />
             </button>
           </div>
 
@@ -158,10 +158,10 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             <button
               onClick={toggleMute}
               aria-label={isMuted ? "Unmute" : "Mute"}
-              className="w-7 h-7 rounded-full text-neutral-400 flex items-center justify-center hover:text-cyan-400 transition shrink-0"
+              className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
               title={isMuted ? "Unmute" : "Mute"}
             >
-              {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+              {isMuted ? <VolumeX size={13} strokeWidth={1.25} /> : <Volume2 size={13} strokeWidth={1.25} />}
             </button>
             <input
               type="range" min="0" max="1" step="0.01"
@@ -172,14 +172,14 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             />
           </div>
 
-          {/* Stop — immediately before the interactive Mini Visualizer */}
+          {/* Stop — minimal square, no fill */}
           <button
             onClick={stopPlayback}
             title="Stop"
             aria-label="Stop"
-            className="w-7 h-7 rounded-full text-neutral-500 hover:text-cyan-400 hover:bg-white/5 transition-colors shrink-0 flex items-center justify-center"
+            className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
           >
-            <Square fill="currentColor" size={13} />
+            <Square size={12} strokeWidth={1.25} />
           </button>
 
           {/* Free-contained mini visualizer — no card, no border, no shadow.

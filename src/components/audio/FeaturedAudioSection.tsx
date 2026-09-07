@@ -100,8 +100,8 @@ export default function FeaturedAudioSection() {
             </p>
           </div>
 
-          {/* Right: live track status card */}
-          <div className="rounded-2xl bg-[#0e121c]/80 border border-white/[0.06] backdrop-blur-md p-5 shadow-[0_0_60px_rgba(0,216,246,0.06)]">
+          {/* Right: live track status card — flat, borderless */}
+          <div className="rounded-2xl bg-[#0e121c]/80 border-none backdrop-blur-md p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-neutral-500">
                 <AudioWaveform size={12} className="text-cyan-400" />

@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Play, Pause, Square, SkipBack, SkipForward, Volume2, VolumeX, Disc3 } from "lucide-react";
+import { Volume2, VolumeX, Disc3 } from "lucide-react";
 import { useAudio } from "@/context/AudioContext";
 import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
 import { deckControls } from "@/lib/audio/DeckControls";
 import MiniVisualizer from "./MiniVisualizer";
 
-// ─── Album cover card — the signature amber-stroked thumbnail ────────────
+// ─── Album cover card — flat, sharp thumbnail (no rounded corners, no glow) ─
 interface CoverCardProps {
   src: string | null;
   name: string;
@@ -22,28 +22,23 @@ function CoverCard({ src, name, isPlaying, onClick }: CoverCardProps) {
 
   return (
     <button
-      className="relative shrink-0 rounded-lg overflow-hidden border-2 border-amber-500/70 cursor-pointer focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1 focus:ring-offset-[#0c0c0c] hover:scale-105 active:scale-95 transition-transform duration-200"
+      className="relative shrink-0 overflow-hidden border border-white/10 cursor-pointer focus:outline-none focus:border-white/30 hover:border-white/25 active:scale-[0.98] transition-all duration-150 rounded-none"
       style={{
         width: 40,
         height: 40,
         flex: "0 0 40px",
-        boxShadow:
-          "0 0 14px rgba(245, 158, 11, 0.45), 0 0 4px rgba(245, 158, 11, 0.7), inset 0 0 0 1px rgba(245, 158, 11, 0.15)",
         background: "none",
         padding: 0,
       }}
       aria-label={`Cover art for ${name} — click to open track`}
       onClick={onClick}
     >
-      {/* Spinning ring when playing */}
+      {/* Hairline playing indicator (no glow, no rounded ring) */}
       {isPlaying && (
         <div
-          className="absolute inset-0 rounded-lg z-10 pointer-events-none"
-          style={{
-            background:
-              "conic-gradient(from 0deg, transparent 0%, rgba(245,158,11,0.28) 30%, transparent 60%)",
-            animation: "spin 2.4s linear infinite",
-          }}
+          className="absolute top-0 left-0 right-0 h-[1px] z-10 pointer-events-none"
+          style={{ background: "rgba(255,255,255,0.85)" }}
+          aria-hidden
         />
       )}
 
@@ -61,10 +56,8 @@ function CoverCard({ src, name, isPlaying, onClick }: CoverCardProps) {
           }}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-[#0e0e12]">
-          <div className="w-8 h-8 rounded-full border-2 border-amber-500/40 flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-          </div>
+        <div className="w-full h-full flex items-center justify-center bg-zinc-900">
+          <Disc3 size={16} className="text-zinc-600" strokeWidth={1} />
         </div>
       )}
     </button>
@@ -90,16 +83,35 @@ export default function StickyTransport() {
     analyserNode,
   } = useAudio();
 
-  // Scroll-aware visibility: hide the bar when the user is scrolled deep into
-  // the page (toward the bottom), show it again when they scroll back up.
-  // Driven by a viewport scroll listener that compares the new scrollY to the
-  // previous one and only animates when state actually changes.
-  const [isHidden, setIsHidden] = useState(false);
+  // Scroll-aware visibility: bar appears at the top of the page (above the
+  // turntable hero) and slides down off-screen once the user scrolls past the
+  // hero threshold. Scroll back up to reveal it again.
+  const [isBarVisible, setIsBarVisible] = useState(true);
   const [miniMode, setMiniMode] = useState<"bars" | "curve" | "waveform">("bars");
-  const [vinylVisible, setVinylVisible] = useState(false);
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [volumeOpen, setVolumeOpen] = useState(false);
   const volumePopRef = useRef<HTMLDivElement | null>(null);
+
+  // Threshold roughly equals the height of the hero / turntable area —
+  // past this point the bar slides off-screen.
+  const HIDE_THRESHOLD_PX = 600;
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (typeof window === "undefined") return;
+      if (window.scrollY > HIDE_THRESHOLD_PX) {
+        setIsBarVisible(false);
+      } else {
+        setIsBarVisible(true);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Trigger once on mount to set the initial state
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Close volume popover on outside tap / Escape
   useEffect(() => {
@@ -118,70 +130,6 @@ export default function StickyTransport() {
       document.removeEventListener("keydown", onKey);
     };
   }, [volumeOpen]);
-
-  useEffect(() => {
-    let lastY = typeof window !== "undefined" ? window.scrollY : 0;
-    let rafId = 0;
-    let ticking = false;
-
-    // Distance from the page bottom at which the bar starts hiding. 240px lets
-    // the bar stay visible long enough to read the active track during the
-    // last scroll, then fades it out before it overlaps the footer.
-    const HIDE_NEAR_BOTTOM_PX = 240;
-
-    const update = () => {
-      ticking = false;
-      const currentY = window.scrollY;
-      const viewportH = window.innerHeight;
-      const docH = document.documentElement.scrollHeight;
-      const distanceFromBottom = docH - (currentY + viewportH);
-
-      if (currentY <= 16) {
-        // Always show when at the very top of the page
-        setIsHidden(false);
-      } else if (vinylVisible) {
-        // Inside Vinyl Showcase section → hide
-        setIsHidden(true);
-      } else if (currentY < lastY - 4) {
-        // Scrolling UP → reveal the bar
-        setIsHidden(false);
-      } else if (currentY > lastY + 4) {
-        // Scrolling DOWN outside vinyl showcase → show (bar re-appears past it)
-        setIsHidden(false);
-      }
-
-      lastY = currentY;
-    };
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      rafId = requestAnimationFrame(update);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    update();
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
-
-  // ── Vinyl Showcase observer: bar hides when inside vinyl, shows after ─────
-  const vinylRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = document.getElementById("vinyl-showcase-section");
-    if (!el) return;
-    const obs = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        setVinylVisible(e.isIntersecting);
-      }
-    }, { threshold: 0.01 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   // ── Resolve thumbnail src for the active track (amber-stroked cover) ────
   // Shared hook — same resolution logic as PlaylistPanel, VinylShowcase, PatchBrowser.
@@ -204,94 +152,91 @@ export default function StickyTransport() {
   return (
     <>
     <div
-      className={`fixed bottom-0 left-0 right-0 z-50 bg-[#0c0c0c]/90 backdrop-blur-md border-t border-white/[0.08] shadow-[0_-20px_60px_rgba(0,0,0,0.7)] transition-all duration-300 ease-out ${
-        isHidden ? "translate-y-full opacity-0" : "translate-y-0 opacity-100"
+      className={`fixed bottom-0 left-0 right-0 z-50 h-14 bg-black/95 backdrop-blur-md flex items-center justify-between px-4 border-none shadow-none transition-transform duration-500 ease-out ${
+        isBarVisible ? "translate-y-0" : "translate-y-full"
       }`}
       role="region"
       aria-label="Audio transport bar"
-      aria-hidden={isHidden}
+      aria-hidden={!isBarVisible}
     >
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-4 md:px-6 py-2 flex items-center gap-1.5 sm:gap-3 md:gap-4 min-w-0 justify-between">
-        {/* ── Transport Controls (left) ──────────────────────────────────── */}
-        <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+      <div className="max-w-7xl mx-auto flex items-center gap-3 sm:gap-4 md:gap-6 min-w-0 justify-between w-full">
+        {/* ── Transport Controls — precision studio style ─────────────────── */}
+        <div className="flex items-center gap-3 shrink-0">
+          {/* Prev */}
           <button
             onClick={() => playPrevious?.()}
             aria-label="Previous track"
-            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
-            <SkipBack size={14} />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
+              <polygon points="19 20 9 12 19 4 19 20" />
+              <line x1="5" y1="19" x2="5" y2="5" />
+            </svg>
           </button>
+
+          {/* Play / Pause — precision wireframe ring */}
           <button
-            onClick={() => {
-              deckControls.toggle();
-            }}
+            onClick={() => { deckControls.toggle(); }}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-cyan-500 to-blue-600 text-slate-950 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 shrink-0"
-            style={{
-              aspectRatio: "1/1",
-              boxShadow:
-                "0 0 15px rgba(0, 216, 246, 0.6), 0 0 4px rgba(0, 216, 246, 0.8)",
-              animation: isPlaying
-                ? "playPulse 2s ease-in-out infinite"
-                : "none",
-            }}
+            className="w-7 h-7 rounded-full border border-zinc-600 hover:border-zinc-200 text-zinc-300 hover:text-white flex items-center justify-center transition-all active:scale-95"
           >
             {isPlaying ? (
-              <Pause size={16} className="shrink-0 text-slate-950" />
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <rect x="6" y="4" width="4" height="16" />
+                <rect x="14" y="4" width="4" height="16" />
+              </svg>
             ) : (
-              <Play size={16} className="shrink-0 ml-0.5 text-slate-950" />
+              <svg className="w-3.5 h-3.5 translate-x-[0.5px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
             )}
           </button>
+
+          {/* Stop — bare, no fill */}
           <button
-            onClick={() => {
-              // Route through turntable choreography — preserves the lift/rotate/rest
-              // animation that the deck's own Stop button drives.
-              deckControls.stop();
-            }}
+            onClick={() => { deckControls.stop(); }}
             aria-label="Stop"
-            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
-            <Square size={12} className="fill-current" />
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
+              <rect x="5" y="5" width="14" height="14" />
+            </svg>
           </button>
+
+          {/* Next */}
           <button
             onClick={() => playNext?.()}
             aria-label="Next track"
-            className="flex w-8 h-8 rounded-full bg-white/[0.04] text-cyan-400 items-center justify-center hover:text-white hover:bg-white/[0.1] active:scale-95 transition shrink-0"
+            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
-            <SkipForward size={14} />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
+              <polygon points="5 4 15 12 5 20 5 4" />
+              <line x1="19" y1="5" x2="19" y2="19" />
+            </svg>
           </button>
         </div>
 
-        {/* ── Album cover card (amp-style, floating, clickable) ─────────── */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink min-w-0 flex-1 sm:flex-initial">
-          {/* Amp-style floating card — amber-stroked, spinning ring when playing */}
+        {/* ── Album cover + track info (left-center) ─────────────────────── */}
+        <div className="flex items-center gap-3 shrink min-w-0 flex-1 sm:flex-initial">
           <CoverCard
             src={coverSrc}
             name={trackName}
             isPlaying={isPlaying}
             onClick={() => setIsReviewOpen(true)}
           />
-          {/* Track metadata — compact pill on mobile, full on sm+ */}
-          <div className="flex-1 sm:hidden flex flex-col min-w-0">
-            <span className="text-[11px] font-bold text-white truncate leading-tight max-w-[160px] sm:max-w-[200px]">
+          {/* Track metadata — synced with PlaylistPanel typography */}
+          <div className="flex flex-col min-w-0 shrink max-w-[160px] lg:max-w-[260px]">
+            <span className="text-sm font-semibold truncate leading-tight text-neutral-200">
               {trackName}
             </span>
-            <span className="text-[8px] font-mono text-cyan-400/70 uppercase tracking-wider truncate max-w-[160px] sm:max-w-[200px]">
-              {trackArtist}
-            </span>
-          </div>
-          <div className="hidden sm:flex flex-col min-w-0 shrink max-w-[160px] lg:max-w-[260px]">
-            <span className="text-sm font-bold text-white truncate leading-tight">
-              {trackName}
-            </span>
-            <span className="text-[9px] font-mono text-cyan-400/70 uppercase tracking-wider truncate">
+            <span className="text-[10px] font-mono text-zinc-500 truncate">
               {trackArtist}
             </span>
           </div>
           {/* Mini visualizer — same 150×36 footprint as FeaturedPlayer, click cycles bars→curve→waveform */}
           <div
             onClick={() => setMiniMode((prev) => (prev === "bars" ? "curve" : prev === "curve" ? "waveform" : "bars"))}
-            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-2 rounded overflow-hidden transition-all duration-200 hover:brightness-110"
+            className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-2 transition-all duration-200 hover:brightness-110"
             title={`${miniMode === "bars" ? "Spec" : miniMode === "curve" ? "Curve" : "Osc"} — click to switch`}
             style={{ width: 120, height: 32, minWidth: 120, minHeight: 32, flexShrink: 0 }}
             aria-label="Cycle visualizer mode"
@@ -306,131 +251,120 @@ export default function StickyTransport() {
           </div>
         </div>
 
-        {/* ── Progress scrubber (hidden timestamps on xs, shown sm+) ──────── */}
-        <div className="flex-1 flex items-center gap-1.5 sm:gap-2 min-w-0 sm:min-w-[160px] md:min-w-[200px] max-w-sm">
-          <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-500 tabular-nums w-8 text-right shrink-0">
+        {/* ── Center: ultra-thin 2px hairline progress track ─────────────── */}
+        <div className="flex-1 flex items-center gap-3 min-w-0 sm:min-w-[200px] md:min-w-[260px] max-w-md">
+          <span className="hidden sm:inline-block text-xs text-zinc-500 font-mono tabular-nums w-8 text-right shrink-0">
             {fmt(currentTime)}
           </span>
           <div
-            className="flex-1 h-1 bg-white/[0.08] rounded-full relative cursor-pointer group min-w-0"
-            style={{ minHeight: 4 }}
+            className="flex-1 h-[2px] bg-zinc-800 relative cursor-pointer group min-w-0"
+            onClick={(e) => {
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+              seek(ratio * duration);
+            }}
+            role="slider"
+            aria-label="Seek"
+            aria-valuemin={0}
+            aria-valuemax={duration || 0}
+            aria-valuenow={currentTime || 0}
           >
             <div
-              className="absolute top-0 left-0 h-full rounded-full transition-[width] duration-100"
-              style={{
-                background: "linear-gradient(90deg, #00d8f6 0%, #00a8c6 100%)",
-                width: `${progress}%`,
-                boxShadow: "0 0 8px rgba(0, 216, 246, 0.55)",
-              }}
-            />
-            <input
-              type="range"
-              min={0}
-              max={duration || 100}
-              value={currentTime || 0}
-              onChange={(e) => seek(Number(e.target.value))}
-              className="absolute inset-0 w-full h-6 -translate-y-1/2 top-1/2 opacity-0 cursor-pointer"
-              aria-label="Seek"
+              className="h-full bg-zinc-300 transition-all duration-75"
+              style={{ width: `${progress}%` }}
             />
             <div
-              className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{
-                left: `calc(${progress}% - 5px)`,
-                boxShadow: "0 0 8px rgba(0, 216, 246, 0.9)",
-              }}
+              className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+              style={{ left: `${progress}%`, transform: "translate(-50%, -50%)" }}
             />
           </div>
-          <span className="hidden sm:inline-block text-[10px] font-mono text-neutral-500 tabular-nums w-8 shrink-0">
+          <span className="hidden sm:inline-block text-xs text-zinc-500 font-mono tabular-nums w-8 shrink-0">
             {fmt(duration)}
           </span>
         </div>
 
-        {/* ── Volume (right) — popover on mobile, inline slider on sm+ ── */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 relative" ref={volumePopRef}>
-          {/* Desktop: inline slider */}
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={volume}
-            onChange={(e) => setVolume(Number(e.target.value))}
-            className="hidden sm:block w-16 sm:w-20 md:w-24 h-1 bg-white/[0.08] rounded-full appearance-none cursor-pointer accent-cyan-400"
-            style={{
-              background: `linear-gradient(to right, #00d8f6 0%, #00d8f6 ${
-                volume * 100
-              }%, rgba(255,255,255,0.1) ${volume * 100}%, rgba(255,255,255,0.1) 100%)`,
+        {/* ── Right: volume + auxiliary controls ────────────────────────── */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 relative" ref={volumePopRef}>
+          {/* Desktop: hairline inline volume track (mirrors progress bar) */}
+          <div
+            className="hidden sm:block w-16 md:w-20 h-[2px] bg-zinc-800 relative cursor-pointer group"
+            onClick={(e) => {
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+              setVolume(ratio);
             }}
+            role="slider"
             aria-label="Volume"
-          />
-          {/* Mute toggle — all viewports */}
+            aria-valuemin={0}
+            aria-valuemax={1}
+            aria-valuenow={volume}
+          >
+            <div
+              className="h-full bg-zinc-300 transition-all duration-75"
+              style={{ width: `${Math.round(volume * 100)}%` }}
+            />
+            <div
+              className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+              style={{ left: `${Math.round(volume * 100)}%`, transform: "translate(-50%, -50%)" }}
+            />
+          </div>
+          <span className="hidden md:inline-block text-xs text-zinc-500 font-mono tabular-nums w-7 shrink-0">
+            {Math.round(volume * 100)}%
+          </span>
+          {/* Mute toggle — flat icon, no pill */}
           <button
             onClick={() => { toggleMute(); setVolumeOpen(false); }}
             aria-label={isMuted ? "Unmute" : "Mute"}
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${
-              isMuted
-                ? "text-red-400 bg-red-500/10"
-                : "text-cyan-400 hover:text-white"
+            className={`w-8 h-8 flex items-center justify-center transition-colors active:scale-90 ${
+              isMuted ? "text-zinc-500 hover:text-zinc-200" : "text-zinc-500 hover:text-zinc-200"
             }`}
           >
-            {isMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
+            {isMuted ? <VolumeX size={14} strokeWidth={1.25} /> : <Volume2 size={14} strokeWidth={1.25} />}
           </button>
           {/* Mobile: tap-to-open volume popover trigger (vertical bars icon) */}
           <button
             onClick={() => setVolumeOpen((o) => !o)}
             aria-label="Open volume control"
             aria-expanded={volumeOpen}
-            className="sm:hidden w-8 h-8 rounded-full flex items-center justify-center text-neutral-400 hover:text-white transition-all active:scale-90"
+            className="sm:hidden w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors active:scale-90"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <rect x="1" y="5" width="2" height="4" rx="1" fill="currentColor" opacity="0.6"/>
-              <rect x="4" y="3" width="2" height="8" rx="1" fill="currentColor" opacity="0.85"/>
-              <rect x="7" y="1" width="2" height="12" rx="1" fill="currentColor"/>
+              <rect x="1" y="5" width="2" height="4" fill="currentColor" opacity="0.6"/>
+              <rect x="4" y="3" width="2" height="8" fill="currentColor" opacity="0.85"/>
+              <rect x="7" y="1" width="2" height="12" fill="currentColor"/>
             </svg>
           </button>
-          {/* Volume popover — vertical slider above the bar */}
+          {/* Volume popover — vertical hairline track above the bar */}
           {volumeOpen && (
-            <div className="absolute bottom-full right-0 mb-2 flex flex-col items-center gap-2 p-3 rounded-xl bg-[#111]/95 backdrop-blur-md border border-white/[0.1] shadow-[0_-4px_20px_rgba(0,0,0,0.6)] z-[60]">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={volume}
-                onChange={(e) => setVolume(Number(e.target.value))}
-                className="w-1 h-24 rounded-full appearance-none cursor-pointer accent-cyan-400"
-                style={{
-                  background: `linear-gradient(to top, #00d8f6 0%, #00d8f6 ${volume * 100}%, rgba(255,255,255,0.1) ${volume * 100}%, rgba(255,255,255,0.1) 100%)`,
-                  writingMode: "vertical-lr" as any,
-                  direction: "rtl",
+            <div className="absolute bottom-full right-0 mb-2 flex flex-col items-center gap-2 p-3 bg-black/95 backdrop-blur-md border border-white/10 z-[60]">
+              <div
+                className="w-[2px] h-24 bg-zinc-800 relative cursor-pointer group"
+                onClick={(e) => {
+                  const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+                  const ratio = Math.max(0, Math.min(1, 1 - (e.clientY - rect.top) / rect.height));
+                  setVolume(ratio);
                 }}
+                role="slider"
                 aria-label="Volume"
-              />
-              <span className="text-[9px] font-mono text-neutral-400">{Math.round(volume * 100)}%</span>
+                aria-valuemin={0}
+                aria-valuemax={1}
+                aria-valuenow={volume}
+              >
+                <div
+                  className="absolute bottom-0 left-0 w-full bg-zinc-300 transition-all duration-75"
+                  style={{ height: `${Math.round(volume * 100)}%` }}
+                />
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 w-2 h-2 bg-white rounded-none opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  style={{ bottom: `${Math.round(volume * 100)}%`, transform: "translate(-50%, 50%)" }}
+                />
+              </div>
+              <span className="text-xs font-mono text-zinc-500 tabular-nums">{Math.round(volume * 100)}%</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* CSS animations — play button pulse + amber ring spin */}
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @keyframes playPulse {
-          0%, 100% {
-            box-shadow:
-              0 0 15px rgba(0, 216, 246, 0.6),
-              0 0 4px rgba(0, 216, 246, 0.8);
-          }
-          50% {
-            box-shadow:
-              0 0 22px rgba(0, 216, 246, 0.85),
-              0 0 8px rgba(0, 216, 246, 1);
-          }
-        }
-      `}</style>
     </div>
 
     {/* ── Amp-Style Review Card Modal ───────────── */}
