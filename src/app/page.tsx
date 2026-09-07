@@ -487,83 +487,143 @@ function SoundPhilosophy({ onPresetSelect }: { onPresetSelect: (preset: any) => 
 }
 
 /* ════════════════════════════════════════════════════
-   FOOTER — single consolidated bottom bar
+   FOOTER — premium audio-studio footer (glass + cyan/gold)
 ═══════════════════════════════════════════════════ */
 function Footer() {
   return (
-    <footer className="w-full mt-32 border-t border-zinc-900 bg-black/40 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
-        {/* Upper Section: Brand, Metadata & Links */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-zinc-900/60">
-          {/* Brand & System Status */}
-          <div className="md:col-span-5 flex flex-col justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2.5 mb-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500/80 animate-pulse" />
-                <span className="text-xs font-mono font-bold text-zinc-200 tracking-widest uppercase">
-                  MEDFENDER
-                </span>
-                <span className="text-[10px] font-mono text-zinc-600 px-1.5 py-0.5 border border-zinc-800/80 rounded bg-zinc-900/50">
-                  v2.0
-                </span>
-              </div>
-              <p className="text-xs font-mono text-zinc-500 max-w-sm leading-relaxed">
-                Tactical audio architecture, custom impulse responses, and stage-ready tone modeling.
-              </p>
-            </div>
+    <footer className="relative w-full overflow-hidden bg-[#0b0f19] text-white">
+      {/* Top hairline + glow */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00d8f6]/40 to-transparent" />
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#00d8f6]/[0.08] rounded-full blur-[120px] pointer-events-none" />
 
-            <div className="flex items-center gap-4 text-[10px] font-mono text-zinc-600">
-              <span>LOC: 31.6295° N, 7.9811° W</span>
-              <span>•</span>
-              <span>96kHz / 24-BIT</span>
-            </div>
-          </div>
-
-          {/* Navigation Matrix */}
-          <div className="md:col-span-4 grid grid-cols-2 gap-4 text-xs font-mono">
-            <div className="flex flex-col gap-2.5">
-              <span className="text-[10px] uppercase text-zinc-600 tracking-widest font-semibold">
-                NAVIGATION
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-10">
+        {/* Main grid: brand + nav + newsletter */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
+          {/* Brand column */}
+          <div className="md:col-span-4 space-y-6">
+            <Link href="/" className="inline-block group">
+              <span className="block text-3xl font-black tracking-tighter uppercase leading-none text-white group-hover:text-[#00d8f6] transition-colors duration-300">
+                Medfender
               </span>
-              <Link className="text-zinc-400 hover:text-zinc-100 transition-colors" href="/audio">
-                Audio Catalog
-              </Link>
-              <Link className="text-zinc-400 hover:text-zinc-100 transition-colors" href="/store">
-                Preset Store
-              </Link>
-              <Link className="text-zinc-400 hover:text-zinc-100 transition-colors" href="/media">
-                Media & Stems
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <span className="text-[10px] uppercase text-zinc-600 tracking-widest font-semibold">
-                SYSTEM
+              <span className="block text-[0.65rem] font-black uppercase tracking-[0.35em] text-zinc-500 mt-2 group-hover:text-[#E5A93C] transition-colors duration-300">
+                Sound Architecture
               </span>
-              <Link className="text-zinc-400 hover:text-zinc-100 transition-colors" href="/contact">
-                Contact
-              </Link>
-              <a href="#philosophy" className="text-zinc-400 hover:text-zinc-100 transition-colors">
-                Philosophy
-              </a>
-            </div>
-          </div>
-
-          {/* Primary CTA Block */}
-          <div className="md:col-span-3 flex flex-col justify-start items-start md:items-center gap-3">
-            <span className="text-[10px] font-mono uppercase text-zinc-600 tracking-widest font-semibold">
-              BOOKING & SESSIONS
-            </span>
-            <Link className="group relative inline-flex items-center justify-center gap-3 px-5 py-3 rounded bg-zinc-900/80 border border-zinc-700/60 text-[#E5A93C] hover:border-[#E5A93C]/80 hover:bg-[#E5A93C]/10 transition-all duration-300 text-xs font-mono font-medium tracking-wider" href="/contact">
-              BOOK A SESSION
             </Link>
+            <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
+              Analog precision meets digital architecture. Presets, impulse captures, and live session tone — engineered for the stage.
+            </p>
+            <div className="flex items-center gap-3 pt-2">
+              {[
+                { label: 'Instagram', href: 'https://www.instagram.com/medfender', icon: 'instagram' },
+                { label: 'YouTube', href: 'https://www.youtube.com/@medfenderchannel7634', icon: 'youtube' },
+                { label: 'SoundCloud', href: 'https://soundcloud.com/med-hamza-798230889', icon: 'soundcloud' },
+              ].map((s) => (
+                <Link
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900/40 flex items-center justify-center text-zinc-400 hover:text-[#00d8f6] hover:border-[#00d8f6]/50 hover:bg-[#00d8f6]/5 transition-all duration-200"
+                  title={s.label}
+                >
+                  {s.icon === 'instagram' && (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+                  )}
+                  {s.icon === 'youtube' && (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75,15.02 15.5,11.75 9.75,8.48" fill="currentColor" stroke="none"/></svg>
+                  )}
+                  {s.icon === 'soundcloud' && (
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 8.5a6.5 6.5 0 0 1 6.5 0v7a6.5 6.5 0 0 1-6.5 0v-7z"/><path d="M7.5 10.5a6.5 6.5 0 0 1 6.5 0v5a6.5 6.5 0 0 1-6.5 0v-5z"/><path d="M14 12.5a6.5 6.5 0 0 1 6.5 0v3a6.5 6.5 0 0 1-6.5 0v-3z"/><path d="M21 14a4 4 0 0 1-2 3.5"/></svg>
+                  )}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation columns */}
+          <div className="md:col-span-3 md:col-start-6">
+            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Explore</h4>
+            <nav className="flex flex-col gap-3">
+              {[
+                { label: 'Audio Sessions', href: '/audio' },
+                { label: 'Store & Presets', href: '/store' },
+                { label: 'Media & Studio', href: '/media' },
+                { label: 'Contact & Setup', href: '/contact' },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm font-medium text-zinc-300 hover:text-white hover:translate-x-1 transition-all duration-200 w-fit"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          <div className="md:col-span-3">
+            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Store</h4>
+            <nav className="flex flex-col gap-3">
+              {[
+                { label: 'TONEX Captures', href: '/store/tonex' },
+                { label: 'HX Stomp Presets', href: '/store/hx-stomp' },
+                { label: 'GNAWA Fusion', href: '/store/gnawa' },
+                { label: 'Custom Impulse', href: '/store/irs' },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="text-sm font-medium text-zinc-300 hover:text-white hover:translate-x-1 transition-all duration-200 w-fit"
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+
+          {/* Newsletter / CTA */}
+          <div className="md:col-span-2 md:col-start-11">
+            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Stay Tuned</h4>
+            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">New captures, preset drops, and session announcements — direct to inbox.</p>
+            <form
+              onSubmit={(e) => { e.preventDefault(); }}
+              className="flex flex-col gap-2"
+            >
+              <input
+                type="email"
+                placeholder="your@email.com"
+                aria-label="Email for newsletter"
+                className="w-full px-3 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#00d8f6]/60 focus:ring-1 focus:ring-[#00d8f6]/20 transition-all duration-200"
+              />
+              <button
+                type="submit"
+                className="w-full px-3 py-2.5 bg-[#00d8f6] hover:bg-[#00b0d4] text-black text-[0.65rem] font-black uppercase tracking-widest rounded-lg transition-colors duration-200 shadow-[0_0_15px_rgba(0,216,246,0.25)] hover:shadow-[0_0_20px_rgba(0,216,246,0.35)]"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
 
-        {/* Lower Section: Copyright Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] font-mono text-zinc-600">
-          <span>© 2026 MEDFENDER. ALL RIGHTS RESERVED.</span>
-          <span className="tracking-widest uppercase">ENGINEERED FOR STAGE & STUDIO</span>
+        {/* Bottom bar: legal + back-to-top */}
+        <div className="mt-16 pt-8 border-t border-zinc-900/60 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-6 text-[0.6rem] font-bold tracking-widest text-zinc-600 uppercase">
+            <span>© 2026 Medfender</span>
+            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
+            <Link href="/support/setup-guide" className="hover:text-zinc-400 transition-colors">Setup Guide</Link>
+          </div>
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            aria-label="Back to top"
+            className="group flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#00d8f6] transition-colors duration-200"
+          >
+            Back to top
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-800 group-hover:border-[#00d8f6]/50 bg-zinc-900/40 group-hover:bg-[#00d8f6]/10 transition-all duration-200">
+              <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
+            </span>
+          </button>
         </div>
       </div>
     </footer>
