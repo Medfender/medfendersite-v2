@@ -38,9 +38,8 @@ export function renderStudioVisualizer(
     drawBars(ctx, width, height, padLeft, padBottom, theme, {
       smoothed: data.smoothed,
       peaks: data.peaks,
-      barCount: 48,
-      gap: 4,
-      cornerRadius: 3,
+      barCount: 0,
+      gap: 0,
     });
     return;
   }

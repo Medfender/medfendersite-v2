@@ -10,6 +10,7 @@ import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
+import SpectrumAnalyzerPanel from "@/components/audio/SpectrumAnalyzerPanel";
 
 import { deckControls } from "@/lib/audio/DeckControls";
 
@@ -71,21 +72,30 @@ export default function AudioClient() {
               Vinyl Showcase
             </p>
           </div>
-          <div className="relative">
-            {/* Turntable — centered */}
-            <div className="w-full flex justify-center flex-shrink-0">
-              <Turntable
-                transportState={transportState}
-                progress={progress}
-                onTogglePlay={handleTogglePlay}
-                onStop={handleTurntableStop}
-                onNeedleDrop={handleNeedleDrop}
-                onPlay={handleTurntablePlay}
-                onPause={pause}
-                bpm={bpm}
-              />
+            {/* Main Wrapper: Flexbox pulls the right column immediately next to the left */}
+            <div className="w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+              {/* Left Column: Explicitly locked width, preventing any flex-shrinking */}
+              <div className="flex-none w-full lg:w-[480px] xl:w-[500px] relative">
+                <Turntable
+                  transportState={transportState}
+                  progress={progress}
+                  onTogglePlay={handleTogglePlay}
+                  onStop={handleTurntableStop}
+                  onNeedleDrop={handleNeedleDrop}
+                  onPlay={handleTurntablePlay}
+                  onPause={pause}
+                  bpm={bpm}
+                />
+              </div>
+
+              {/* Right Column: Takes up the remaining space, pulled left, with a wider max-width */}
+              <div className="flex-1 w-full max-w-[900px] aspect-[21/9] xl:aspect-[3/1] relative">
+                <SpectrumAnalyzerPanel
+                  selectedBandId={null}
+                  setSelectedBandId={() => {}}
+                />
+              </div>
             </div>
-          </div>
 
           {/* Playlist: below the turntable section */}
           <div className="mt-6">

@@ -105,8 +105,8 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
         const themeKey: ColorTheme = colorThemeRef.current;
         const themeObj = (require("@/lib/visualizer/useAudioVisualizer") as any).THEMES?.[themeKey] ?? (require("@/lib/visualizer/useAudioVisualizer") as any).THEMES?.cyan;
 
-        // Draw EQ curve using renderStudioVisualizer (curve mode)
-        renderStudioVisualizer(ctx2d, data, cssW, cssH, "curve", themeKey);
+        const currentMode = viewModeRef.current;
+        renderStudioVisualizer(ctx2d, data, cssW, cssH, currentMode, themeKey);
       } else {
         drawFrame(ctx2d, canvas, frame, viewModeRef.current, colorThemeRef.current);
       }
@@ -211,7 +211,7 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
     hoverRef.current = hit ? hit.id : null;
 
     const canvas = canvasRef.current!;
-    canvas.style.cursor = hit ? "grab" : "crosshair";
+    canvas.style.cursor = hit ? "grab" : "default";
 
     if (dragRef.current) {
       const freq = xNormToFreq(p.x);
@@ -276,9 +276,8 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden"
+      className="relative w-full h-full overflow-hidden"
       style={{
-        height: "clamp(320px, 42vw, 480px)",
         background: "transparent",
       }}
     >
@@ -328,7 +327,6 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
           textShadow: "0 0 8px rgba(0,216,246,0.45), 0 0 20px rgba(0,216,246,0.15)",
         }}
       >
-        Studio Analyzer · Pro-Q · Real-Time
       </div>
       <div
         style={{
@@ -345,7 +343,6 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
           textShadow: "0 1px 4px rgba(0,0,0,0.8)",
         }}
       >
-        20Hz · 100 · 1k · 10k · 20kHz
       </div>
 
       {/* Curve / Bars toggle + color theme buttons in header toolbar */}

@@ -1249,7 +1249,7 @@ export default function Turntable({
           </div>
 
           {/* Bottom-left: Power + Play transport — scaled down for narrow mobile */}
-          <div className="absolute left-1 bottom-1 z-30 flex items-end gap-1 origin-bottom-left transition-transform duration-300 sm:left-2 sm:bottom-2 md:scale-100" style={{ transform: 'scale(0.65)' }}>
+          <div className="absolute left-1 bottom-1 z-30 flex items-end gap-3 origin-bottom-left transition-transform duration-300 sm:left-2 sm:bottom-2 md:scale-100" style={{ transform: 'scale(0.65)' }}>
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
                 <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
