@@ -138,7 +138,7 @@ function Hero() {
           className="w-full h-auto block"
         />
         {/* Top gradient fade overlay */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none z-10" />
+        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none z-10" />
         {/* Top gradient removed — image renders fully clear */}
       </div>
 
