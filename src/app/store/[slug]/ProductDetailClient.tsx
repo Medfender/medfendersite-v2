@@ -15,65 +15,8 @@ import {
 } from "lucide-react";
 import type { PackData, ToneModel } from "@/data/storeData";
 import { useCart } from "@/lib/CartContext";
+import { DemoTracklist } from "@/components/DemoTracklist";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// TONE CHANNEL — analog hardware row
-// ═══════════════════════════════════════════════════════════════════════════════
-function ToneChannel({
-  tone,
-  active,
-  onToggle,
-}: {
-  tone: ToneModel;
-  active: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="w-full group relative bg-neutral-950 border-b border-zinc-800/80 hover:border-zinc-600 transition-colors">
-      {/* Subtle left glow edge when active */}
-      <div className={`absolute left-0 top-0 bottom-0 w-[2px] transition-colors ${active ? "bg-cyan-400 shadow-[0_0_12px_rgba(0,216,246,0.7)]" : "bg-transparent"}`} />
-
-      <div className="flex items-stretch gap-0 min-h-[72px]">
-        {/* Play button — heavy analog feel */}
-        <button
-          onClick={onToggle}
-          aria-label={active ? `Stop ${tone.name}` : `Play ${tone.name}`}
-          className={`shrink-0 flex items-center justify-center px-6 py-4 border-r transition-all cursor-pointer ${
-            active
-              ? "bg-cyan-600 border-cyan-400 text-white shadow-[inset_0_0_20px_rgba(0,216,246,0.4)]"
-              : "bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white"
-          }`}
-        >
-          {active ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
-        </button>
-
-        {/* Tone info — monospace gear details */}
-        <div className="flex-1 min-w-0 px-6 py-4 flex flex-col justify-center">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className={`text-lg font-black uppercase tracking-tight leading-tight ${active ? "text-cyan-200" : "text-white"}`}>
-              {tone.name}
-            </h3>
-            {active && (
-              <span className="inline-block text-[9px] font-mono uppercase tracking-[0.2em] text-cyan-400 bg-cyan-950/60 px-2 py-0.5 border border-cyan-800/50 rounded-none">
-                Playing
-              </span>
-            )}
-          </div>
-          <p className="text-[11px] font-mono text-zinc-300 mt-1 tracking-wider truncate">{tone.gearTag || "—"}</p>
-        </div>
-
-        {/* Right: gear meta */}
-        <div className="hidden md:flex shrink-0 items-center px-6 py-4 border-l border-zinc-800 bg-black/30">
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 leading-relaxed">
-            Source<br />
-            <span className="text-zinc-300 font-bold">96kHz / 24-bit</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN PRODUCT DETAIL CLIENT — rebuilt from scratch
@@ -83,6 +26,8 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
   const [added, setAdded] = useState(false);
   const [activeTone, setActiveTone] = useState<ToneModel | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [durations, setDurations] = useState<Record<string, number>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleToggle = useCallback(
@@ -90,16 +35,25 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
       const tone = pack.toneModels.find((t) => t.id === id);
       if (!tone || !audioRef.current) return;
 
-      if (activeTone?.id === id && isPlaying) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        setIsPlaying(false);
-        setActiveTone(null);
+      // Scenario A: Clicking the track that is currently loaded
+      if (activeTone?.id === id) {
+        if (isPlaying) {
+          audioRef.current.pause();  // Just pause, keep currentTime
+          setIsPlaying(false);
+        } else {
+          audioRef.current.play();   // Just resume from exact position
+          setIsPlaying(true);
+        }
+        // CRITICAL: Do NOT touch currentTime. Do NOT reassign src.
         return;
       }
 
+      // Scenario B: Clicking a completely different track
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
       audioRef.current.src = tone.audioUrl;
-      audioRef.current.currentTime = 0;
+      audioRef.current.load();
       audioRef.current.play().then(() => {
         setActiveTone(tone);
         setIsPlaying(true);
@@ -206,33 +160,36 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
           {/* ─── LEFT COLUMN (lg:col-span-8) ───────────────────────────── */}
           <div className="lg:col-span-8 space-y-16">
 
-            {/* Interactive Tone Rack */}
+            {/* Demo Tracklist */}
             <article>
               <header className="flex items-center gap-4 mb-10">
-                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-300 shrink-0">Tone Rack</h2>
+                <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-cyan-300 shrink-0">Demo Tracks</h2>
                 <div className="h-px flex-1 bg-zinc-800" />
-                <span className="text-[10px] font-mono text-zinc-300 tracking-wider">Select a model below to audition</span>
+                <span className="text-[10px] font-mono text-zinc-300 tracking-wider">Preview pack tones</span>
               </header>
 
-              <div className="border border-zinc-800 bg-neutral-950 shadow-[0_0_40px_rgba(0,0,0,0.7)]">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-black/50">
-                  <div className="flex items-center gap-3">
-                    <Headphones size={16} className="text-cyan-400" />
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300">Active Channels</span>
-                  </div>
-                  <span className="text-[10px] font-mono text-zinc-300">{pack.toneModels.length} Available</span>
-                </div>
-                <div>
-                  {pack.toneModels.map((tone) => (
-                    <ToneChannel
-                      key={tone.id}
-                      tone={tone}
-                      active={activeTone?.id === tone.id && isPlaying}
-                      onToggle={() => handleToggle(tone.id)}
-                    />
-                  ))}
-                </div>
-              </div>
+              <DemoTracklist
+                demo={{
+                  title: pack.title,
+                  tracks: pack.toneModels.map((tone) => ({
+                    id: tone.id,
+                    title: tone.name,
+                    audioUrl: tone.audioUrl,
+                    duration: 94
+                  }))
+                }}
+                activeTrackId={activeTone?.id || null}
+                currentTime={currentTime}
+                duration={audioRef.current ? audioRef.current.duration || 0 : 0}
+                isPlaying={isPlaying}
+                onTrackToggle={(id) => handleToggle(id)}
+                onSeek={(trackId, time) => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = time;
+                    setCurrentTime(time);
+                  }
+                }}
+              />
             </article>
 
             {/* Video Demonstrations — secondary proof */}
@@ -404,7 +361,29 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
         ref={audioRef}
         preload="metadata"
         crossOrigin="anonymous"
+        onTimeUpdate={() => {
+          if (isPlaying && audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+            // Fail-safe: capture duration from active audio if missing
+            if (audioRef.current.duration && Number.isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
+              const activeId = activeTone?.id;
+              if (activeId) {
+                setDurations?.((prev: any) => ({ ...prev, [activeId]: audioRef.current.duration }));
+              }
+            }
+          }
+        }}
+        onLoadedMetadata={(e) => {
+          const realDuration = e.currentTarget.duration;
+          if (realDuration && Number.isFinite(realDuration) && realDuration > 0) {
+            const activeId = activeTone?.id;
+            if (activeId) {
+              setDurations((prev) => ({ ...prev, [activeId]: realDuration }));
+            }
+          }
+        }}
         onEnded={() => {
+          setCurrentTime(0);
           setIsPlaying(false);
           setActiveTone(null);
         }}

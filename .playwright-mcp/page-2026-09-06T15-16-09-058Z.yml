@@ -1,0 +1,188 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - link "MEDFENDER Home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - text: Medfender
+      - generic "Main navigation" [ref=e6]:
+        - link "AUDIO" [ref=e8] [cursor=pointer]:
+          - /url: /audio
+        - link "STORE" [ref=e10] [cursor=pointer]:
+          - /url: /store
+        - link "MEDIA" [ref=e12] [cursor=pointer]:
+          - /url: /media
+        - link "SUPPORT" [ref=e14] [cursor=pointer]:
+          - /url: /support/setup-guide
+      - generic [ref=e15]:
+        - button "Open cart (0 items)" [ref=e16]
+        - link "BOOK A SESSION" [ref=e22] [cursor=pointer]:
+          - /url: mailto:contact@medfender.com
+  - main [ref=e25]:
+    - paragraph [ref=e29]: SOUND ARCHITECTURE & LIVE SESSIONS
+    - generic [ref=e34]:
+      - generic [ref=e35]:
+        - generic [ref=e36]: NEW
+        - link "TONEX CAPTURES" [ref=e37] [cursor=pointer]:
+          - /url: /store/tonex
+      - link "HX STOMP XL PRESETS" [ref=e40] [cursor=pointer]:
+        - /url: /store/hx-stomp
+      - link "HYBRID GNAWA FUSION" [ref=e43] [cursor=pointer]:
+        - /url: /store/gnawa
+      - generic [ref=e45]:
+        - generic [ref=e46]: NEW
+        - link "CUSTOM IMPULSE RESPONSES" [ref=e47] [cursor=pointer]:
+          - /url: /store/irs
+      - link "AMP PROFILES" [ref=e50] [cursor=pointer]:
+        - /url: /store/profiles
+      - link "STOMP RIGS" [ref=e53] [cursor=pointer]:
+        - /url: /store/stomps
+      - generic [ref=e55]:
+        - generic [ref=e56]: NEW
+        - link "STUDIO SESSIONS" [ref=e57] [cursor=pointer]:
+          - /url: /store/sessions
+      - generic [ref=e59]:
+        - generic [ref=e60]: NEW
+        - link "TONEX CAPTURES" [ref=e61] [cursor=pointer]:
+          - /url: /store/tonex
+      - link "HX STOMP XL PRESETS" [ref=e64] [cursor=pointer]:
+        - /url: /store/hx-stomp
+      - link "HYBRID GNAWA FUSION" [ref=e67] [cursor=pointer]:
+        - /url: /store/gnawa
+      - generic [ref=e69]:
+        - generic [ref=e70]: NEW
+        - link "CUSTOM IMPULSE RESPONSES" [ref=e71] [cursor=pointer]:
+          - /url: /store/irs
+      - link "AMP PROFILES" [ref=e74] [cursor=pointer]:
+        - /url: /store/profiles
+      - link "STOMP RIGS" [ref=e77] [cursor=pointer]:
+        - /url: /store/stomps
+      - generic [ref=e79]:
+        - generic [ref=e80]: NEW
+        - link "STUDIO SESSIONS" [ref=e81] [cursor=pointer]:
+          - /url: /store/sessions
+      - generic [ref=e83]:
+        - generic [ref=e84]: NEW
+        - link "TONEX CAPTURES" [ref=e85] [cursor=pointer]:
+          - /url: /store/tonex
+      - link "HX STOMP XL PRESETS" [ref=e88] [cursor=pointer]:
+        - /url: /store/hx-stomp
+      - link "HYBRID GNAWA FUSION" [ref=e91] [cursor=pointer]:
+        - /url: /store/gnawa
+      - generic [ref=e93]:
+        - generic [ref=e94]: NEW
+        - link "CUSTOM IMPULSE RESPONSES" [ref=e95] [cursor=pointer]:
+          - /url: /store/irs
+      - link "AMP PROFILES" [ref=e98] [cursor=pointer]:
+        - /url: /store/profiles
+      - link "STOMP RIGS" [ref=e101] [cursor=pointer]:
+        - /url: /store/stomps
+      - generic [ref=e103]:
+        - generic [ref=e104]: NEW
+        - link "STUDIO SESSIONS" [ref=e105] [cursor=pointer]:
+          - /url: /store/sessions
+    - generic [ref=e108]:
+      - generic [ref=e109]:
+        - paragraph [ref=e110]: SOUND PHILOSOPHY
+        - heading "Built on trust. Driven by tone." [level=2] [ref=e111]: Built on trust.Driven by tone.
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - paragraph [ref=e116]: GNAWA BLUES DELUXE
+                - paragraph [ref=e117]: Blues / Fusion
+              - generic [ref=e118]: $29
+            - button "PLAY PREVIEW" [ref=e119]
+            - generic [ref=e123]:
+              - link "EXPLORE" [ref=e124] [cursor=pointer]:
+                - /url: /store/gnawa-blues-deluxe
+              - link "DETAILS" [ref=e125] [cursor=pointer]:
+                - /url: /store/gnawa-blues-deluxe#details
+          - generic [ref=e126]:
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - paragraph [ref=e129]: TUBE CRUNCH STUDIO
+                - paragraph [ref=e130]: Rock / Crunch
+              - generic [ref=e131]: $24
+            - button "PLAY PREVIEW" [ref=e132]
+            - generic [ref=e136]:
+              - link "EXPLORE" [ref=e137] [cursor=pointer]:
+                - /url: /store/tube-crunch-studio
+              - link "DETAILS" [ref=e138] [cursor=pointer]:
+                - /url: /store/tube-crunch-studio#details
+        - generic [ref=e139]:
+          - generic [ref=e140]:
+            - generic [ref=e141]: "01"
+            - generic [ref=e143]: The Setup
+          - generic [ref=e144]:
+            - generic [ref=e145]: "02"
+            - generic [ref=e147]: The Tone
+          - generic [ref=e148]:
+            - generic [ref=e149]: "03"
+            - generic [ref=e151]: The Craft
+          - generic [ref=e152]:
+            - generic [ref=e153]: "04"
+            - generic [ref=e155]: The Stage
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - generic [ref=e158]:
+            - generic [ref=e159]: "01"
+            - heading "The Setup" [level=3] [ref=e162]
+            - paragraph [ref=e163]: Integrating the organic feel of analog gear with the precision of digital processors. Every preset begins with a real signal chain — genuine tube preamps, real outboard, physical cab IRs — then distilled into a HX Stomp or TONEX capture that feels indistinguishable from the source.
+          - img "The Setup" [ref=e166]
+        - generic [ref=e168]:
+          - generic [ref=e169]:
+            - generic [ref=e170]: "02"
+            - heading "The Tone" [level=3] [ref=e173]
+            - paragraph [ref=e174]: Blues, rock, fusion, and Gnawa fusion architecture. We build for how a guitarist actually plays — not how a chart measures. Touch sensitivity, note bloom, harmonic feedback at stage volume. Tone that responds to your hands, not just your fingers.
+          - img "The Tone" [ref=e177]
+        - generic [ref=e179]:
+          - generic [ref=e180]:
+            - generic [ref=e181]: "03"
+            - heading "The Craft" [level=3] [ref=e184]
+            - paragraph [ref=e185]: Precision audio engineering backed by stem separation, multi-band analysis, and gain-staging at 96kHz / 24-bit. Every impulse response and capture is verified against the original before release. We don't ship until the comparison is airtight.
+          - img "The Craft" [ref=e188]
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]: "04"
+            - heading "The Stage" [level=3] [ref=e195]
+            - paragraph [ref=e196]: Translating studio-grade tone to the live environment. Whether it is an intimate solo arrangement or a high-energy Gnawa fusion trio, the digital architecture is built to cut through the mix, adapt to any venue, and command the room.
+          - img "The Stage" [ref=e199]
+    - generic [ref=e201]:
+      - generic [ref=e202]:
+        - generic [ref=e203]:
+          - link "STORE" [ref=e204] [cursor=pointer]:
+            - /url: /store
+          - link "AUDIO" [ref=e205] [cursor=pointer]:
+            - /url: /audio
+          - link "SUPPORT" [ref=e206] [cursor=pointer]:
+            - /url: /support/setup-guide
+        - link "BOOK A SESSION" [ref=e207] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e210]: © 2026 Medfender — Digital Tone Architecture
+  - contentinfo [ref=e211]:
+    - generic [ref=e212]:
+      - paragraph [ref=e214]: © 2026 Medfender. All rights reserved.
+      - generic [ref=e215]:
+        - link "Audio" [ref=e216] [cursor=pointer]:
+          - /url: /audio
+        - link "Store" [ref=e217] [cursor=pointer]:
+          - /url: /store
+        - link "Media" [ref=e218] [cursor=pointer]:
+          - /url: /media
+        - link "Contact" [ref=e219] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e220]:
+        - generic [ref=e221]: Support
+        - link "Installation & Setup →" [ref=e222] [cursor=pointer]:
+          - /url: /support/setup-guide
+      - generic [ref=e223]:
+        - link "YouTube" [ref=e224] [cursor=pointer]:
+          - /url: "#"
+          - text: ▶
+        - link "Instagram" [ref=e225] [cursor=pointer]:
+          - /url: "#"
+          - text: ◉
+        - link "GitHub" [ref=e226] [cursor=pointer]:
+          - /url: "#"
+          - text: ◈
+  - button "Open Next.js Dev Tools" [ref=e232] [cursor=pointer]
