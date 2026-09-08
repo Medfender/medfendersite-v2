@@ -22,7 +22,7 @@ const marqueeItems = [
 
 const MARQUEE_TEXT = 'TONEX CAPTURES • HX STOMP XL PRESETS • HYBRID GNAWA FUSION • CUSTOM IMPULSE RESPONSES •';
 
-const HERO_IMG = '/images/gallery/IMG_7742.JPG';
+const HERO_IMG = '/images/gallery/hero-cropped.jpg';
 
 const PHILOSOPHY_IMGS = [
   'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1400&q=80',
@@ -125,75 +125,25 @@ function Hero() {
     offset: ['start start', 'end start'],
   });
 
-  // Hero image parallax: moves up as user scrolls
-  const imgY = useTransform(scrollYProgress, [0, 1], ['-10%', '8%']);
+  // Parallax disabled to preserve natural image framing at scroll=0
+  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '0%']);
 
   return (
-    <section ref={ref} className="relative min-h-[120vh] w-full flex flex-col items-center overflow-hidden bg-[url('/images/gallery/IMG_7742.JPG')] bg-cover bg-bottom pt-28">
-      {/* Top-dark mask — moderate fade, keeps image visible */}
-      <div className="pointer-events-none absolute top-0 left-0 right-0 h-[20rem] bg-gradient-to-b from-[#050505] to-transparent z-10" />
-      {/* ── Display Text: sub-text only ── */}
-      <div className="relative z-10 flex flex-col items-center text-center px-6 mt-auto mb-16">
-        {/* Sub-text: Audio Architecture */}
-        <div className="overflow-hidden mt-4">
-          <motion.p
-            className="text-[1rem] font-black uppercase tracking-[0.35em] text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            custom={1}
-          >
-            SOUND ARCHITECTURE & LIVE SESSIONS
-          </motion.p>
-        </div>
-
+    <section ref={ref} className="relative w-full overflow-hidden bg-[#050505] pt-0 mt-0 mb-0 pb-0">
+      {/* Natural hero image — full width, no forced crop */}
+      <div className="relative w-full mb-0 pb-0 h-auto">
+        <img
+          src={HERO_IMG}
+          alt="Medfender sound architecture stage"
+          className="w-full h-auto block"
+        />
+        {/* Top gradient fade overlay */}
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black via-black/80 to-transparent pointer-events-none z-10" />
+        {/* Top gradient removed — image renders fully clear */}
       </div>
 
-      {/* Parallax image handled via section bg */}
+      {/* Marquee preset string flush to hero image bottom */}
 
-      {/* ── Scroll invitation: a quiet glowing breath ── */}
-      <motion.div
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10"
-        variants={fadeUp}
-        initial="hidden"
-        animate="visible"
-        custom={3}
-      >
-        <div className="relative flex flex-col items-center gap-3">
-          {/* Three drifting amber motes — like embers above a signal chain */}
-          <div className="relative w-28 h-8 flex items-center justify-center">
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                className="absolute w-2.5 h-2.5 rounded-full"
-                style={{
-                  background: '#E5A93C',
-                  boxShadow: '0 0 8px rgba(229, 169, 60, 0.8), 0 0 16px rgba(229, 169, 60, 0.4), 0 0 28px rgba(229, 169, 60, 0.15)',
-                }}
-                animate={{
-                  x: [(-16 + i * 16), (16 - i * 16), (-16 + i * 16)],
-                  opacity: [0.35, 1, 0.35],
-                  scale: [0.8, 1.4, 0.8],
-                }}
-                transition={{
-                  duration: 2.6 + i * 0.35,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: i * 0.35,
-                }}
-              />
-            ))}
-          </div>
-          {/* Subtle "scroll" wordmark */}
-          <motion.span
-            className="text-[0.55rem] font-black uppercase tracking-[0.4em] text-zinc-500"
-            animate={{ opacity: [0.4, 0.7, 0.4] }}
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            Scroll
-          </motion.span>
-        </div>
-      </motion.div>
     </section>
   );
 }
@@ -285,7 +235,7 @@ function PresetCard({ preset, isLastAdded, onPresetSelect }: { preset: Preset; i
       <div className="flex gap-3 items-start">
         <div className="w-16 h-16 shrink-0 rounded-md bg-zinc-800 border border-zinc-700 overflow-hidden">
           <img
-            src={preset.img || '/images/gallery/IMG_7742.JPG'}
+            src={preset.img || '/images/gallery/hero-cropped.jpg'}
             alt={preset.title}
             className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
           />
@@ -415,7 +365,7 @@ function SoundPhilosophy({ onPresetSelect }: { onPresetSelect: (preset: any) => 
   const lastAddedId = cartItems.length > 0 ? cartItems[cartItems.length - 1].pack.id : null;
 
   return (
-    <section className="relative bg-[#050505] border-t border-zinc-900 pt-20 pb-24">
+    <section className="relative bg-[#050505] border-t-0 border-zinc-900 pt-0 pb-24 mt-0">
       {/* Sticky + scrollable layout */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 px-6 py-24">
         {/* Left: outer grid cell — stretches full height */}
@@ -472,7 +422,7 @@ function SoundPhilosophy({ onPresetSelect }: { onPresetSelect: (preset: any) => 
           {cards.map((card, i) => (
             <motion.div
               key={card.num}
-              className="group flex gap-8 items-start min-h-[200px]"
+              className="group flex gap-8 items-start min-h-[200px] pt-0 mt-0"
               initial={false}
               animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: 60, y: 40 }}
               transition={{
@@ -934,7 +884,7 @@ export default function Home() {
   const playingTrack = activeDemo?.tracks?.find((t: any) => t.id === playingTrackId);
 
   return (
-    <main className="bg-zinc-950 text-white antialiased">
+    <main className="bg-zinc-950 text-white antialiased flex flex-col gap-0 space-y-0">
       <Hero />
       <Marquee />
       <SoundPhilosophy onPresetSelect={(preset: any) => {
