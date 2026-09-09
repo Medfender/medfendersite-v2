@@ -1252,20 +1252,25 @@ export default function Turntable({
           <div className="absolute left-1 bottom-1 z-30 flex items-end gap-3 origin-bottom-left transition-transform duration-300 sm:left-2 sm:bottom-2 md:scale-100" style={{ transform: 'scale(0.65)' }}>
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
-                <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: "linear-gradient(180deg, #2a3038 0%, #181a22 50%, #0e1015 100%)", boxShadow: "inset 0 0 6px rgba(0,0,0,0.7), 0 2px 4px rgba(0,0,0,0.5)" }}>
-                  <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{
-                    background: isPowered ? "radial-gradient(circle at 35% 30%, #ff4a4a 0%, #c82828 60%, #581418 100%)" : "radial-gradient(circle at 35% 30%, #5a626c 0%, #2c3040 60%, #14161a 100%)",
-                    boxShadow: isPowered ? "0 0 8px rgba(220,50,50,0.6), inset 0 1px 2px rgba(255,200,200,0.4)" : "inset 0 1px 2px rgba(255,255,255,0.1)",
-                    filter: isPowered ? 'none' : 'grayscale(0.6) opacity(0.7)',
+                <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center transition-all active:scale-[0.92] cursor-pointer overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{
+                  background: isPowered ? 'linear-gradient(135deg, #3a3e4a 0%, #2a3040 50%, #0a0b12 100%)' : 'linear-gradient(135deg, #2a2e38 0%, #1a1d28 50%, #0c0e14 100%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                }}>
+                  <span className="w-6 h-6 sm:w-9 sm:h-9 rounded-sm flex items-center justify-center shadow-[inset_0_1px_4px_rgba(255,255,255,0.08)]" style={{
+                    background: isPowered ? 'linear-gradient(180deg, #8a949c 0%, #5a6068 100%)' : 'linear-gradient(180deg, #4a5268 0%, #2c3038 100%)',
+                    boxShadow: isPowered ? '0 0 6px 1px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.5)' : 'inset 0 1px 3px rgba(0,0,0,0.6)',
                   }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: isPowered ? "#ff3a3a" : "#3a1010", boxShadow: isPowered ? "0 0 6px rgba(255,58,58,0.9), 0 0 12px rgba(255,58,58,0.4)" : "none" }} />
-                  </button>
-                </div>
+                    <span className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 rounded-full" style={{
+                      background: isPowered ? '#ff3a3a' : '#1f2428',
+                      boxShadow: isPowered ? '0 0 5px 2px rgba(255,58,58,0.7)' : 'none',
+                    }} />
+                  </span>
+                </button>
               </div>
               <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
             </div>
             <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-8 h-8 sm:w-11 sm:h-11 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-12 h-12 sm:w-14 sm:h-14 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
                 {localTransport === 'playing' ? (
                   <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
                 ) : (
@@ -1279,7 +1284,7 @@ export default function Turntable({
               <button
                 onClick={isPowered ? handleDeckStop : undefined}
                 aria-label="Stop"
-                className="w-4 h-4 sm:w-6 sm:h-6 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
                 style={{
                   background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
                   boxShadow: !isPlaying
@@ -1287,7 +1292,7 @@ export default function Turntable({
                     : "inset 0 0 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)",
                 }}
               >
-                <div className={`w-3 h-3 rounded-sm transition-all duration-200 ${
+                <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm transition-all duration-200 ${
                   !isPowered
                     ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
                     : (isPlaying || currentTime > 0)
