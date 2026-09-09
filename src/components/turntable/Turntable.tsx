@@ -1260,7 +1260,7 @@ export default function Turntable({
                     background: isPowered ? 'linear-gradient(180deg, #8a949c 0%, #5a6068 100%)' : 'linear-gradient(180deg, #4a5268 0%, #2c3038 100%)',
                     boxShadow: isPowered ? '0 0 6px 1px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.5)' : 'inset 0 1px 3px rgba(0,0,0,0.6)',
                   }}>
-                    <span className="w-3.5 h-3.5 sm:w-4.5 sm:h-4.5 rounded-full" style={{
+                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style={{
                       background: isPowered ? '#ff3a3a' : '#1f2428',
                       boxShadow: isPowered ? '0 0 5px 2px rgba(255,58,58,0.7)' : 'none',
                     }} />
