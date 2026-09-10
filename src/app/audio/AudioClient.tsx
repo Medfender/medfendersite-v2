@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import Turntable from "@/components/turntable/Turntable";
 import PatchBrowser from "@/components/audio/PatchBrowser";
 import PlaylistPanel from "@/components/audio/PlaylistPanel";
 import StickyTransport from "@/components/audio/StickyTransport";
+import AudioPlayer from "@/components/player/AudioPlayer";
 import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
@@ -25,6 +26,8 @@ export default function AudioClient() {
     currentBpm,
     playTrack,
     togglePlay,
+    playNext,
+    playPrevious,
     stop: ctxStop,
     pause,
     seek,
@@ -33,6 +36,12 @@ export default function AudioClient() {
   // Click-to-seek: convert a 0..1 waveform percent into an absolute time on the active track.
   const handlePlaylistSeek = (percent: number) => {
     if (duration > 0) seek(percent * duration);
+  };
+
+  const [repeatMode, setRepeatMode] = useState<'off' | 'all' | 'one'>('off');
+
+  const handleToggleRepeat = () => {
+    setRepeatMode(prev => prev === 'off' ? 'all' : prev === 'all' ? 'one' : 'off');
   };
 
   const handleTogglePlay = () => togglePlay();
@@ -104,8 +113,30 @@ export default function AudioClient() {
             </div>
 
           {/* Playlist: flat horizontal-line aesthetic, no card/box framing */}
-          <div className="mt-6">
+          <div id="playlist-panel" data-playlist className="mt-6">
             <PlaylistPanel onSeek={handlePlaylistSeek} />
+          </div>
+
+          {/* Audio Player — embedded below playlist on desktop */}
+          <div className="mt-8 md:mt-10 w-full max-w-3xl mx-auto">
+            <AudioPlayer
+              isPlaying={isPlaying}
+              isPowered={isPowered}
+              onPlayPause={handleTogglePlay}
+              onSkipBack={playPrevious}
+              onSkipForward={playNext}
+              onToggleRepeat={handleToggleRepeat}
+              repeatMode={repeatMode}
+              onOpenQueue={() => {
+                const panel = document.getElementById('playlist-panel');
+                if (panel) {
+                  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                  const el = document.querySelector('[data-playlist]') || document.querySelector('.rounded-2xl.bg-\[#0a0a0a\]');
+                  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }}
+            />
           </div>
         </section>
 
