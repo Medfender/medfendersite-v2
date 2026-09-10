@@ -89,8 +89,11 @@ export default function PresetCard({ preset, coverImage }: PresetCardProps) {
 
           {/* Full-width explore button */}
           <div className="-mx-5 -mb-0">
-            <div className="w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-cyan-600 text-white font-black uppercase tracking-widest text-xs py-3.5 transition-colors duration-150 group/btn">
-              <span>Explore Rig</span>
+            <div
+            className="w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-cyan-600 text-white font-black uppercase tracking-widest text-xs py-3.5 transition-colors duration-150 group/btn"
+            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
+          >
+            <span>Explore Rig</span>
               <ArrowRight
                 size={13}
                 className="shrink-0 group-hover/btn:translate-x-0.5 transition-transform duration-150"
