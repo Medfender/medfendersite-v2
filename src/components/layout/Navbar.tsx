@@ -150,9 +150,9 @@ export default function Navbar() {
             </button>
 
             {/* BOOK A SESSION CTA */}
-            <a href="mailto:contact@medfender.com" aria-label="Book a session">
+            <Link href="/contact" aria-label="Book a session" className="hidden md:block">
               <BookSessionButton />
-            </a>
+            </Link>
 
             {/* Mobile: Hamburger */}
             <button
