@@ -15,19 +15,14 @@ export async function GET() {
   const audioDirFallback = path.join(process.cwd(), "public", "audio", "featured");
   const thumbDir = path.join(process.cwd(), "public", "images", "Thumbnails");
 
-  // Prefer featured-artists; fall back to featured
-  let audioDir = audioDirPrimary;
+  // Strict single directory scope: ONLY featured-artists; no fallback
+  const audioDir = audioDirPrimary;
   let audioFiles: string[] = [];
   try {
     audioFiles = fs.readdirSync(audioDir);
-  } catch (e1) {
-    try {
-      audioDir = audioDirFallback;
-      audioFiles = fs.readdirSync(audioDir);
-    } catch (e2) {
-      console.warn("[audio/featured] Both audio directories missing:", audioDirPrimary, audioDirFallback, e2);
-      return NextResponse.json({ tracks: [], count: 0, audioDir: audioDirPrimary, thumbDir });
-    }
+  } catch (e) {
+    console.warn("[audio/featured] Audio directory missing:", audioDir, e);
+    return NextResponse.json({ tracks: [], count: 0, audioDir, thumbDir });
   }
 
   let thumbFiles: string[] = [];
@@ -55,7 +50,15 @@ export async function GET() {
 
   const defaultThumb = null;
 
-  const tracks = validAudio.map((f, i) => {
+  // Deduplicate strictly by filename (single source, no double execution)
+  const seen = new Set<string>();
+  const deduped = validAudio.filter((f) => {
+    if (seen.has(f)) return false;
+    seen.add(f);
+    return true;
+  });
+
+  const tracks = deduped.map((f, i) => {
     const cleanName = f.replace(/\.(mp3|wav|m4a|flac|ogg|aac)$/i, "").trim();
     const parts = cleanName.split(" - ");
     let artist = "MedFender";
