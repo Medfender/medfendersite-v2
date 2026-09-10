@@ -110,5 +110,4 @@ export const rootTracks: FeaturedTrack[] = [
 export const allTracks: FeaturedTrack[] = [
   ...featuredArtists,
   ...demoTracks,
-  ...rootTracks,
 ];
