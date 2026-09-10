@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
+import BookSessionButton from "@/components/BookSessionButton";
 import { useCart } from "@/lib/CartContext";
 import CartDrawer from "./CartDrawer";
 
@@ -149,12 +150,9 @@ export default function Navbar() {
             </button>
 
             {/* BOOK A SESSION CTA */}
-            <Link
-              href="mailto:contact@medfender.com"
-              className="hidden md:flex items-center bg-[#E5A93C] text-black font-black uppercase text-xs tracking-widest px-6 py-3 hover:bg-white transition-colors duration-150"
-            >
-              BOOK A SESSION
-            </Link>
+            <a href="mailto:contact@medfender.com" aria-label="Book a session">
+              <BookSessionButton />
+            </a>
 
             {/* Mobile: Hamburger */}
             <button
