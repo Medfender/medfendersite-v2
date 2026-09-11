@@ -150,6 +150,11 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
+        {/* ── Signal Chain (moved below local library) ─────────────────────── */}
+        <section className="w-full pb-14 md:pb-18">
+          <SignalChain />
+        </section>
+
 
 
         {/* ── Section 8: Playlist & Details Description Block ──────────────── */}
@@ -202,11 +207,6 @@ export default function AudioClient() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* ── Section 9: Signal Chain Diagram ──────────────────────────────── */}
-        <section className="w-full pb-14 md:pb-18">
-          <SignalChain />
         </section>
 
         {/* ── Section 9: Manual Layout Zone ──────────────────────────────── */}
