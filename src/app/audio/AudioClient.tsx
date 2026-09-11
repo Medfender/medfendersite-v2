@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useAudio } from "@/context/AudioContext";
 import Turntable from "@/components/turntable/Turntable";
-import PatchBrowser from "@/components/audio/PatchBrowser";
 import PlaylistPanel from "@/components/audio/PlaylistPanel";
 import StickyTransport from "@/components/audio/StickyTransport";
 import AudioPlayer from "@/components/player/AudioPlayer";
@@ -56,19 +55,6 @@ export default function AudioClient() {
   const progress = duration > 0 ? currentTime / duration : 0;
 
   // Audition bridge: selecting from playlist or patch loads onto turntable
-  const handlePatchAudition = (track: any) => {
-    const candidate = {
-      ...track,
-      id: track.id || track.title || `patch-${Date.now()}`,
-      name: track.name || track.title || track.name,
-      audioUrl: track.url || track.audioUrl || "/audio/featured/01.mp3",
-      thumbnail: track.thumbnail || track.coverUrl || track.thumbnail || undefined,
-    };
-    if (playTrack) playTrack(candidate);
-    // Selecting a track must always result in playing — never trigger a pause.
-    deckControls.play();
-  };
-
   return (
     <>
       <main
@@ -165,41 +151,6 @@ export default function AudioClient() {
         </section>
 
 
-        {/* ── Section 6b: Preset & Patch Browser ──────────────────────────── */}
-        <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-8 md:pt-10">
-          <PatchBrowser onAudition={handlePatchAudition} />
-        </section>
-
-        {/* ── Section 7: Technical Specs Row ────────────────────────────────── */}
-        <section className="w-full bg-transparent/30 border-y border-white/[0.04] py-6">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { value: "192 kHz", label: "Sample Rate", accent: "cyan" },
-                { value: "32-bit", label: "Bit Depth", accent: "cyan" },
-                { value: "126 dB", label: "Dynamic Range", accent: "amber" },
-                { value: "< 1 ms", label: "Round-Trip Latency", accent: "cyan" },
-              ].map((spec) => (
-                <div key={spec.label} className="flex flex-col items-center text-center">
-                  <span
-                    className="text-2xl md:text-3xl font-mono font-bold tracking-tight"
-                    style={{
-                      color: spec.accent === "cyan" ? "#00d8f6" : "#f59e0b",
-                      textShadow: spec.accent === "cyan"
-                        ? "0 0 20px rgba(0,216,246,0.4)"
-                        : "0 0 20px rgba(245,158,11,0.4)",
-                    }}
-                  >
-                    {spec.value}
-                  </span>
-                  <span className="mt-1 text-[10px] font-mono text-neutral-500 uppercase tracking-[0.25em]">
-                    {spec.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* ── Section 8: Playlist & Details Description Block ──────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
