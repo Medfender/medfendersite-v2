@@ -80,13 +80,25 @@ export default function AudioClient() {
         {/* ── Section 3: Master Turntable & Playlist Workstation ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-20 md:pb-24">
           {/* Section header: Tactile Listening / Vinyl Showcase */}
-          <div className="mb-6">
-            <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
-              Tactile Listening
-            </h2>
-            <p className="mt-1 text-xl md:text-2xl font-bold text-white tracking-tight">
-              Vinyl Showcase
-            </p>
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-xs font-mono uppercase tracking-[0.4em] text-neutral-500">
+                Tactile Listening
+              </h2>
+              <p className="mt-1 text-xl md:text-2xl font-bold text-white tracking-tight">
+                Vinyl Showcase
+              </p>
+            </div>
+            <a
+              href="#local-library"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('local-library')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className="inline-flex items-center gap-2 self-center px-4 py-2.5 rounded-md bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-mono uppercase tracking-[0.1em] hover:bg-cyan-500/20 hover:border-cyan-500/50 transition shrink-0"
+            >
+              Import your music
+            </a>
           </div>
             {/* Main Wrapper: Flexbox pulls the right column immediately next to the left */}
             <div className="w-full flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
@@ -139,6 +151,12 @@ export default function AudioClient() {
               }}
             />
           </div>
+
+        </section>
+
+        {/* ── Section 3b: Local Track Library (moved up, full block) ───────── */}
+        <section id="local-library" className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-8">
+          <LocalTrackPanel />
         </section>
 
         {/* ── Section 4: Vinyl Showcase ─────────────────────────────────────── */}
@@ -146,11 +164,6 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
-
-        {/* ── Section 3b: Local Track Library ─────────────────────────────── */}
-        <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-8">
-          <LocalTrackPanel />
-        </section>
 
         {/* ── Section 6: Gear Info Cards (TONEX + HX Stomp XL) ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">
