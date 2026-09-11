@@ -101,7 +101,7 @@ export async function GET() {
     };
   });
 
-  console.log(`[audio/featured] Scanned ${audioDir} (${validAudio.length} audio) and ${thumbDir} (${thumbFiles.length} thumb). Returning ${tracks.length} tracks.`);
+  console.log(`[FORENSIC] source=audio/featured endpoint=/api/audio/featured audioDir=${audioDir} files_scanned=${validAudio.length} deduped=${deduped.length} tracks_returned=${tracks.length}`);
 
   return NextResponse.json({
     tracks,

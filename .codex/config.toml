@@ -1,0 +1,9 @@
+[mcp_servers.comfy-local]
+command = "comfy-mcp"
+args = [
+    "-e",
+    "COMFY_BIN=/home/medfender/ComfyUI",
+]
+
+[mcp_servers.storybook]
+command = "http://localhost:6006/mcp"

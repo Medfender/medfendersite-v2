@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAudio } from "@/context/AudioContext";
 
 interface Track {
   id: string;
@@ -82,8 +83,22 @@ export function DemoTracklist({
   const [internalExpandedId, setInternalExpandedId] = useState<string | null>(null);
   const [durations, setDurations] = useState<Record<string, number>>({});
 
-  const tracks = demo.tracks || [];
-  console.log("DEMO TRACK DATA:", tracks);
+  const { playlist } = useAudio();
+
+  const localTracks = playlist.filter((t: any) => t.id?.startsWith("local-"));
+  const hasLocal = localTracks.length > 0;
+
+  // When user-added local tracks exist, show them as the active temporary tracklist.
+  const tracks = hasLocal
+    ? localTracks.map((t: any) => ({
+        id: t.id,
+        title: t.name || t.title || "Untitled",
+        duration: t.duration || "0:00",
+        audioUrl: t.audioUrl || t.url || t.src,
+        thumbnail: t.thumbnail,
+      }))
+    : (demo.tracks || []);
+  const displayTitle = hasLocal ? "Local Tracks" : (demo.title || "Demo Tracks");
 
   // Background preloading: double-buffered duration extraction
   useEffect(() => {

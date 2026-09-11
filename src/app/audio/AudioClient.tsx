@@ -10,6 +10,7 @@ import AudioPlayer from "@/components/player/AudioPlayer";
 import SignalChain from "@/components/audio/SignalChain";
 import FeaturedAudioSection from "@/components/audio/FeaturedAudioSection";
 import VinylShowcase from "@/components/VinylShowcase";
+import LocalTrackPanel from "@/components/audio/LocalTrackPanel";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
 import SpectrumAnalyzerPanel from "@/components/audio/SpectrumAnalyzerPanel";
 
@@ -145,6 +146,11 @@ export default function AudioClient() {
           <VinylShowcase />
         </section>
 
+
+        {/* ── Section 3b: Local Track Library ─────────────────────────────── */}
+        <section className="w-full max-w-7xl mx-auto px-4 md:px-6 pb-8">
+          <LocalTrackPanel />
+        </section>
 
         {/* ── Section 6: Gear Info Cards (TONEX + HX Stomp XL) ─────────────── */}
         <section className="w-full max-w-7xl mx-auto px-4 md:px-6 py-14 md:py-18">

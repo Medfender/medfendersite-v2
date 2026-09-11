@@ -181,6 +181,8 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (!raw || typeof raw !== "string") {
       return "/audio/featured-artists/Sidi Bouganga feat Younes Hadir.mp3";
     }
+    // Preserve blob: URLs (local file object URLs) untouched — never corrupt them.
+    if (raw.startsWith("blob:")) return raw;
     // Preserve the path as-is but resolve relative paths against /audio/featured-artists/ if missing segment
     const stripped = raw.startsWith("http")
       ? raw.replace(/^https?:\/\/[^/]+/, "")
