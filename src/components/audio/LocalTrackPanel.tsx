@@ -283,9 +283,22 @@ export default function LocalTrackPanel() {
           return (
             <div key={track.id} className={`flex items-center gap-3 px-2 py-2 rounded-lg border border-zinc-900/60 transition-colors ${isActive ? "bg-cyan-500/10" : "bg-[#0e121c]/60"}`}>
               <img src={coverSrc} alt="" className="w-9 h-9 rounded object-cover shrink-0" />
-              <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => playTrack(track)}
+                  className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition flex items-center justify-center"
+                  aria-label="Play"
+                  title="Play"
+                >
+                  <Play size={14} />
+                </button>
+              </div>
+              <div className="flex-1 min-w-0 flex flex-col">
                 <div className={`text-xs font-semibold truncate ${isActive ? "text-cyan-200" : "text-neutral-200"}`}>{track.name}</div>
                 <div className="text-[10px] text-zinc-500 truncate">{track.artist || "Local"}</div>
+                <div className="w-full h-1 bg-white/10 rounded-full mt-1 overflow-hidden">
+                  <div className="h-full bg-cyan-400/70 rounded-full transition-all duration-300" style={{ width: isActive ? "60%" : "0%" }} />
+                </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button onClick={() => handleFindCover(track.id)} disabled={!!lookingUpId} className="text-[9px] px-1.5 py-0.5 rounded border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/10 transition" title="Find cover art">Art</button>
