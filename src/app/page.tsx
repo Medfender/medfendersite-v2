@@ -63,7 +63,7 @@ const fadeUp: any = {
    MARQUEE COMPONENT
 ═══════════════════════════════════════════════════ */
 function Marquee() {
-  const tripleItems = [...marqueeItems, ...marqueeItems, ...marqueeItems];
+  const doubleItems = [...marqueeItems, ...marqueeItems];
 
   return (
     <div className="relative w-full overflow-hidden border-y border-zinc-900 py-6 bg-[#050505] group">
@@ -86,7 +86,7 @@ function Marquee() {
       `}</style>
 
       <div className="marquee-track flex items-center whitespace-nowrap w-max">
-        {tripleItems.map((item, i) => (
+        {doubleItems.map((item, i) => (
           <span key={i} className="flex items-center shrink-0">
             {item.accent && (
               <span

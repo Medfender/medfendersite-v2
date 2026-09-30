@@ -511,8 +511,10 @@ export default function Turntable({
     (audio as any)._headshellOnDisk = headshellOnDisk;
 
     if (!headshellOnDisk) {
-      // Headshell not on vinyl → force pause immediately to prevent any blip
-      try { audio.pause(); } catch { /* ignore */ }
+      // Don't force an abrupt pause here — that breaks the continuous loop.
+      // The choreography useEffect manages audio timing; interrupting it
+      // causes the blip/crush. Only update the gate, don't call pause().
+      // try { audio.pause(); } catch { /* ignore */ }  // REMOVED — prevents glitch
     }
   }, [cuePhase, audioRef]);
 
@@ -719,7 +721,9 @@ export default function Turntable({
       setIsQuickLift(true);
       if (audio) {
         (audio as any)._armMoving = true; // arm is moving → block stray play()
-        try { audio.pause(); } catch { /* ignore */ }
+        // Don't call audio.pause() here — it interrupts the continuous
+        // loop flow and causes the blip/crush when resuming.
+        // try { audio.pause(); } catch { /* ignore */ }  // REMOVED — keeps loop smooth
       }
       isArmMovingRef.current = true;
       setIsLifted(true);              // lift (prepare for drop)
