@@ -365,10 +365,11 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
           if (isPlaying && audioRef.current) {
             setCurrentTime(audioRef.current.currentTime);
             // Fail-safe: capture duration from active audio if missing
-            if (audioRef.current.duration && Number.isFinite(audioRef.current.duration) && audioRef.current.duration > 0) {
+            const currentDuration = audioRef.current?.duration;
+            if (currentDuration && Number.isFinite(currentDuration) && currentDuration > 0) {
               const activeId = activeTone?.id;
               if (activeId) {
-                setDurations?.((prev: any) => ({ ...prev, [activeId]: audioRef.current.duration }));
+                setDurations?.((prev: any) => ({ ...prev, [activeId]: currentDuration }));
               }
             }
           }

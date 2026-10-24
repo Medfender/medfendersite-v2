@@ -68,6 +68,7 @@ export const demoTracks: FeaturedTrack[] = [
     id: "clean-twin",
     name: "Clean Twin",
     artist: "Fender-style Clean · TONEX",
+    gearTag: "Clean Tone · TONEX",
     audioUrl: "/audio/demos/srv/clean-twin.mp3",
     hardware: "TONEX",
   },
