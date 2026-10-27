@@ -249,10 +249,10 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                     }}
                   >
                     {/* Corner screws */}
-                    <div className="absolute top-4 left-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-zinc-900 z-10" />
-                    <div className="absolute top-4 right-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-zinc-900 z-10" />
-                    <div className="absolute bottom-4 left-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-zinc-900 z-10" />
-                    <div className="absolute bottom-4 right-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-zinc-900 z-10" />
+                    <div className="absolute top-4 left-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-white/[0.06] z-10" />
+                    <div className="absolute top-4 right-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-white/[0.06] z-10" />
+                    <div className="absolute bottom-4 left-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-white/[0.06] z-10" />
+                    <div className="absolute bottom-4 right-4 w-3.5 h-3.5 rounded-full bg-zinc-700 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] border border-white/[0.06] z-10" />
 
                     {/* ── Top panel: silkscreen header + fake VU meters ── */}
                     <div
@@ -380,7 +380,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                               />
                             </div>
                             {/* Tube base pins */}
-                            <div className="w-6 h-1.5 rounded-sm bg-zinc-800 border border-zinc-900" />
+                            <div className="w-6 h-1.5 rounded-sm bg-zinc-800 border border-white/[0.06]" />
                           </div>
                         ))}
                       </div>
@@ -389,7 +389,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                       <div className="flex items-center gap-4 w-full max-w-xs">
                         {/* STANDBY label */}
                         <div className="flex-1 text-right">
-                          <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-zinc-500 select-none">
+                          <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-[#6b726f] select-none">
                             Standby
                           </span>
                         </div>
@@ -428,8 +428,8 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                               className="absolute inset-0 rounded-full"
                               style={{
                                 background:
-                                  "radial-gradient(ellipse at 50% 50%, rgba(0,216,246,0.25) 0%, transparent 70%)",
-                                boxShadow: "0 0 12px rgba(0,216,246,0.3)",
+                                  "radial-gradient(ellipse at 50% 50%, rgba(223,161,74,0.25) 0%, transparent 70%)",
+                                boxShadow: "0 0 12px rgba(223,161,74,0.3)",
                               }}
                             />
 
@@ -440,11 +440,11 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                                 height="14"
                                 viewBox="0 0 24 24"
                                 fill="none"
-                                className="drop-shadow-[0_0_4px_rgba(0,216,246,0.8)]"
+                                className="drop-shadow-[0_0_4px_rgba(223,161,74,0.8)]"
                               >
                                 <motion.path
                                   d="M12 3v9"
-                                  stroke="#00d8f6"
+                                  stroke="#D0C0A6"
                                   strokeWidth="2.5"
                                   strokeLinecap="round"
                                   animate={{ opacity: [0.8, 1, 0.8] }}
@@ -452,7 +452,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                                 />
                                 <motion.path
                                   d="M18.36 6.64A9 9 0 1 1 5.64 6.64"
-                                  stroke="#00d8f6"
+                                  stroke="#D0C0A6"
                                   strokeWidth="2.5"
                                   strokeLinecap="round"
                                   fill="none"
@@ -468,8 +468,8 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
                               transition={{ duration: 1.8, repeat: Infinity }}
                               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
                               style={{
-                                background: "#00d8f6",
-                                boxShadow: "0 0 8px #00d8f6, 0 0 16px rgba(0,216,246,0.4)",
+                                background: "#D0C0A6",
+                                boxShadow: "0 0 8px #D0C0A6, 0 0 16px rgba(223,161,74,0.4)",
                               }}
                             />
                           </div>
@@ -477,14 +477,14 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
 
                         {/* POWER label */}
                         <div className="flex-1">
-                          <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-zinc-500 select-none">
+                          <span className="text-[9px] font-bold tracking-[0.2em] uppercase text-[#6b726f] select-none">
                             Power
                           </span>
                         </div>
                       </div>
 
                       {/* ── Jack labels ── */}
-                      <div className="flex items-center justify-between w-full max-w-xs pt-2 border-t border-zinc-800/50">
+                      <div className="flex items-center justify-between w-full max-w-xs pt-2 border-t border-white/[0.06]/50">
                         <div className="flex flex-col items-center gap-1">
                           <span className="text-[8px] font-bold tracking-[0.15em] uppercase text-zinc-600">Input</span>
                           <div className="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]">
@@ -507,7 +507,7 @@ export default function TrackThumbnailCard({ showTitle = false }: Props) {
 
                       {/* Track name silkscreen */}
                       <div className="text-center select-none pb-2">
-                        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">
+                        <p className="text-[10px] font-bold text-[#A1A8A3] uppercase tracking-[0.2em]">
                           {trackName || "No Track Selected"}
                         </p>
                         <p className="text-[9px] text-zinc-600 font-mono mt-0.5">

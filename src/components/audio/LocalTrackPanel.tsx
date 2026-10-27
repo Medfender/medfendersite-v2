@@ -45,7 +45,7 @@ function revokeUrl(url: string) {
 
 function Thumbnail({ src, size = 36, accent = "cyan" }: { src: string | null; size?: number; accent?: "cyan" | "amber" }) {
   const [err, setErr] = useState(false);
-  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-cyan-500/30 shadow-[0_0_6px_rgba(0,216,246,0.25)]";
+  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-brass/30 shadow-[0_0_6px_rgba(223,161,74,0.25)]";
   return (
     <div className={`relative shrink-0 rounded-sm overflow-hidden border ${ring} bg-[#0e0e12]`} style={{ width: size, height: size }} aria-hidden>
       {src && !err ? <img src={src} alt="" className="w-full h-full object-cover" onError={() => setErr(true)} /> : <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-neutral-700" /></div>}
@@ -180,21 +180,52 @@ export default function LocalTrackPanel() {
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div className="w-full px-2 pt-3 pb-1">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-500">Local Library</h3>
-        <span className="text-[10px] font-mono text-zinc-600">{countMsg}</span>
+    <div className="w-full">
+      <div className="flex items-center gap-4">
+        <span className="fret-index" data-inlay="true">
+          07
+        </span>
+        <span className="eyebrow-on-ink">Local library</span>
+        <span aria-hidden className="h-px flex-1 bg-[var(--rule-ink)]" />
+        <span className="font-mono text-[8px] uppercase tracking-[0.22em] text-cream/60">
+          {countMsg}
+        </span>
       </div>
-      <div className="flex gap-2 mb-2">
-        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-[10px] font-mono text-cyan-300 cursor-pointer hover:bg-cyan-500/20 transition">
-          <Music size={10} /> Import
-          <input type="file" accept="audio/*" multiple ref={inputRef} onChange={handleImport} className="hidden" />
-        </label>
-        {localTracks.length > 0 && (
-          <button onClick={clearLocal} className="px-2 py-1.5 rounded-md bg-red-500/10 border border-red-500/20 text-[10px] font-mono text-red-300 hover:bg-red-500/20 transition">Clear</button>
-        )}
+
+      <div className="mt-8 flex flex-col gap-8 border-b border-[var(--rule-ink)] pb-8 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 className="display-md max-w-xl text-balance text-cream">
+            Your own <em className="italic text-brass">recording,</em> on the same deck.
+          </h2>
+          <p className="mt-4 max-w-md text-sm leading-relaxed text-cream/55">
+            Load an MP3, WAV or FLAC from this device. Files stay in the browser —
+            nothing is uploaded. Only an optional cover-art lookup sends the
+            track title and artist text out.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <label className="btn btn-ghost cursor-pointer">
+            <Music size={13} aria-hidden />
+            Import audio
+            <input
+              type="file"
+              accept="audio/*"
+              multiple
+              ref={inputRef}
+              onChange={handleImport}
+              className="sr-only"
+            />
+          </label>
+          {localTracks.length > 0 && (
+            <button
+              onClick={clearLocal}
+              className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55 underline decoration-cream/20 underline-offset-4 transition-colors hover:text-[var(--color-brass-light)]"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
       </div>
-      <p className="text-[9px] text-zinc-600 leading-tight mb-2">Local files never leave your device. Only an optional cover-art search sends track title/artist text to Apple.</p>
 
       <div className="flex flex-col">
         {localTracks.map((track, idx) => {
@@ -204,34 +235,34 @@ export default function LocalTrackPanel() {
             <div
               key={track.id}
               onClick={() => playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER } as any)}
-              className={`w-full flex flex-col border-b border-zinc-900/40 py-3 transition-colors hover:bg-white/[0.02] cursor-pointer group ${isActive ? "bg-white/[0.02]" : ""}`}
+              className={`w-full flex flex-col border-b border-[var(--rule-ink)] py-3 transition-colors hover:bg-cream/[0.02] cursor-pointer group ${isActive ? "bg-cream/[0.02]" : ""}`}
             >
-              <div className="flex items-center justify-between w-full px-2">
+              <div className="flex items-center justify-between w-full px-1">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <span className="text-xs text-zinc-600 font-mono w-7 shrink-0">{String(idx + 1).padStart(2, "0")}</span>
+                  <span className="text-[10px] text-cream/55 font-mono w-7 shrink-0 tabular-nums">{String(idx + 1).padStart(2, "0")}</span>
                   <Thumbnail src={coverSrc} size={36} accent={isActive ? "cyan" : "amber"} />
                   <div className="min-w-0 flex-1">
-                    <h4 className={`text-sm font-semibold truncate ${isActive ? "text-cyan-200" : "text-neutral-200"}`}>
+                    <h4 className={`text-sm truncate ${isActive ? "text-brass-light" : "text-cream/90"}`}>
                       {track.name || "Untitled"}
                     </h4>
-                    <p className="text-[10px] text-zinc-500 truncate font-mono">{track.artist || "Local"}</p>
+                    <p className="text-[10px] text-cream/55 truncate font-mono uppercase tracking-[0.14em]">{track.artist || "Local"}</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0 ml-2">
-                  <button onClick={(e) => { e.stopPropagation(); removeTrack(track.id); }} className="text-zinc-500 hover:text-red-400 transition" aria-label="Remove track"><Trash2 size={12} /></button>
+                  <button onClick={(e) => { e.stopPropagation(); removeTrack(track.id); }} className="text-cream/55 hover:text-[var(--color-brass-light)] transition" aria-label="Remove track"><Trash2 size={12} /></button>
                   <button
                     aria-label={isActive && isPlaying ? "Pause" : "Play"}
                     onClick={(e) => { e.stopPropagation(); playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER } as any); }}
                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
                       isActive
-                        ? "border-zinc-400 text-zinc-200 bg-zinc-800/50"
-                        : "border-zinc-700 text-zinc-400 opacity-0 group-hover:opacity-100 hover:border-zinc-500 hover:text-white bg-transparent"
+                        ? "border-brass/60 text-cream bg-brass/10"
+                        : "border-cream/20 text-cream/60 opacity-0 group-hover:opacity-100 hover:border-brass/50 hover:text-cream bg-transparent"
                     }`}
                   >
                     {isActive && isPlaying ? <Pause size={12} strokeWidth={1.5} /> : <Play size={12} strokeWidth={1.5} className="ml-0.5" />}
                   </button>
-                  <span className="text-xs text-zinc-500 font-mono w-10 text-right">{(track as any).duration || "0:00"}</span>
+                  <span className="text-[10px] text-cream/60 font-mono w-10 text-right tabular-nums">{(track as any).duration || "0:00"}</span>
                 </div>
               </div>
 
@@ -252,15 +283,15 @@ export default function LocalTrackPanel() {
                       return (
                         <div
                           key={i}
-                          className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-zinc-300" : "bg-zinc-800"}`}
+                          className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-brass/80" : "bg-cream/10"}`}
                           style={{ height: `${Math.max(30, 15 + (i % 3) * 20)}%` }}
                         />
                       );
                     })}
                   </div>
                   <div
-                    className="absolute top-0 bottom-0 w-[1px] bg-white z-10 pointer-events-none"
-                    style={{ left: `${Math.min(100, Math.max(0, progressPercent))}%`, boxShadow: "0 0 3px rgba(255,255,255,0.6)" }}
+                    className="absolute top-0 bottom-0 w-[1px] bg-brass-light z-10 pointer-events-none"
+                    style={{ left: `${Math.min(100, Math.max(0, progressPercent))}%`, boxShadow: "0 0 3px rgba(240,197,121,0.6)" }}
                   />
                 </div>
               )}
@@ -268,7 +299,22 @@ export default function LocalTrackPanel() {
           );
         })}
         {localTracks.length === 0 && (
-          <div className="text-zinc-600 text-xs py-6 text-center">No local tracks loaded.</div>
+          <div className="grid grid-cols-1 gap-6 py-12 md:grid-cols-[1fr_auto] md:items-center">
+            <div>
+              <p className="font-display text-2xl leading-tight text-cream/80">
+                Nothing loaded yet.
+              </p>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-cream/55">
+                Import up to ten tracks to audition them through the master
+                turntable, the queue and the meters above.
+              </p>
+            </div>
+            <p className="font-mono text-[8px] uppercase leading-relaxed tracking-[0.22em] text-cream/55">
+              Format — MP3 · WAV · FLAC
+              <br />
+              Storage — this browser only
+            </p>
+          </div>
         )}
       </div>
     </div>

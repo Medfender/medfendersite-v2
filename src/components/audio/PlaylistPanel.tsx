@@ -8,7 +8,7 @@ import { deckControls } from "@/lib/audio/DeckControls";
 
 function Thumbnail({ src, size = 32, accent = "cyan" }: { src: string | null; size?: number; accent?: "cyan" | "amber" }) {
   const [err, setErr] = useState(false);
-  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-cyan-500/30 shadow-[0_0_6px_rgba(0,216,246,0.25)]";
+  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-brass/30 shadow-[0_0_6px_rgba(223,161,74,0.25)]";
   return (
     <div className={`relative shrink-0 rounded-sm overflow-hidden border ${ring} bg-[#0e0e12]`} style={{ width: size, height: size }} aria-hidden>
       {src && !err ? <img src={src} alt="" className="w-full h-full object-cover" onError={() => setErr(true)} /> : <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-neutral-700" /></div>}
@@ -95,19 +95,19 @@ export default function PlaylistPanel({ onSeek }: { onSeek?: (percentage: number
     <div className="flex flex-col h-full">
       {/* Active-track hero — minimal, flat, no box */}
       {activeTrack && (
-        <div className="flex items-center gap-3 px-2 py-3 border-b border-zinc-900/50">
+        <div className="flex items-center gap-3 px-2 py-3 border-b border-white/[0.06]/50">
           <Thumbnail src={activeCoverSrc} size={48} accent="amber" />
           <div className="min-w-0 flex-1">
-            <div className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.2em]">Active</div>
+            <div className="text-[9px] font-mono text-cream/55 uppercase tracking-[0.2em]">Active</div>
             <div className="text-sm font-bold text-white truncate">{(activeTrack as any).name || (activeTrack as any).title}</div>
-            <div className="text-[10px] font-mono text-zinc-500 truncate">{(activeTrack as any).gearTag || (activeTrack as any).artist}</div>
+            <div className="text-[10px] font-mono text-cream/55 truncate">{(activeTrack as any).gearTag || (activeTrack as any).artist}</div>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between px-2 pt-3 pb-1">
-        <h3 className="text-[10px] font-mono uppercase tracking-[0.25em] text-zinc-500">Playlist</h3>
-        <span className="text-[10px] font-mono text-zinc-600">{playlist.length} tracks</span>
+        <h3 className="text-[10px] font-mono uppercase tracking-[0.25em] text-cream/55">Playlist</h3>
+        <span className="text-[10px] font-mono text-cream/55">{playlist.length} tracks</span>
       </div>
 
       {/* Flat full-width rows — no gap, border-separated */}
@@ -127,7 +127,7 @@ export default function PlaylistPanel({ onSeek }: { onSeek?: (percentage: number
             />
           );
         })}
-        {playlist.length === 0 && <p className="text-zinc-600 text-xs py-6 text-center">No tracks loaded.</p>}
+        {playlist.length === 0 && <p className="text-cream/55 text-xs py-6 text-center">No tracks loaded.</p>}
       </div>
     </div>
   );
@@ -171,19 +171,19 @@ function PlaylistRow({
   return (
     <div
       onClick={onClick}
-      className="w-full flex flex-col border-b border-zinc-900/40 py-3 transition-colors hover:bg-white/[0.02] cursor-pointer group"
+      className="w-full flex flex-col border-b border-white/[0.06]/40 py-3 transition-colors hover:bg-white/[0.02] cursor-pointer group"
     >
       {/* Row info line */}
       <div className="flex items-center justify-between w-full px-2">
         {/* Left: index + thumb + title/sub */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="text-xs text-zinc-600 font-mono w-7 shrink-0">{String(index).padStart(2, "0")}</span>
+          <span className="text-xs text-cream/55 font-mono w-7 shrink-0">{String(index).padStart(2, "0")}</span>
           <Thumbnail src={coverSrc} size={36} accent={isActive ? "cyan" : "amber"} />
           <div className="min-w-0 flex-1">
-            <h4 className={`text-sm font-semibold truncate ${isActive ? "text-cyan-200" : "text-neutral-200"}`}>
+            <h4 className={`text-sm font-semibold truncate ${isActive ? "text-brass-light" : "text-neutral-200"}`}>
               {(track as any).name || (track as any).title || "Untitled"}
             </h4>
-            <p className="text-[10px] text-zinc-500 truncate font-mono">{(track as any).gearTag || (track as any).artist || "—"}</p>
+            <p className="text-[10px] text-cream/55 truncate font-mono">{(track as any).gearTag || (track as any).artist || "—"}</p>
           </div>
         </div>
 
@@ -195,12 +195,12 @@ function PlaylistRow({
             className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
               isActive
                 ? "border-zinc-400 text-zinc-200"
-                : "border-zinc-700 text-zinc-400 opacity-0 group-hover:opacity-100 hover:border-zinc-500 hover:text-white"
+                : "border-zinc-700 text-[#A1A8A3] opacity-0 group-hover:opacity-100 hover:border-zinc-500 hover:text-white"
             }`}
           >
             {isPlaying ? <Pause size={12} strokeWidth={1.5} /> : <Play size={12} strokeWidth={1.5} className="ml-0.5" />}
           </button>
-          <span className="text-xs text-zinc-500 font-mono w-10 text-right">{durStr}</span>
+          <span className="text-xs text-cream/55 font-mono w-10 text-right">{durStr}</span>
         </div>
       </div>
 

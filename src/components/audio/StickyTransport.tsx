@@ -56,8 +56,8 @@ function CoverCard({ src, name, isPlaying, onClick }: CoverCardProps) {
           }}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center bg-zinc-900">
-          <Disc3 size={16} className="text-zinc-600" strokeWidth={1} />
+        <div className="w-full h-full flex items-center justify-center bg-[#121619]">
+          <Disc3 size={16} className="text-cream/55" strokeWidth={1} />
         </div>
       )}
     </button>
@@ -166,7 +166,7 @@ export default function StickyTransport() {
           <button
             onClick={() => playPrevious?.()}
             aria-label="Previous track"
-            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
+            className="text-cream/55 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
               <polygon points="19 20 9 12 19 4 19 20" />
@@ -178,7 +178,7 @@ export default function StickyTransport() {
           <button
             onClick={() => { deckControls.toggle(); }}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="w-7 h-7 rounded-full border border-zinc-600 hover:border-zinc-200 text-zinc-300 hover:text-white flex items-center justify-center transition-all active:scale-95"
+            className="w-7 h-7 rounded-full border border-zinc-600 hover:border-zinc-200 text-[#A1A8A3] hover:text-white flex items-center justify-center transition-all active:scale-95"
           >
             {isPlaying ? (
               <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -196,7 +196,7 @@ export default function StickyTransport() {
           <button
             onClick={() => { deckControls.stop(); }}
             aria-label="Stop"
-            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
+            className="text-cream/55 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
               <rect x="5" y="5" width="14" height="14" />
@@ -207,7 +207,7 @@ export default function StickyTransport() {
           <button
             onClick={() => playNext?.()}
             aria-label="Next track"
-            className="text-zinc-500 hover:text-zinc-200 transition-colors p-1 active:scale-95"
+            className="text-cream/55 hover:text-zinc-200 transition-colors p-1 active:scale-95"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="square" aria-hidden>
               <polygon points="5 4 15 12 5 20 5 4" />
@@ -229,13 +229,21 @@ export default function StickyTransport() {
             <span className="text-sm font-semibold truncate leading-tight text-neutral-200">
               {trackName}
             </span>
-            <span className="text-[10px] font-mono text-zinc-500 truncate">
+            <span className="text-[10px] font-mono text-cream/55 truncate">
               {trackArtist}
             </span>
           </div>
           {/* Mini visualizer — same 150×36 footprint as FeaturedPlayer, click cycles bars→curve→waveform */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => setMiniMode((prev) => (prev === "bars" ? "curve" : prev === "curve" ? "waveform" : "bars"))}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setMiniMode((prev) => (prev === "bars" ? "curve" : prev === "curve" ? "waveform" : "bars"));
+              }
+            }}
             className="hidden md:flex items-center justify-center cursor-pointer shrink-0 ml-2 transition-all duration-200 hover:brightness-110"
             title={`${miniMode === "bars" ? "Spec" : miniMode === "curve" ? "Curve" : "Osc"} — click to switch`}
             style={{ width: 120, height: 32, minWidth: 120, minHeight: 32, flexShrink: 0 }}
@@ -253,7 +261,7 @@ export default function StickyTransport() {
 
         {/* ── Center: ultra-thin 2px hairline progress track ─────────────── */}
         <div className="flex-1 flex items-center gap-3 min-w-0 sm:min-w-[200px] md:min-w-[260px] max-w-md">
-          <span className="hidden sm:inline-block text-xs text-zinc-500 font-mono tabular-nums w-8 text-right shrink-0">
+          <span className="hidden sm:inline-block text-xs text-cream/55 font-mono tabular-nums w-8 text-right shrink-0">
             {fmt(currentTime)}
           </span>
           <div
@@ -278,7 +286,7 @@ export default function StickyTransport() {
               style={{ left: `${progress}%`, transform: "translate(-50%, -50%)" }}
             />
           </div>
-          <span className="hidden sm:inline-block text-xs text-zinc-500 font-mono tabular-nums w-8 shrink-0">
+          <span className="hidden sm:inline-block text-xs text-cream/55 font-mono tabular-nums w-8 shrink-0">
             {fmt(duration)}
           </span>
         </div>
@@ -308,7 +316,7 @@ export default function StickyTransport() {
               style={{ left: `${Math.round(volume * 100)}%`, transform: "translate(-50%, -50%)" }}
             />
           </div>
-          <span className="hidden md:inline-block text-xs text-zinc-500 font-mono tabular-nums w-7 shrink-0">
+          <span className="hidden md:inline-block text-xs text-cream/55 font-mono tabular-nums w-7 shrink-0">
             {Math.round(volume * 100)}%
           </span>
           {/* Mute toggle — flat icon, no pill */}
@@ -316,7 +324,7 @@ export default function StickyTransport() {
             onClick={() => { toggleMute(); setVolumeOpen(false); }}
             aria-label={isMuted ? "Unmute" : "Mute"}
             className={`w-8 h-8 flex items-center justify-center transition-colors active:scale-90 ${
-              isMuted ? "text-zinc-500 hover:text-zinc-200" : "text-zinc-500 hover:text-zinc-200"
+              isMuted ? "text-cream/55 hover:text-zinc-200" : "text-cream/55 hover:text-zinc-200"
             }`}
           >
             {isMuted ? <VolumeX size={14} strokeWidth={1.25} /> : <Volume2 size={14} strokeWidth={1.25} />}
@@ -326,7 +334,7 @@ export default function StickyTransport() {
             onClick={() => setVolumeOpen((o) => !o)}
             aria-label="Open volume control"
             aria-expanded={volumeOpen}
-            className="sm:hidden w-8 h-8 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors active:scale-90"
+            className="sm:hidden w-8 h-8 flex items-center justify-center text-cream/55 hover:text-zinc-200 transition-colors active:scale-90"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
               <rect x="1" y="5" width="2" height="4" fill="currentColor" opacity="0.6"/>
@@ -359,7 +367,7 @@ export default function StickyTransport() {
                   style={{ bottom: `${Math.round(volume * 100)}%`, transform: "translate(-50%, 50%)" }}
                 />
               </div>
-              <span className="text-xs font-mono text-zinc-500 tabular-nums">{Math.round(volume * 100)}%</span>
+              <span className="text-xs font-mono text-cream/55 tabular-nums">{Math.round(volume * 100)}%</span>
             </div>
           )}
         </div>
@@ -371,10 +379,10 @@ export default function StickyTransport() {
     {isReviewOpen && typeof document !== "undefined" && createPortal(
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/95 backdrop-blur-md" onClick={() => setIsReviewOpen(false)} role="dialog" aria-modal="true" aria-label="Track review">
         <div onClick={e=>e.stopPropagation()} className="relative w-full max-w-md rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.95)] border border-white/[0.06]" style={{background:"linear-gradient(160deg,#2a2a2a 0%,#1c1c1c 40%,#141414 100%)"}}>
-          <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
-          <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
-          <div className="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
-          <div className="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-zinc-900 shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
+          <div className="absolute top-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-white/[0.06] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
+          <div className="absolute top-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-white/[0.06] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
+          <div className="absolute bottom-3 left-3 w-3 h-3 rounded-full bg-zinc-700 border border-white/[0.06] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
+          <div className="absolute bottom-3 right-3 w-3 h-3 rounded-full bg-zinc-700 border border-white/[0.06] shadow-[inset_0_2px_4px_rgba(0,0,0,0.9)] z-10"/>
           <div className="px-6 pt-8 pb-4 border-b border-black/40" style={{background:"linear-gradient(180deg,rgba(255,255,255,0.03) 0%,transparent 100%)"}}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex gap-1">{["bg-amber-500","bg-amber-400","bg-zinc-600","bg-zinc-700","bg-zinc-800"].map((c,i)=><div key={i} className={`w-1 h-3 rounded-full ${c}`}/>)}</div>
@@ -395,11 +403,11 @@ export default function StickyTransport() {
                   <div className="absolute inset-2 top-1 rounded-sm opacity-20" style={{background:"repeating-linear-gradient(0deg,#888 0px,#888 1px,transparent 1px,transparent 3px),repeating-linear-gradient(90deg,#888 0px,#888 1px,transparent 1px,transparent 3px)"}}/>
                   <div className="absolute bottom-0 inset-x-1 h-2 rounded-b-sm" style={{background:"radial-gradient(ellipse at center bottom,rgba(255,120,0,0.8) 0%,rgba(255,60,0,0.4) 50%,transparent 100%)"}}/>
                 </div>
-                <div className="w-6 h-1.5 rounded-sm bg-zinc-800 border border-zinc-900"/>
+                <div className="w-6 h-1.5 rounded-sm bg-zinc-800 border border-white/[0.06]"/>
               </div>
             )}</div>
-            <button onClick={()=>setIsReviewOpen(false)} className="px-4 py-1 rounded-full text-xs font-mono text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/20 transition" aria-label="Close review">Close</button>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">{trackName||"No Track"}</p>
+            <button onClick={()=>setIsReviewOpen(false)} className="px-4 py-1 rounded-full text-xs font-mono text-brass-light bg-brass/10 border border-brass/20 hover:bg-brass/20 transition" aria-label="Close review">Close</button>
+            <p className="text-[10px] font-bold text-[#A1A8A3] uppercase tracking-[0.2em]">{trackName||"No Track"}</p>
           </div>
         </div>
       </div>, document.body

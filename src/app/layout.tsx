@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { AudioProvider } from "@/context/AudioContext";
 import { CartProvider } from "@/lib/CartContext";
+import { AcademyAccessProvider } from "@/context/AcademyAccessContext";
 import Navbar from "@/components/layout/Navbar";
+import SiteFooter from "@/components/layout/SiteFooter";
 import AudioNavigationGuard from "@/components/layout/AudioNavigationGuard";
 import PageTransition from "@/components/layout/PageTransition";
-import GalaxyBackgroundClient from "@/components/GalaxyBackgroundClient";
+import PaperAtmosphere from "@/components/layout/PaperAtmosphere";
+import { site } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,29 +22,105 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Medfender — Tactical Audio Hardware & Preset Packs",
-  description: "Hand-tuned TONEX and HX Stomp preset packs, analog audio captures, and studio-grade tone profiles.",
+  metadataBase: new URL("https://medfender.com"),
+  title: {
+    default: "Medfender — Live Band & Composer · Marrakech",
+    template: "%s — Medfender",
+  },
+  description: site.description,
+  keywords: [
+    "Medfender",
+    "Marrakech guitarist",
+    "live band Marrakech",
+    "Gnawa blues",
+    "Moroccan guitarist",
+    "wedding guitarist Morocco",
+    "event musicians Marrakech",
+    "TONEX captures",
+    "HX Stomp presets",
+  ],
+  authors: [{ name: "Medfender" }],
+  creator: "Medfender",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "Medfender",
+    title: "Medfender — Live Band & Composer · Marrakech",
+    description: site.tagline,
+    images: [
+      {
+        url: "/images/site/hero-stage.webp",
+        width: 2560,
+        height: 1246,
+        alt: "Medfender performing live at So Lounge, Marrakech",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Medfender — Live Band & Composer · Marrakech",
+    description: site.tagline,
+    images: ["/images/site/hero-stage.webp"],
+  },
+  robots: { index: true, follow: true },
+  alternates: { canonical: "/" },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "MusicGroup",
+  name: "Medfender",
+  description: site.description,
+  genre: ["Gnawa", "Blues", "Blues Rock", "Fusion", "Instrumental"],
+  url: "https://medfender.com",
+  image: "https://medfender.com/images/site/hero-stage.webp",
+  areaServed: [
+    { "@type": "City", name: "Marrakech" },
+    { "@type": "Country", name: "Morocco" },
+  ],
+  sameAs: site.socials.map((s) => s.href),
+  email: site.email,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
     >
-      <body suppressHydrationWarning className="min-h-full flex flex-col text-neutral-100 min-h-screen bg-transparent">
-        {/* Spiral Galaxy background (z-index -10, behind main content z-10) — client-only */}
-        <GalaxyBackgroundClient />
+      <body
+        suppressHydrationWarning
+        className="grain min-h-full bg-paper text-ink"
+      >
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <CartProvider>
-          <Navbar />
-          <AudioProvider>
-            <AudioNavigationGuard />
-            <div className="relative z-10">
-              <PageTransition>{children}</PageTransition>
-            </div>
-          </AudioProvider>
+          <AcademyAccessProvider>
+            <Navbar />
+            <AudioProvider>
+              <PaperAtmosphere />
+              <AudioNavigationGuard />
+              <div id="main" className="relative z-10">
+                <PageTransition>{children}</PageTransition>
+              </div>
+            </AudioProvider>
+          </AcademyAccessProvider>
         </CartProvider>
+        <SiteFooter />
+        <Script
+          id="medfender-structured-data"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <Script
           src="https://assets.lemonsqueezy.com/lemon.js"
           strategy="afterInteractive"

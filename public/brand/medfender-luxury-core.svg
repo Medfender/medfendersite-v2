@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000" viewBox="0 0 1000 1000">
+  <defs>
+    <radialGradient id="obsidian" cx="50%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#141E30"/>
+      <stop offset="55%" stop-color="#0B0C0E"/>
+      <stop offset="100%" stop-color="#05060A"/>
+    </radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2A3A63"/>
+      <stop offset="25%" stop-color="#A9B7D3"/>
+      <stop offset="50%" stop-color="#E6ECF8"/>
+      <stop offset="75%" stop-color="#A9B7D3"/>
+      <stop offset="100%" stop-color="#2A3A63"/>
+    </linearGradient>
+    <linearGradient id="indigo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#141E30"/>
+      <stop offset="50%" stop-color="#2D1B36"/>
+      <stop offset="100%" stop-color="#141E30"/>
+    </linearGradient>
+    <filter id="filigree-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1000" height="1000" fill="url(#obsidian)"/>
+
+  <!-- Hendrix smoke: organic spline diffusion behind grid -->
+  <g opacity="0.55" filter="url(#filigree-glow)">
+    <path d="M 180,520 C 260,360 420,280 520,400 C 620,520 760,460 820,300" fill="none" stroke="url(#indigo)" stroke-width="34" stroke-linecap="round"/>
+    <path d="M 220,640 C 340,720 480,600 560,720 C 640,840 800,760 860,620" fill="none" stroke="url(#indigo)" stroke-width="26" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 300,260 C 420,180 580,240 620,360 C 660,480 540,560 460,480" fill="none" stroke="url(#indigo)" stroke-width="22" stroke-linecap="round" opacity="0.6"/>
+  </g>
+
+  <!-- Skeleton: 12-point Zellige star filigree -->
+  <g transform="translate(500,500)" stroke="url(#brass)" stroke-width="1.6" fill="none" filter="url(#filigree-glow)">
+    <!-- {12/5} dodecagram -->
+    <polygon points="
+      360,0 108.7,342.2 -290.9,212.7 -290.9,-212.7 108.7,-342.2
+    "/>
+    <polygon points="
+      0,360 -342.2,108.7 -212.7,-290.9 212.7,-290.9 342.2,108.7
+    " transform="rotate(15)"/>
+    <!-- inner 12-point star -->
+    <polygon points="
+      220,0 67.4,210.9 -179.2,131.1 -179.2,-131.1 67.4,-210.9
+    " stroke-width="1.2" opacity="0.7"/>
+    <polygon points="
+      0,220 -210.9,67.4 -131.1,-179.2 131.1,-179.2 210.9,67.4
+    " transform="rotate(15)" stroke-width="1.2" opacity="0.7"/>
+  </g>
+
+  <!-- Stratocaster silhouette discovered in negative space -->
+  <g transform="translate(500,500) rotate(-8)" opacity="0.18">
+    <path d="M 0,0 C 40,-120 80,-220 60,-300 C 40,-360 -20,-380 -80,-340 C -140,-300 -180,-220 -160,-120 C -140,-20 -80,40 0,0 Z" fill="none" stroke="#A9B7D3" stroke-width="0.8" stroke-dasharray="2 6"/>
+  </g>
+
+  <!-- Terracotta harmonic intersections -->
+  <g fill="#4A0E14" opacity="0.7">
+    <circle cx="500" cy="140" r="3"/>
+    <circle cx="860" cy="500" r="3"/>
+    <circle cx="500" cy="860" r="3"/>
+    <circle cx="140" cy="500" r="3"/>
+  </g>
+</svg>

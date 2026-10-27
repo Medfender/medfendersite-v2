@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { site } from "@/lib/site";
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", inquiryType: "General", subject: "", message: "" });
@@ -19,10 +20,10 @@ export default function ContactSection() {
       });
       const data = await res.json();
       if (res.ok) {
-        setStatus({ ok: true, msg: "Message sent! We'll be in touch soon." });
+        setStatus({ ok: true, msg: "Message sent. We'll be in touch within 48 hours." });
         setForm({ name: "", email: "", inquiryType: "General", subject: "", message: "" });
       } else {
-        setStatus({ ok: false, msg: data.error || "Something went wrong." });
+        setStatus({ ok: false, msg: data.error || "Something went wrong. Please try again." });
       }
     } catch {
       setStatus({ ok: false, msg: "Network error. Please try again." });
@@ -31,102 +32,205 @@ export default function ContactSection() {
     }
   };
 
-  return (
-    <section id="contact" className="w-full max-w-6xl mx-auto px-6 py-24">
-      <div className="grid lg:grid-cols-5 gap-8 lg:gap-12">
-        {/* Form */}
-        <div className="lg:col-span-3 bg-neutral-900/50 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl backdrop-blur-md">
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">Contact & Booking</h2>
-          <p className="text-neutral-400 mb-8">Send a request for bookings, tone matching, or preset inquiries.</p>
+  const fieldClass = "field";
+  const labelClass =
+    "mb-2 block font-mono text-[8.5px] uppercase tracking-[0.28em] text-ink/60";
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            <div className="grid md:grid-cols-2 gap-5">
-              <input
-                required
-                type="text"
-                placeholder="Name"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full bg-neutral-950/60 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-400/40 transition placeholder:text-neutral-500"
-              />
-              <input
-                required
-                type="email"
-                placeholder="Email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-neutral-950/60 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-400/40 transition placeholder:text-neutral-500"
-              />
+  return (
+    <section
+      id="booking"
+      className="surface-paper bg-paper py-16 md:py-24"
+    >
+      <div className="mx-auto w-full max-w-[1560px] px-5 md:px-8">
+        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* ── The form, set as a letter ───────────────────────────── */}
+          <div className="lg:col-span-7">
+            <div className="mb-8 flex items-center gap-4">
+              <span className="font-mono text-[10px] tracking-[0.18em] text-rust">
+                01
+              </span>
+              <span className="eyebrow">Enquiries</span>
+              <span aria-hidden className="h-px flex-1 bg-[var(--rule)]" />
             </div>
 
-            <select
-              value={form.inquiryType}
-              onChange={(e) => setForm({ ...form, inquiryType: e.target.value })}
-              className="w-full bg-neutral-950/60 border border-white/10 text-neutral-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-400/40 transition cursor-pointer"
-            >
-              <option>General</option>
-              <option>Booking</option>
-              <option>Presets</option>
-              <option>Tone Matching</option>
-            </select>
-
-            <input
-              type="text"
-              placeholder="Subject"
-              value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              className="w-full bg-neutral-950/60 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-400/40 transition placeholder:text-neutral-500"
-            />
-
-            <textarea
-              required
-              rows={5}
-              placeholder="Message..."
-              value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="w-full bg-neutral-950/60 border border-white/10 text-white rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-cyan-400/40 transition placeholder:text-neutral-500 resize-none"
-            />
-
-            {status && (
-              <div
-                className={`rounded-xl px-4 py-3 text-sm font-semibold ${
-                  status.ok ? "bg-emerald-950/60 text-emerald-300 border border-emerald-500/20" : "bg-rose-950/60 text-rose-300 border border-rose-500/20"
-                }`}
-              >
-                {status.msg}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-cyan-400 to-cyan-600 text-black font-extrabold px-6 py-3 shadow-[0_0_20px_rgba(0,216,246,0.35)] hover:scale-[1.02] active:scale-[0.98] transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? "Sending..." : "Send Message"}
-            </button>
-          </form>
-        </div>
-
-        {/* Sidebar */}
-        <aside className="lg:col-span-2 flex flex-col gap-6">
-          <div className="bg-neutral-950/40 border border-white/10 rounded-3xl p-8 shadow-lg backdrop-blur-md">
-            <h3 className="text-xl font-extrabold text-white mb-4">Marrakech Bookings</h3>
-            <p className="text-neutral-400 text-sm leading-relaxed mb-3">
-              Available for solo, duo, and full trio performances at luxury venues across Marrakech and beyond.
+            <h2 className="display-lg text-ink text-balance">
+              Tell us
+              <br />
+              <em className="italic text-rust">the room.</em>
+            </h2>
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-ink/65 md:text-base">
+              From an intimate trio to a full stage of fifteen — send the venue,
+              the date and the kind of night. We reply within 48 hours with
+              availability and a full technical rider.
             </p>
-            <ul className="text-neutral-300 text-sm space-y-1 list-disc list-inside">
-              <li>Solo acoustic sets</li>
-              <li>Duo with percussion</li>
-              <li>Full trio — electric + rhythm section</li>
-            </ul>
+
+            <form onSubmit={handleSubmit} className="mt-10 flex flex-col gap-6">
+              <div className="grid gap-6 md:grid-cols-2">
+                <label className="block">
+                  <span className={labelClass}>Name</span>
+                  <input
+                    required
+                    type="text"
+                    placeholder="Your name"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className={fieldClass}
+                  />
+                </label>
+
+                <label className="block">
+                  <span className={labelClass}>Email</span>
+                  <input
+                    required
+                    type="email"
+                    placeholder="you@studio.com"
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className={fieldClass}
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <label className="block">
+                  <span className={labelClass}>Inquiry type</span>
+                  <select
+                    value={form.inquiryType}
+                    onChange={(e) => setForm({ ...form, inquiryType: e.target.value })}
+                    className={fieldClass}
+                  >
+                    <option>General</option>
+                    <option>Booking</option>
+                    <option>Presets</option>
+                    <option>Tone Matching</option>
+                    <option>Custom Capture</option>
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className={labelClass}>Subject</span>
+                  <input
+                    type="text"
+                    placeholder="Wedding · June 14"
+                    value={form.subject}
+                    onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                    className={fieldClass}
+                  />
+                </label>
+              </div>
+
+              <label className="block">
+                <span className={labelClass}>Message</span>
+                <textarea
+                  required
+                  rows={6}
+                  placeholder="Venue, date, format, audience, technical constraints…"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className={`${fieldClass} min-h-[150px] resize-y`}
+                />
+              </label>
+
+              {status && (
+                <div
+                  className={`border px-4 py-3 text-sm ${
+                    status.ok
+                      ? "border-[#4a5c48]/40 bg-[#e7ead9] text-[#3b4a37]"
+                      : "border-rust/35 bg-rust/[0.08] text-rust-deep"
+                  }`}
+                  role="status"
+                >
+                  {status.msg}
+                </div>
+              )}
+
+              <div className="flex flex-wrap items-center gap-6 border-t border-[var(--rule)] pt-6">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-ink w-full disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                >
+                  {loading ? "Sending…" : "Send inquiry"}
+                  <span aria-hidden>→</span>
+                </button>
+                <p className="font-mono text-[8.5px] uppercase tracking-[0.24em] text-ink/60">
+                  Reply within 48 hours
+                </p>
+              </div>
+            </form>
           </div>
 
-          <div className="bg-gradient-to-br from-cyan-900/30 to-cyan-950/20 border border-cyan-500/20 rounded-3xl p-8 shadow-lg backdrop-blur-md">
-            <h3 className="text-xl font-extrabold text-cyan-300 mb-3">Direct Inquiry</h3>
-            <p className="text-neutral-300 text-sm mb-4">For urgent bookings or custom tone requests, reach directly via email or social links.</p>
-            <a href="mailto:contact@medfender.site" className="inline-block text-cyan-300 font-bold hover:underline">contact@medfender.site</a>
-          </div>
-        </aside>
+          {/* ── The colophon ────────────────────────────────────────── */}
+          <aside className="lg:col-span-5 lg:pl-10">
+            <div className="lg:sticky lg:top-28">
+              <div className="flex items-center gap-4 border-t border-[var(--rule)] pt-5">
+                <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/60">
+                  Direct
+                </span>
+              </div>
+
+              <a
+                href={`mailto:${site.email}`}
+                className="mt-5 block font-display text-[clamp(1.6rem,3vw,2.4rem)] leading-tight text-ink transition-colors hover:text-rust"
+              >
+                {site.email}
+              </a>
+
+              <p className="mt-4 max-w-sm text-sm leading-relaxed text-ink/60">
+                For urgent bookings, custom tone captures or press enquiries,
+                write directly. Replies within 48 hours, Marrakech time.
+              </p>
+
+              <dl className="mt-10 grid grid-cols-2 gap-x-6 gap-y-6 border-t border-[var(--rule)] pt-6">
+                {[
+                  { k: "Based", v: "Marrakech, Morocco" },
+                  { k: "Territory", v: "Morocco & abroad" },
+                  { k: "Roster", v: "Trio → 15 players" },
+                  { k: "Sets", v: "DJ available on request" },
+                ].map((item) => (
+                  <div key={item.k}>
+                    <dt className="font-mono text-[8px] uppercase tracking-[0.26em] text-ink/60">
+                      {item.k}
+                    </dt>
+                    <dd className="mt-1.5 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-ink/75">
+                      {item.v}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+
+              <div className="mt-10 border-t border-[var(--rule)] pt-6">
+                <p className="font-mono text-[8.5px] uppercase tracking-[0.28em] text-ink/60">
+                  Follow
+                </p>
+                <div className="mt-4 flex flex-col">
+                  {site.socials.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center justify-between border-b border-[var(--rule-soft)] py-3 text-sm text-ink/70 transition-colors hover:text-rust"
+                    >
+                      <span>{social.label}</span>
+                      <span
+                        aria-hidden
+                        className="text-ink/30 transition-all group-hover:translate-x-0.5 group-hover:text-rust"
+                      >
+                        ↗
+                      </span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <p className="mt-8 font-mono text-[8px] uppercase leading-relaxed tracking-[0.24em] text-ink/70">
+                Occasions — private dinners · hotel residencies · weddings ·
+                brand evenings · festivals
+              </p>
+            </div>
+          </aside>
+        </div>
       </div>
     </section>
   );

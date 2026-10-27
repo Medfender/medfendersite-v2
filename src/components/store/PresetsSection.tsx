@@ -2,27 +2,42 @@
 
 import React from "react";
 import { packs } from "@/data/storeData";
-import PresetCard from "./PresetCard";
 import type { PackData } from "@/data/storeData";
+import PresetCard from "./PresetCard";
+import Reveal from "@/components/luxury/Reveal";
+import SectionHeading from "@/components/luxury/SectionHeading";
 
 export default function PresetsSection() {
   const presets = packs as PackData[];
 
   return (
-    <section className="w-full max-w-6xl mx-auto px-6 py-20">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4 drop-shadow-[0_0_20px_rgba(0,216,246,0.3)]">
-          Digital Preset Packs & Captures
-        </h2>
-        <p className="text-neutral-400 text-base md:text-lg max-w-2xl mx-auto">
-          Hand-tuned presets for TONEX, HX Stomp, and studio captures. Preview the demo, then grab your pack.
-        </p>
-      </div>
+    <section className="surface-paper bg-paper">
+      <div className="mx-auto w-full max-w-[1560px] px-5 py-20 md:px-8 md:py-28">
+        <SectionHeading
+          index="01"
+          eyebrow="Catalogue"
+          title={
+            <>
+              Every capture,
+              <br />
+              <em className="italic text-rust">in print.</em>
+            </>
+          }
+          intro="Profiles and presets built from real amplifiers, real cabinets and real rooms. Each pack ships with its signal chain documented, so the sound survives the trip to your rig."
+          action={
+            <p className="font-mono text-[9px] uppercase tracking-[0.26em] text-ink/60">
+              {presets.length} releases · instant download
+            </p>
+          }
+        />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {presets.map((preset) => (
-          <PresetCard key={preset.id} preset={preset} />
-        ))}
+        <div className="mt-14 grid grid-cols-1 gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {presets.map((preset, i) => (
+            <Reveal key={preset.id} delay={(i % 4) * 0.04}>
+              <PresetCard preset={preset} index={i} />
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
   );

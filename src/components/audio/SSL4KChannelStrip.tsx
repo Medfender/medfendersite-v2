@@ -320,8 +320,8 @@ export default function SSL4KChannelStrip() {
             <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Channel Strip</span>
           </div>
           <div className="text-right">
-            <span className="text-[9px] font-mono text-cyan-400/70 tracking-wider">CH 1</span>
-            <div className="w-1 h-1 rounded-full bg-cyan-400/40 mt-0.5 mx-auto shadow-[0_0_4px_rgba(0,216,246,0.4)]" />
+            <span className="text-[9px] font-mono text-brass/70 tracking-wider">CH 1</span>
+            <div className="w-1 h-1 rounded-full bg-brass/40 mt-0.5 mx-auto shadow-[0_0_4px_rgba(223,161,74,0.4)]" />
           </div>
         </div>
       </div>

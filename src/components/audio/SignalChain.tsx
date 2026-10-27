@@ -126,7 +126,7 @@ export default function SignalChain() {
               fontFamily: "'Courier Prime', monospace",
               fontSize: "clamp(9px, 1.2vw, 11px)",
               letterSpacing: "0.4em",
-              color: "#00d8f6",
+              color: "#D0C0A6",
               textTransform: "uppercase",
               fontWeight: 700,
             }}
@@ -170,7 +170,7 @@ export default function SignalChain() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: node.active ? "#00d8f6" : "#5a4a30",
+                      color: node.active ? "#D0C0A6" : "#a99e8c",
                       boxShadow: node.active
                         ? "0 0 16px rgba(201,168,76,0.2), inset 0 1px 0 rgba(255,255,255,0.05)"
                         : "inset 0 2px 8px rgba(0,0,0,0.5)",
@@ -205,7 +205,7 @@ export default function SignalChain() {
                         letterSpacing: "0.15em",
                         textTransform: "uppercase",
                         fontWeight: node.active ? 700 : 400,
-                        color: node.active ? "#00d8f6" : "#5a4a30",
+                        color: node.active ? "#D0C0A6" : "#a99e8c",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -219,7 +219,7 @@ export default function SignalChain() {
                         fontSize: "clamp(7px, 0.9vw, 8px)",
                         letterSpacing: "0.12em",
                         textTransform: "uppercase",
-                        color: "#5a4a30",
+                        color: "#a99e8c",
                         marginTop: "1px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -299,7 +299,7 @@ export default function SignalChain() {
             fontSize: "clamp(8px, 1vw, 9px)",
             letterSpacing: "0.2em",
             textTransform: "uppercase",
-            color: "#5a4a30",
+            color: "#a99e8c",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -308,7 +308,7 @@ export default function SignalChain() {
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
-                background: isPlaying ? "#ff8c00" : "#5a4a30",
+                background: isPlaying ? "#ff8c00" : "#a99e8c",
                 boxShadow: isPlaying ? "0 0 6px rgba(255,140,0,0.6)" : "none",
                 display: "inline-block",
               }}
@@ -322,7 +322,7 @@ export default function SignalChain() {
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
-                background: "#00d8f6",
+                background: "#D0C0A6",
                 opacity: "0.5",
                 display: "inline-block",
               }}
@@ -336,7 +336,7 @@ export default function SignalChain() {
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
-                background: "#00d8f6",
+                background: "#D0C0A6",
                 opacity: "0.5",
                 display: "inline-block",
               }}

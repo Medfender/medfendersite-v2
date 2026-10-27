@@ -78,10 +78,10 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
         {/* Hardware badge */}
         <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono uppercase tracking-wider mb-2 border ${
           patch.accent === "cyan"
-            ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20 ring-1 ring-cyan-500/30"
+            ? "bg-brass/10 text-brass border-brass/20 ring-1 ring-brass/30"
             : "bg-amber-500/10 text-amber-400 border-amber-500/20 ring-1 ring-amber-500/30"
         }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${patch.accent === "cyan" ? "bg-cyan-400 shadow-[0_0_6px_rgba(0,216,246,0.6)]" : "bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.6)]"}`} />
+          <span className={`w-1.5 h-1.5 rounded-full ${patch.accent === "cyan" ? "bg-brass shadow-[0_0_6px_rgba(223,161,74,0.6)]" : "bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.6)]"}`} />
           <span className="font-bold">{patch.hardware}</span>
           <span className="text-[9px] opacity-70">{patch.file}</span>
         </div>
@@ -99,7 +99,7 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
           <span className="text-[10px] font-mono text-neutral-500">{patch.file}</span>
           <button
             onClick={(e) => { e.stopPropagation(); alert(`Download ${patch.file}`); }}
-            className="flex items-center gap-1 text-[10px] font-medium text-cyan-400 hover:text-white transition"
+            className="flex items-center gap-1 text-[10px] font-medium text-brass hover:text-white transition"
             aria-label={`Download ${patch.title}`}
           >
             <Download size={12} /> Download Patch
@@ -117,7 +117,7 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
           aria-label={`Preview ${patch.title}`}
         >
           <div
-            className="relative max-w-md w-full rounded-2xl bg-neutral-900/95 border border-white/[0.10] shadow-[0_0_60px_rgba(0,216,246,0.15)] p-6"
+            className="relative max-w-md w-full rounded-2xl bg-neutral-900/95 border border-white/[0.10] shadow-[0_0_60px_rgba(223,161,74,0.15)] p-6"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Amp-style close — square with thick stroke like amp power */}
@@ -140,9 +140,9 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
 
             <h3 className="text-lg font-bold text-white mb-1">{patch.title}</h3>
             <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono uppercase tracking-wider mb-3 border ${
-              patch.accent === "cyan" ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+              patch.accent === "cyan" ? "bg-brass/10 text-brass border-brass/20" : "bg-amber-500/10 text-amber-400 border-amber-500/20"
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${patch.accent === "cyan" ? "bg-cyan-400" : "bg-amber-400"}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${patch.accent === "cyan" ? "bg-brass" : "bg-amber-400"}`} />
               <span className="font-bold">{patch.hardware}</span>
             </div>
 
@@ -156,7 +156,7 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
             <div className="flex items-center gap-2">
               <button
                 onClick={(e) => { e.stopPropagation(); alert(`Download ${patch.file}`); }}
-                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/20 transition"
+                className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-brass/10 border border-brass/30 text-brass-light text-xs font-semibold hover:bg-brass/20 transition"
               >
                 <Download size={14} /> Download {patch.file}
               </button>
@@ -170,9 +170,9 @@ function PatchCard({ patch, onAudition }: { patch: typeof PATCHES[0]; onAudition
 
 export default function PatchBrowser({ onAudition }: PatchBrowserProps) {
   return (
-    <div className="rounded-3xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 p-5 sm:p-6 shadow-[0_0_30px_rgba(0,216,246,0.08)]">
+    <div className="rounded-3xl bg-neutral-900/60 backdrop-blur-xl border border-white/10 p-5 sm:p-6 shadow-[0_0_30px_rgba(223,161,74,0.08)]">
       <div className="flex items-center gap-2 mb-4">
-        <Waves className="text-cyan-400" size={18} />
+        <Waves className="text-brass" size={18} />
         <h2 className="text-sm font-bold tracking-widest uppercase text-neutral-100">Preset & Patch Browser</h2>
         <span className="text-[10px] font-mono text-neutral-500">4 patches</span>
       </div>

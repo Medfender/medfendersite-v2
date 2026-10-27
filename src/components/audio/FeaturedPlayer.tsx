@@ -57,7 +57,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
     const emptyMsg = "No audio — add files to /public/audio/featured";
     return (
       <div
-        className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-zinc-900 backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
+        className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-white/[0.06] backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
           isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
         }`}
       >
@@ -65,7 +65,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
           <span className="text-xs text-neutral-500 font-mono">{emptyMsg}</span>
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="text-xs text-cyan-400 hover:text-white transition shrink-0"
+            className="text-xs text-brass hover:text-white transition shrink-0"
           >
             ↑ Top
           </button>
@@ -76,7 +76,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-zinc-900 backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
+      className={`fixed bottom-0 left-0 right-0 bg-neutral-950/90 border-t border-white/[0.06] backdrop-blur-xl text-white z-50 transition-all duration-500 ease-in-out ${
         isSectionInView ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-8 pointer-events-none"
       }`}
     >
@@ -89,7 +89,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             <button
               onClick={playPrevious}
               aria-label="Previous track"
-              className="text-zinc-500 hover:text-zinc-200 p-1 transition-colors active:scale-95"
+              className="text-cream/55 hover:text-zinc-200 p-1 transition-colors active:scale-95"
             >
               <SkipBack size={13} strokeWidth={1.2} />
             </button>
@@ -113,7 +113,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             <button
               onClick={playNext}
               aria-label="Next track"
-              className="text-zinc-500 hover:text-zinc-200 p-1 transition-colors active:scale-95"
+              className="text-cream/55 hover:text-zinc-200 p-1 transition-colors active:scale-95"
             >
               <SkipForward size={13} strokeWidth={1.2} />
             </button>
@@ -142,7 +142,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             max={duration || 100}
             value={currentTime || 0}
             onChange={(e) => seek(Number(e.target.value))}
-            className="w-full accent-cyan-400 cursor-pointer h-1 bg-neutral-700 rounded-lg appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)]"
+            className="w-full accent-brass cursor-pointer h-1 bg-neutral-700 rounded-lg appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brass [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(223,161,74,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brass [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(223,161,74,0.6)]"
             aria-label="Seek"
           />
           <span className="text-[10px] font-mono text-neutral-500 shrink-0 tabular-nums">
@@ -158,7 +158,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             <button
               onClick={toggleMute}
               aria-label={isMuted ? "Unmute" : "Mute"}
-              className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
+              className="w-7 h-7 flex items-center justify-center text-cream/55 hover:text-zinc-200 transition-colors shrink-0"
               title={isMuted ? "Unmute" : "Mute"}
             >
               {isMuted ? <VolumeX size={13} strokeWidth={1.25} /> : <Volume2 size={13} strokeWidth={1.25} />}
@@ -167,7 +167,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
               type="range" min="0" max="1" step="0.01"
               value={volume}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-16 md:w-20 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-cyan-400 shrink-0 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cyan-400 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cyan-400 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(0,216,246,0.6)]"
+              className="w-16 md:w-20 h-1 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-brass shrink-0 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brass [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(223,161,74,0.6)] [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brass [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(223,161,74,0.6)]"
               aria-label="Volume"
             />
           </div>
@@ -177,7 +177,7 @@ export default function FeaturedPlayer({ isSectionInView }: FeaturedPlayerProps)
             onClick={stopPlayback}
             title="Stop"
             aria-label="Stop"
-            className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
+            className="w-7 h-7 flex items-center justify-center text-cream/55 hover:text-zinc-200 transition-colors shrink-0"
           >
             <Square size={12} strokeWidth={1.25} />
           </button>

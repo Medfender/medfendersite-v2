@@ -1,920 +1,626 @@
-'use client';
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { site } from "@/lib/site";
+import { packs } from "@/data/storeData";
+import { parseChord } from "@/lib/theory/chords";
+import { intervalLabel, solveVoicing } from "@/lib/theory/fretboard";
+import Reveal from "@/components/luxury/Reveal";
+import SectionHeading from "@/components/luxury/SectionHeading";
+import BookingBand from "@/components/luxury/BookingBand";
+import Marquee from "@/components/luxury/Marquee";
+import PackCover from "@/components/store/PackCover";
+import ServicesShowcase from "@/components/luxury/ServicesShowcase";
+import FormationsShowcase from "@/components/luxury/FormationsShowcase";
+import HeroPlate from "@/components/hero/HeroPlate";
+import NeckMap from "@/components/neck/NeckMap";
+import type { NeckNote } from "@/components/neck/NeckMap";
 
-import Link from 'next/link';
-import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
-
-/* ════════════════════════════════════════════════════
-   COPY & ASSETS
-═══════════════════════════════════════════════════ */
-/* ════════════════════════════════════════════════════
-   MARQUEE DATA
-═══════════════════════════════════════════════════ */
-const marqueeItems = [
-  { label: 'TONEX CAPTURES', href: '/store/tonex', accent: 'NEW' },
-  { label: 'HX STOMP XL PRESETS', href: '/store/hx-stomp', accent: null },
-  { label: 'HYBRID GNAWA FUSION', href: '/store/gnawa', accent: null },
-  { label: 'CUSTOM IMPULSE RESPONSES', href: '/store/irs', accent: 'NEW' },
-  { label: 'AMP PROFILES', href: '/store/profiles', accent: null },
-  { label: 'STOMP RIGS', href: '/store/stomps', accent: null },
-  { label: 'STUDIO SESSIONS', href: '/store/sessions', accent: 'NEW' },
-];
-
-const MARQUEE_TEXT = 'TONEX CAPTURES • HX STOMP XL PRESETS • HYBRID GNAWA FUSION • CUSTOM IMPULSE RESPONSES •';
-
-const HERO_IMG = '/images/gallery/hero-cropped.jpg';
-
-const PHILOSOPHY_IMGS = [
-  'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1400&q=80',
-  'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&w=1400&q=80',
-];
-
-/* ════════════════════════════════════════════════════
-   FRAMER MOTION — staggered mask-reveal variants
-═══════════════════════════════════════════════════ */
-const wordVariant: any = {
-  hidden: { y: '110%', opacity: 0 },
-  visible: (i: number) => ({
-    y: '0%',
-    opacity: 1,
-    transition: {
-      delay: i * 0.12,
-      duration: 0.9,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
+export const metadata: Metadata = {
+  title: "Medfender — Guitarist, Composer & Live Act · Marrakech",
+  description: site.description,
+  alternates: { canonical: "/" },
 };
 
-const fadeUp: any = {
-  hidden: { opacity: 0, y: 32 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: 0.4 + i * 0.15,
-      duration: 0.7,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  }),
-};
+const pillars = [
+  {
+    number: "I",
+    title: "Gnawa rhythm",
+    body: "The qarqaba pulse and the guembri's loop, translated to strings. Hypnotic, cyclical and patient — the oldest layer of the sound.",
+    position: "5",
+  },
+  {
+    number: "II",
+    title: "Texas blues",
+    body: "Bold attack, glassy cleans, a midrange that bites. The roadhouse language: honest, overdriven, and never rushed.",
+    position: "7",
+  },
+  {
+    number: "III",
+    title: "Cinematic rock",
+    body: "Long reverb tails, wide dynamics and space between the notes. Music that behaves like a score for the room it is in.",
+    position: "9",
+  },
+];
 
-/* ════════════════════════════════════════════════════
-   MARQUEE COMPONENT
-═══════════════════════════════════════════════════ */
-function Marquee() {
-  const doubleItems = [...marqueeItems, ...marqueeItems];
+const frames = [
+  { src: "/images/site/thumb/IMG_7746.webp", title: "So Lounge — stage left", tag: "Live" },
+  { src: "/images/site/thumb/IMG_7748.webp", title: "Low angle, second set", tag: "Live" },
+  { src: "/images/site/thumb/Me-Guitar-3.webp", title: "Portrait with the Strat", tag: "Studio" },
+  { src: "/images/site/thumb/IMG_7747.webp", title: "Pedalboard, after soundcheck", tag: "Gear" },
+];
 
-  return (
-    <div className="relative w-full overflow-hidden border-y border-zinc-900 py-6 bg-[#050505] group">
-      {/* Edge fades for cinematic entry/exit */}
-      <div className="pointer-events-none absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10" />
-      <div className="pointer-events-none absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10" />
+const featuredSlugs = [
+  "gnawa-blues-deluxe",
+  "srv-ultimate-amp-capture-pack",
+  "the-synth-board-hx-stomp-exclusive",
+];
 
-      <style jsx>{`
-        @keyframes marquee-scroll {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track {
-          animation: marquee-scroll 18s linear infinite;
-          will-change: transform;
-        }
-        .group:hover .marquee-track {
-          animation-play-state: paused;
-        }
-      `}</style>
+const atlasChord = parseChord("Cmaj7");
+const atlasShape = solveVoicing(atlasChord, { maxFret: 12 });
+const atlasNotes: NeckNote[] =
+  atlasShape?.positions.map((position) => ({
+    string: position.string,
+    fret: position.fret,
+    label: intervalLabel(position.interval),
+    name: position.name,
+    role: position.role,
+    active: true,
+  })) ?? [];
 
-      <div className="marquee-track flex items-center whitespace-nowrap w-max">
-        {doubleItems.map((item, i) => (
-          <span key={i} className="flex items-center shrink-0">
-            {item.accent && (
-              <span
-                className={[
-                  "mr-3 px-2 py-0.5 text-[0.55rem] font-black uppercase tracking-widest",
-                  item.accent === 'NEW'
-                    ? "bg-[#E5A93C] text-black"
-                    : "border border-zinc-700 text-zinc-500"
-                ].join(" ")}
-              >
-                {item.accent}
-              </span>
-            )}
-            <Link
-              href={item.href}
-              className="text-[0.85rem] font-black uppercase tracking-[0.2em] text-zinc-400 hover:text-[#E5A93C] transition-colors duration-200"
-            >
-              {item.label}
-            </Link>
-            {/* Vertical separator */}
-            <span className="mx-8 w-px h-4 bg-zinc-800 shrink-0" aria-hidden="true" />
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ════════════════════════════════════════════════════
-   HERO SECTION — staggered mask-reveal + parallax img
-═══════════════════════════════════════════════════ */
-function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end start'],
-  });
-
-  // Parallax disabled to preserve natural image framing at scroll=0
-  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '0%']);
+export default function HomePage() {
+  const featured = featuredSlugs
+    .map((slug) => packs.find((pack) => pack.slug === slug))
+    .filter((pack): pack is (typeof packs)[number] => Boolean(pack));
 
   return (
-    <section ref={ref} className="relative w-full overflow-hidden bg-[#050505] pt-0 mt-0 mb-0 pb-0">
-      {/* Natural hero image — full width, no forced crop */}
-      <div className="relative w-full mb-0 pb-0 h-auto">
-        <img
-          src={HERO_IMG}
-          alt="Medfender sound architecture stage"
-          className="w-full h-auto block"
+    <main id="top" className="flex flex-col">
+      {/* ── Fret 0 · The room ────────────────────────────────────────── */}
+      <section className="surface-ink relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden bg-ink-deep">
+        <HeroPlate
+          src="/images/site/hero-stage.webp"
+          alt="Medfender performing with the band at So Lounge, Marrakech"
         />
-        {/* Top gradient fade overlay */}
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/90 via-black/40 to-transparent pointer-events-none z-10" />
-        {/* Top gradient removed — image renders fully clear */}
-      </div>
 
-      {/* Marquee preset string flush to hero image bottom */}
+        {/* Navbar legibility at the top, type legibility at the base */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(11,11,10,0.62) 0%, rgba(11,11,10,0.04) 26%, rgba(11,11,10,0.10) 46%, rgba(11,11,10,0.62) 76%, rgba(11,11,10,0.94) 100%)",
+          }}
+        />
+        {/* The band emerges from the room; the type sits in it. */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(94deg, rgba(11,11,10,0.72) 0%, rgba(11,11,10,0.26) 34%, rgba(11,11,10,0) 62%, rgba(11,11,10,0.22) 100%)",
+          }}
+        />
 
-    </section>
-  );
-}
-
-import { useCart } from '@/lib/CartContext';
-import { packs } from '@/data/storeData';
-
-/* ════════════════════════════════════════════════════
-   PRESET CARD — compact audio preview card
-═══════════════════════════════════════════════════ */
-interface Preset {
-  id: string;
-  title: string;
-  genre: string;
-  price: string;
-  href: string;
-  img?: string;
-  tracks?: { id: string; title: string; duration: string }[];
-}
-
-const presets: Preset[] = [
-  {
-    id: 'gnawa-blues-deluxe',
-    title: 'GNAWA BLUES DELUXE',
-    genre: 'Blues / Fusion',
-    price: '$29',
-    href: '/store/gnawa-blues-deluxe',
-    img: 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=200&q=80',
-    tracks: [
-      { id: '001', title: 'GNAWA LEAD & FUSION CLEAN', duration: '1:48' },
-      { id: '002', title: 'TUBE CRUNCH RHYTHM DEMO', duration: '2:15' },
-      { id: '003', title: 'SOLO BOOST & REVERB CAB', duration: '1:32' },
-    ],
-  },
-  {
-    id: 'tube-crunch-studio',
-    title: 'TUBE CRUNCH STUDIO',
-    genre: 'Rock / Crunch',
-    price: '$24',
-    href: '/store/tube-crunch-studio',
-    img: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=200&q=80',
-    tracks: [
-      { id: '001', title: 'HEAVY CRUNCH RHYTHM BREAK', duration: '1:55' },
-      { id: '002', title: 'CLEAN TWIN ROLL', duration: '2:05' },
-      { id: '003', title: 'STAGE REVERB SWELL', duration: '1:42' },
-    ],
-  },
-];
-
-function PlayIcon() {
-  return (
-    <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M3 2.5v11l10-5.5L3 2.5z" />
-    </svg>
-  );
-}
-
-function StopIcon() {
-  return (
-    <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
-      <rect x="2" y="2" width="8" height="8" rx="1" />
-    </svg>
-  );
-}
-
-function PresetCard({ preset, isLastAdded, onPresetSelect }: { preset: Preset; isLastAdded?: boolean; onPresetSelect?: (p: any) => void }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [showAdded, setShowAdded] = useState(false);
-  const { addToCart } = useCart();
-
-  // Map preset to closest PackData for cart integration
-  const packForCart = packs.find(
-    (pk) => pk.title === preset.title || pk.slug.includes(preset.title.toLowerCase().replace(/\s+/g, '-'))
-  ) || {
-    id: preset.href,
-    slug: preset.href,
-    title: preset.title,
-    price: parseFloat(preset.price.replace('$', '')) || 0,
-    badge: preset.genre,
-    type: 'TONEX' as const,
-    description: preset.title,
-    toneModels: [],
-    tones: [],
-  } as any;
-
-  return (
-    <div className="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-3 w-full flex flex-col">
-      {/* Thumbnail + info row */}
-      <div className="flex gap-3 items-start">
-        <div className="w-16 h-16 shrink-0 rounded-md bg-zinc-800 border border-zinc-700 overflow-hidden">
-          <img
-            src={preset.img || '/images/gallery/hero-cropped.jpg'}
-            alt={preset.title}
-            className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-300"
-          />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-black uppercase tracking-tight text-white leading-tight truncate">
-            {preset.title}
-          </p>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-[0.55rem] font-medium text-zinc-400 uppercase tracking-wider">{preset.genre}</span>
-          </div>
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-sm font-black text-[#E5A93C]">{preset.price}</p>
-            <button
-              onClick={() => {
-                addToCart(packForCart);
-                setShowAdded(true);
-                setTimeout(() => setShowAdded(false), 2000);
-              }}
-              className="text-[0.55rem] font-black uppercase tracking-widest bg-[#E5A93C] hover:bg-[#d4942e] text-black px-2.5 py-0.5 rounded-md border border-[#E5A93C]/30 hover:border-[#E5A93C]/60 transition-all duration-200 shadow-[0_0_6px_rgba(229,169,60,0.15)] hover:shadow-[0_0_10px_rgba(229,169,60,0.35)]"
-            >
-              {showAdded ? 'ADDED ✓' : 'ADD'}
-            </button>
-            {isLastAdded && (
-              <Link
-                href="/checkout"
-                aria-label="Checkout"
-                className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700/50 hover:border-zinc-600 text-[#00d8f6] hover:text-[#00d8f6]/90 transition-colors duration-200"
-              >
-                <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="5" cy="12" r="1.5" />
-                  <circle cx="11" cy="12" r="1.5" />
-                  <path d="M2 2h2.5l1.5 7h7l1.5-3H5.5" />
-                </svg>
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mini-player */}
-      <button
-        onClick={() => onPresetSelect?.(preset)}
-        className="flex items-center justify-between w-full bg-zinc-900/50 p-2 rounded-lg mt-3 border border-zinc-700/30 hover:border-zinc-600/50 transition-colors duration-200"
-      >
-        <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-300">
-          {isPlaying ? 'STOP PREVIEW' : 'PLAY PREVIEW'}
-        </span>
-        {isPlaying ? <StopIcon /> : <PlayIcon />}
-      </button>
-
-      {/* Bottom action buttons */}
-      <div className="flex gap-2 w-full mt-auto pt-3">
-        <Link
-          href="/store"
-          className="group/explore flex-1 relative inline-flex items-center justify-center gap-1.5 py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-zinc-800/60 hover:bg-zinc-700/60 border border-zinc-700/50 text-zinc-300 rounded-lg transition-all duration-200 overflow-hidden"
+        {/* Vertical folio */}
+        <p
+          aria-hidden
+          className="absolute right-6 top-1/2 hidden -translate-y-1/2 rotate-90 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.36em] text-cream/60 lg:block"
         >
-          <span className="relative z-10">EXPLORE</span>
-          <svg className="relative z-10 w-3 h-3 transition-transform duration-200 group-hover/explore:translate-x-0.5" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 6h8M7 3l3 3-3 3" />
-          </svg>
-          <span className="absolute inset-0 -translate-x-full group-hover/explore:translate-x-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent transition-transform duration-500" />
-        </Link>
-        <Link
-          href={`${preset.href}#details`}
-          className="group/details flex-1 relative inline-flex items-center justify-center gap-1.5 py-1.5 text-[0.6rem] font-black uppercase tracking-widest bg-[#00d8f6]/10 hover:bg-[#00d8f6]/20 border border-[#00d8f6]/30 text-[#00d8f6] rounded-lg transition-all duration-200 overflow-hidden"
-        >
-          <span className="relative z-10">DETAILS</span>
-          <span className="absolute inset-0 bg-[#00d8f6]/0 group-hover/details:bg-[#00d8f6]/5 transition-colors duration-200" />
-        </Link>
-      </div>
-    </div>
-  );
-}
+          The instrument · Marrakech
+        </p>
 
-/* ════════════════════════════════════════════════════
-   SOUND PHILOSOPHY — sticky left + scrollable right
-═══════════════════════════════════════════════════ */
-const cards = [
-  {
-    num: '01',
-    title: 'The Setup',
-    body:
-      'Integrating the organic feel of analog gear with the precision of digital processors. Every preset begins with a real signal chain — genuine tube preamps, real outboard, physical cab IRs — then distilled into a HX Stomp or TONEX capture that feels indistinguishable from the source.',
-    img: PHILOSOPHY_IMGS[0],
-  },
-  {
-    num: '02',
-    title: 'The Tone',
-    body:
-      'Blues, rock, fusion, and Gnawa fusion architecture. We build for how a guitarist actually plays — not how a chart measures. Touch sensitivity, note bloom, harmonic feedback at stage volume. Tone that responds to your hands, not just your fingers.',
-    img: PHILOSOPHY_IMGS[1],
-  },
-  {
-    num: '03',
-    title: ' The Craft',
-    body:
-      'Precision audio engineering backed by stem separation, multi-band analysis, and gain-staging at 96kHz / 24-bit. Every impulse response and capture is verified against the original before release. We don\'t ship until the comparison is airtight.',
-    img: PHILOSOPHY_IMGS[2],
-  },
-  {
-    num: '04',
-    title: 'The Stage',
-    body: 'Translating studio-grade tone to the live environment. Whether it is an intimate solo arrangement or a high-energy Gnawa fusion trio, the digital architecture is built to cut through the mix, adapt to any venue, and command the room.',
-    img: '/images/gallery/So Lounge.JPG',
-  },
-];
+        <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-10 pt-40 md:px-8 md:pb-12">
+          <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:gap-12">
+            <div className="lg:col-span-8">
+              <div className="flex items-center gap-4">
+                <span className="fret-index" data-inlay="false">
+                  0
+                </span>
+                <span className="eyebrow-on-ink">
+                  Live band · Composer · Marrakech
+                </span>
+                <span aria-hidden className="h-px w-16 bg-cream/25 md:w-28" />
+              </div>
 
-function SoundPhilosophy({ onPresetSelect }: { onPresetSelect: (preset: any) => void }) {
-  const scrollRef = useRef(null);
-  const isInView = useInView(scrollRef, { once: true, margin: "0px 0px -20% 0px" });
-  const { itemCount, cartItems } = useCart();
-  const [showNotif, setShowNotif] = useState(false);
-  const prevCount = useRef(itemCount);
+              <h1 className="display-hero mt-8 text-cream">
+                Gnawa soul.
+                <br />
+                <em className="italic text-brass">Electric blues.</em>
+              </h1>
 
-  // Show notification when cart gains an item, auto-hide after 2.5s
-  useEffect(() => {
-    if (itemCount > prevCount.current) {
-      setShowNotif(true);
-      const t = setTimeout(() => setShowNotif(false), 2500);
-      return () => clearTimeout(t);
-    }
-    prevCount.current = itemCount;
-  }, [itemCount]);
-
-  // Determine which preset was last added to cart
-  const lastAddedId = cartItems.length > 0 ? cartItems[cartItems.length - 1].pack.id : null;
-
-  return (
-    <section className="relative bg-[#050505] border-t-0 border-zinc-900 pt-0 pb-24 mt-0">
-      {/* Sticky + scrollable layout */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 px-6 py-24">
-        {/* Left: outer grid cell — stretches full height */}
-        <div className="lg:col-span-5 relative h-full">
-          {/* Inner sticky wrapper */}
-          <div className="sticky top-24 space-y-6">
-            <p className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-[#E5A93C] mb-4">
-              SOUND PHILOSOPHY
-            </p>
-            <h2 className="text-4xl md:text-5xl font-black tracking-[-0.02em] leading-[1.05] text-white uppercase">
-              Built on trust.
-              <br />
-              Driven by tone.
-            </h2>
-            <div className="mt-10 flex flex-col gap-3">
-              {cards.map((c) => (
-                <div key={c.num} className="flex items-center gap-4 text-zinc-400">
-                  <span className="text-[0.55rem] font-black tracking-widest">{c.num}</span>
-                  <div className="h-px flex-1 bg-zinc-900" />
-                  <span className="text-[0.6rem] font-black uppercase tracking-widest text-zinc-400">
-                    {c.title}
-                  </span>
-                </div>
-              ))}
-            </div>
-            {/* Notification banner — cart confirmation */}
-            <div
-              className={`mb-3 flex items-center gap-2 bg-zinc-900/80 border border-zinc-800 rounded-lg px-3 py-2.5 transition-all duration-300 ${
-                showNotif ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none'
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E5A93C] animate-pulse" />
-              <p className="text-[0.65rem] font-black uppercase tracking-widest text-zinc-300">
-                Added to your cart — <span className="text-[#E5A93C]">presets ready for checkout</span>
+              <p className="mt-8 max-w-xl text-sm leading-relaxed text-cream/70 md:text-base">
+                A band built for the room — from an intimate trio to fifteen
+                musicians with Gnaoua and brass sections. Private dinners, hotel
+                residencies, weddings and festivals across Morocco and abroad.
               </p>
+
+              <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
+                <Link href="/contact#booking" className="btn btn-brass">
+                  Request availability
+                  <span aria-hidden>→</span>
+                </Link>
+                <Link href="/audio" className="link-rule-light">
+                  Hear the room
+                  <span aria-hidden>↗</span>
+                </Link>
+                <Link href="/fretboard" className="link-rule-light">
+                  Play the atlas
+                  <span aria-hidden>→</span>
+                </Link>
+              </div>
             </div>
 
-            {/* Two preset cards — below index list */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-              {presets.map((p) => (
-                <PresetCard
-                  key={p.id}
-                  preset={p}
-                  isLastAdded={!!(p.id === lastAddedId || (lastAddedId && p.href.includes(lastAddedId)))}
-                  onPresetSelect={onPresetSelect}
-                />
-              ))}
+            <div className="lg:col-span-4 lg:pb-2">
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-cream/20 pt-6">
+                {[
+                  { k: "Instrument", v: "Guitar · Composition" },
+                  { k: "Roster", v: "Trio → 15 players" },
+                  { k: "Territory", v: "Morocco & abroad" },
+                  { k: "Reply", v: "Within 48 hours" },
+                ].map((item) => (
+                  <div key={item.k}>
+                    <dt className="font-mono text-[9px] uppercase tracking-[0.26em] text-cream/60">
+                      {item.k}
+                    </dt>
+                    <dd className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-cream/85">
+                      {item.v}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Right: scrollable cards */}
-        <div ref={scrollRef} className="lg:col-span-7 space-y-24">
-          {cards.map((card, i) => (
-            <motion.div
-              key={card.num}
-              className="group flex gap-8 items-start min-h-[200px] pt-0 mt-0"
-              initial={false}
-              animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: 60, y: 40 }}
-              transition={{
-                duration: 0.7,
-                delay: i * 0.15,
-                ease: [0.21, 0.47, 0.32, 0.98],
-              }}
-            >
-              {/* Card text side */}
-              <div className="flex-1 pt-2">
-                <div className="flex items-center gap-4 mb-5">
-                  <span className="text-[0.55rem] font-black tracking-widest text-[#E5A93C]">
-                    {card.num}
-                  </span>
-                  <div className="h-px flex-1 border-t border-zinc-900" />
-                </div>
-                <h3 className="text-2xl font-black tracking-tight text-white mb-4">
-                  {card.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-zinc-500 max-w-lg">{card.body}</p>
+      {/* ── The signature: the instrument, drawn ─────────────────────── */}
+      <section className="surface-paper relative border-b border-[var(--rule)] bg-paper py-16 md:py-24">
+        <div className="mx-auto w-full max-w-[1560px] px-5 md:px-8">
+          <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <Reveal className="max-w-2xl">
+              <div className="mb-5 flex items-center gap-4">
+                <span className="fret-index" data-inlay="true">
+                  12
+                </span>
+                <span className="eyebrow">The instrument, drawn</span>
+                <span aria-hidden className="h-px w-16 bg-[var(--rule)] md:w-24" />
               </div>
+              <h2 className="display-lg text-ink text-balance">
+                Every note is a position.
+                <br />
+                <em className="italic text-rust">Every position is a choice.</em>
+              </h2>
+              <p className="mt-6 max-w-xl text-sm leading-relaxed text-ink/65 md:text-base">
+                The fretboard on this site is not a picture of a guitar. It is
+                the guitar&apos;s actual geometry — fret wires placed by the
+                two-to-the-twelfth law, strings gauged low to high, inlays where
+                the maker puts them. The shapes come from the Beato Book&apos;s
+                printed drop voicings, moved along the neck and judged by how
+                little the hand has to move.
+              </p>
+            </Reveal>
 
-              {/* Card image side */}
-              <div className="w-64 shrink-0">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950">
-                  <img
-                    src={card.img}
-                    alt={card.title}
-                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/30 to-transparent" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════
-   FOOTER — premium audio-studio footer (glass + cyan/gold)
-═══════════════════════════════════════════════════ */
-function Footer() {
-  return (
-    <footer className="relative w-full overflow-hidden bg-[#0b0f19] text-white">
-      {/* Top hairline + glow */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00d8f6]/40 to-transparent" />
-      <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#00d8f6]/[0.08] rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 pt-20 pb-10">
-        {/* Main grid: brand + nav + newsletter */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-8">
-          {/* Brand column */}
-          <div className="md:col-span-4 space-y-6">
-            <Link href="/" className="inline-block group">
-              <span className="block text-3xl font-black tracking-tighter uppercase leading-none text-white group-hover:text-[#00d8f6] transition-colors duration-300">
-                Medfender
-              </span>
-              <span className="block text-[0.65rem] font-black uppercase tracking-[0.35em] text-zinc-500 mt-2 group-hover:text-[#E5A93C] transition-colors duration-300">
-                Sound Architecture
-              </span>
-            </Link>
-            <p className="text-sm leading-relaxed text-zinc-400 max-w-xs">
-              Analog precision meets digital architecture. Presets, impulse captures, and live session tone — engineered for the stage.
-            </p>
-            <div className="flex items-center gap-3 pt-2">
-              {[
-                { label: 'Instagram', href: 'https://www.instagram.com/medfender', icon: 'instagram' },
-                { label: 'YouTube', href: 'https://www.youtube.com/@medfenderchannel7634', icon: 'youtube' },
-                { label: 'SoundCloud', href: 'https://soundcloud.com/med-hamza-798230889', icon: 'soundcloud' },
-              ].map((s) => (
-                <Link
-                  key={s.label}
-                  href={s.href}
-                  aria-label={s.label}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full border border-zinc-800 bg-zinc-900/40 flex items-center justify-center text-zinc-400 hover:text-[#00d8f6] hover:border-[#00d8f6]/50 hover:bg-[#00d8f6]/5 transition-all duration-200"
-                  title={s.label}
-                >
-                  {s.icon === 'instagram' && (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/></svg>
-                  )}
-                  {s.icon === 'youtube' && (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75,15.02 15.5,11.75 9.75,8.48" fill="currentColor" stroke="none"/></svg>
-                  )}
-                  {s.icon === 'soundcloud' && (
-                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 8.5a6.5 6.5 0 0 1 6.5 0v7a6.5 6.5 0 0 1-6.5 0v-7z"/><path d="M7.5 10.5a6.5 6.5 0 0 1 6.5 0v5a6.5 6.5 0 0 1-6.5 0v-5z"/><path d="M14 12.5a6.5 6.5 0 0 1 6.5 0v3a6.5 6.5 0 0 1-6.5 0v-3z"/><path d="M21 14a4 4 0 0 1-2 3.5"/></svg>
-                  )}
-                </Link>
-              ))}
-            </div>
+            <Reveal delay={0.1} className="shrink-0">
+              <Link href="/fretboard" className="btn btn-ink">
+                Open the atlas
+                <span aria-hidden>→</span>
+              </Link>
+            </Reveal>
           </div>
 
-          {/* Navigation columns */}
-          <div className="md:col-span-3 md:col-start-6">
-            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Explore</h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { label: 'Audio Sessions', href: '/audio' },
-                { label: 'Store & Presets', href: '/store' },
-                { label: 'Media & Studio', href: '/media' },
-                { label: 'Contact & Setup', href: '/contact' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium text-zinc-300 hover:text-white hover:translate-x-1 transition-all duration-200 w-fit"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="md:col-span-3">
-            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Store</h4>
-            <nav className="flex flex-col gap-3">
-              {[
-                { label: 'TONEX Captures', href: '/store/tonex' },
-                { label: 'HX Stomp Presets', href: '/store/hx-stomp' },
-                { label: 'GNAWA Fusion', href: '/store/gnawa' },
-                { label: 'Custom Impulse', href: '/store/irs' },
-              ].map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="text-sm font-medium text-zinc-300 hover:text-white hover:translate-x-1 transition-all duration-200 w-fit"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          {/* Newsletter / CTA */}
-          <div className="md:col-span-2 md:col-start-11">
-            <h4 className="text-[0.55rem] font-black uppercase tracking-[0.3em] text-[#E5A93C] mb-5">Stay Tuned</h4>
-            <p className="text-xs text-zinc-500 mb-4 leading-relaxed">New captures, preset drops, and session announcements — direct to inbox.</p>
-            <form
-              onSubmit={(e) => { e.preventDefault(); }}
-              className="flex flex-col gap-2"
-            >
-              <input
-                type="email"
-                placeholder="your@email.com"
-                aria-label="Email for newsletter"
-                className="w-full px-3 py-2.5 bg-zinc-900/60 border border-zinc-800 rounded-lg text-xs font-medium text-white placeholder:text-zinc-600 focus:outline-none focus:border-[#00d8f6]/60 focus:ring-1 focus:ring-[#00d8f6]/20 transition-all duration-200"
+          <Reveal delay={0.14}>
+            <div className="mt-12 border border-[var(--rule)] bg-cream px-2 py-6 md:px-6">
+              <NeckMap
+                lastFret={12}
+                notes={atlasNotes}
+                tone="paper"
+                ariaLabel="The C major seventh chord drawn on a twelve-fret guitar neck in standard tuning"
               />
-              <button
-                type="submit"
-                className="w-full px-3 py-2.5 bg-[#00d8f6] hover:bg-[#00b0d4] text-black text-[0.65rem] font-black uppercase tracking-widest rounded-lg transition-colors duration-200 shadow-[0_0_15px_rgba(0,216,246,0.25)] hover:shadow-[0_0_20px_rgba(0,216,246,0.35)]"
-              >
-                Subscribe
-              </button>
-            </form>
+            </div>
+          </Reveal>
+
+          <div className="mt-4 flex flex-col gap-2 font-mono text-[8.5px] uppercase tracking-[0.22em] text-ink/60 sm:flex-row sm:items-center sm:justify-between">
+            <p>Standard tuning · 25.5″ scale</p>
+            <p>
+              <span aria-hidden className="mr-2 inline-block h-2 w-2 bg-rust align-middle" />
+              Root · third · fifth · seventh
+            </p>
           </div>
         </div>
+      </section>
 
-        {/* Bottom bar: legal + back-to-top */}
-        <div className="mt-16 pt-8 border-t border-zinc-900/60 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-6 text-[0.6rem] font-bold tracking-widest text-zinc-600 uppercase">
-            <span>© 2026 Medfender</span>
-            <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
-            <Link href="/support/setup-guide" className="hover:text-zinc-400 transition-colors">Setup Guide</Link>
+      <Marquee />
+
+      {/* ── Fret 3 · The player ─────────────────────────────────────── */}
+      <section className="surface-paper relative bg-paper py-20 md:py-32">
+        <div className="mx-auto w-full max-w-[1560px] px-5 md:px-8">
+          <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-12 lg:gap-16">
+            <Reveal className="lg:col-span-5">
+              <figure>
+                <div className="plate aspect-[4/5] w-full">
+                  <Image
+                    src="/images/site/portrait-studio.webp"
+                    alt="Medfender in the studio with his Stratocaster"
+                    width={1200}
+                    height={1500}
+                    sizes="(max-width: 1024px) 100vw, 40vw"
+                    className="h-full w-full object-cover object-[55%_center]"
+                  />
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-gradient-to-t from-ink/35 via-transparent to-transparent"
+                  />
+                </div>
+                <figcaption className="mt-3 flex items-center justify-between border-t border-[var(--rule)] pt-3 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/60">
+                  <span>The studio · Marrakech</span>
+                  <span>Fig. 02</span>
+                </figcaption>
+              </figure>
+            </Reveal>
+
+            <div className="lg:col-span-6 lg:col-start-7 lg:pt-6">
+              <Reveal>
+                <div className="mb-7 flex items-center gap-4">
+                  <span className="fret-index" data-inlay="true">
+                    3
+                  </span>
+                  <span className="eyebrow">The player</span>
+                  <span aria-hidden className="h-px flex-1 bg-[var(--rule)]" />
+                </div>
+                <h2 className="display-xl text-ink text-balance">
+                  A hand-trained ear.
+                  <br />
+                  <em className="italic text-rust">A room-trained instinct.</em>
+                </h2>
+              </Reveal>
+
+              <Reveal delay={0.1}>
+                <p className="mt-8 text-base leading-relaxed text-ink/75 first-letter:float-left first-letter:mr-3 first-letter:font-display first-letter:text-[3.4rem] first-letter:leading-[0.82] first-letter:text-ink md:text-[1.05rem]">
+                  Medfender is the working name of a Marrakech guitarist and
+                  composer who has spent his life between two vocabularies: the
+                  looping, hypnotic pulse of Gnawa and the crying, overdriven
+                  honesty of Texas blues.
+                </p>
+                <p className="mt-5 text-sm leading-relaxed text-ink/65 md:text-base">
+                  On stage the many become one language — cinematic, unhurried,
+                  built around the room rather than the set list. From an
+                  intimate trio to fifteen musicians with Gnaoua and brass, the
+                  formation follows the night.
+                </p>
+              </Reveal>
+
+              <Reveal delay={0.18}>
+                <div className="mt-10 border-t border-[var(--rule)] pt-7">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="mb-2 font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/60">
+                        Signature
+                      </p>
+                      <p className="wordmark text-2xl text-ink">Medfender</p>
+                    </div>
+                    <p className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.2em] text-ink/60 sm:text-right">
+                      Guitar · Composer
+                      <br />
+                      Marrakech, Morocco
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
           </div>
-          <button
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            aria-label="Back to top"
-            className="group flex items-center gap-2 text-[0.6rem] font-black uppercase tracking-[0.3em] text-zinc-500 hover:text-[#00d8f6] transition-colors duration-200"
-          >
-            Back to top
-            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-zinc-800 group-hover:border-[#00d8f6]/50 bg-zinc-900/40 group-hover:bg-[#00d8f6]/10 transition-all duration-200">
-              <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
-            </span>
-          </button>
         </div>
-      </div>
-    </footer>
-  );
-}
+      </section>
 
-/* ════════════════════════════════════════════════════
-   AMBIENT IDLE VISUALIZER — cursor inactivity overlay
-═══════════════════════════════════════════════════ */
-function AmbientVisualizer({ title, isPlaying }: { title: string; isPlaying: boolean }) {
-  const [isIdle, setIsIdle] = useState(false);
+      {/* ── Fret 5 · The sound ──────────────────────────────────────── */}
+      <section className="surface-ink relative overflow-hidden bg-ink-deep py-20 md:py-32">
+        <div className="relative mx-auto w-full max-w-[1560px] px-5 md:px-8">
+          <SectionHeading
+            index="5"
+            inlay
+            tone="ink"
+            eyebrow="The sound"
+            title={
+              <>
+                Three rivers,
+                <br />
+                <em className="italic text-brass">one current.</em>
+              </>
+            }
+            intro="Moroccan rhythm, American blues and filmic rock are not a fusion project here. They are one guitarist's accent."
+            action={
+              <Link href="/audio" className="link-rule-light">
+                Listen to the library
+                <span aria-hidden>→</span>
+              </Link>
+            }
+          />
 
-  useEffect(() => {
-    if (!isPlaying) { setIsIdle(false); return; }
-    let timer: ReturnType<typeof setTimeout>;
-    const handleMouseMove = () => {
-      setIsIdle(false);
-      clearTimeout(timer);
-      timer = setTimeout(() => setIsIdle(true), 3000);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    timer = setTimeout(() => setIsIdle(true), 3000);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(timer);
-    };
-  }, [isPlaying]);
-
-  return (
-    <AnimatePresence>
-      {isPlaying && isIdle && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center pointer-events-none"
-        >
-          {/* Rotating radial ring */}
-          <motion.svg
-            className="w-48 h-48 mb-10"
-            viewBox="0 0 200 200"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}
-          >
-            {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => {
-              const rad = (angle * Math.PI) / 180;
-              const r1 = 70 + (i % 3) * 18;
-              const r2 = r1 + 12;
-              const x1 = 100 + r1 * Math.cos(rad);
-              const y1 = 100 + r1 * Math.sin(rad);
-              const x2 = 100 + r2 * Math.cos(rad);
-              const y2 = 100 + r2 * Math.sin(rad);
-              return (
-                <motion.line
-                  key={angle}
-                  x1={x1} y1={y1} x2={x2} y2={y2}
-                  stroke={i % 2 === 0 ? '#E5A93C' : '#00d8f6'}
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  animate={{ opacity: [0.3, 1, 0.3], y: [0, -4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.15 }}
-                />
-              );
-            })}
-          </motion.svg>
-
-          <p className="font-black uppercase tracking-[0.4em] text-[11px] text-zinc-500 mb-3">PLAYING NOW</p>
-          <p className="font-black uppercase tracking-[0.3em] text-sm text-white mb-2 text-center px-4">{title}</p>
-          <p className="font-black uppercase tracking-[0.4em] text-[10px] text-zinc-600">MEDFENDER TONE ARCHITECTURE</p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-}
-
-/* ════════════════════════════════════════════════════
-   IN-PAGE TRACKLIST — michaelgatt-style expandable list
-═══════════════════════════════════════════════════ */
-const TRACK_BARS = 36;
-const trackWaveforms: Record<string, number[]> = {};
-function getTrackWave(id: string): number[] {
-  if (!trackWaveforms[id]) {
-    trackWaveforms[id] = Array.from({ length: TRACK_BARS }, (_, i) => {
-      const p = i / (TRACK_BARS - 1);
-      return Math.max(3, Math.min(28, 8 + Math.sin(p * Math.PI) * 12 + Math.sin(p * Math.PI * 4) * 4 + (Math.random() - 0.5) * 5));
-    });
-  }
-  return trackWaveforms[id];
-}
-
-function ExpandedTracklist({
-  demo,
-  playingTrackId,
-  onTrackToggle,
-  onClose,
-  onSeek,
-  expandedTrackId: expandedTrackIdProp,
-  currentTime = 0,
-}: {
-  demo: any;
-  playingTrackId: string | null;
-  onTrackToggle: (id: string) => void;
-  onClose: () => void;
-  onSeek?: (trackId: string, time: number) => void;
-  expandedTrackId?: string | null;
-  currentTime?: number;
-}) {
-  const [internalExpandedId, setInternalExpandedId] = useState<string | null>(null);
-  const expandedTrackId = expandedTrackIdProp ?? internalExpandedId;
-
-  const WAVEFORM_BARS = 250;
-
-  // Seeded pseudo-random heights for realistic amplitude peaks
-  function seededRandom(seed: number): number {
-    const x = Math.sin(seed * 9301 + 49297) * 233280;
-    return x - Math.floor(x);
-  }
-
-  function getWaveHeights(id: string): number[] {
-    const seed = id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return Array.from({ length: WAVEFORM_BARS }, (_, i) => {
-      const r = seededRandom(seed * 1000 + i);
-      const peak = 0.2 + r * 0.8; // 20%–100% height variation
-      const trans = seededRandom(seed * 3000 + i) > 0.88 ? 0.3 : 1; // transient dips
-      return Math.round(peak * trans * 100);
-    });
-  }
-
-  const tracks = demo.tracks || [];
-
-  function handleTrackClick(trackId: string) {
-    setInternalExpandedId(trackId);
-    onTrackToggle(trackId);
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="border-t border-zinc-900 bg-[#050505]"
-    >
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-[0.55rem] font-black uppercase tracking-[0.25em] text-[#E5A93C]">DEMO TRACKS</span>
-            <span className="text-zinc-800">|</span>
-            <span className="text-[0.55rem] font-black uppercase tracking-[0.25em] text-zinc-500">{demo.title}</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-6 h-6 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 flex items-center justify-center transition-colors"
-            aria-label="Close tracklist"
-          >
-            <svg className="w-2.5 h-2.5" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"><path d="M2.5 2.5l5 5M7.5 2.5l-5 5"/></svg>
-          </button>
-        </div>
-
-        {/* Track rows */}
-        <div className="space-y-1">
-          {tracks.map((track: any, idx: number) => {
-            const isPlaying = track.id === playingTrackId;
-            const isExpanded = expandedTrackId === track.id;
-            const dur = (() => {
-              const [m, s] = (track.duration || '1:34').split(':').map(Number);
-              return (m || 1) * 60 + (s || 34);
-            })();
-            const progressPct = Math.min(100, Math.max(0, (currentTime / dur) * 100));
-
-            return (
-              <div
-                key={track.id}
-                className="w-full flex flex-col py-6 border-b border-zinc-900/50 last:border-0 transition-all duration-500"
-              >
-                {/* Top control bar — 3-column grid, edge-to-edge */}
-                <div className="w-full grid grid-cols-3 items-center">
-                  <div className="flex items-center gap-6 md:gap-12">
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600">{String(idx + 1).padStart(3, '0')}</span>
-                    <span className={`text-sm md:text-lg font-light tracking-[0.3em] uppercase transition-colors ${isPlaying ? 'text-white' : isExpanded ? 'text-zinc-200' : 'text-zinc-500'}`}>
-                      {track.title}
+          <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-12 md:grid-cols-3">
+            {pillars.map((pillar, i) => (
+              <Reveal key={pillar.title} delay={i * 0.09}>
+                <div className="border-t border-cream/20 pt-6">
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-mono text-[10px] tracking-[0.2em] text-brass">
+                      {pillar.number}
+                    </span>
+                    <span className="font-mono text-[9px] tracking-[0.16em] text-cream/55">
+                      pos. {pillar.position}
                     </span>
                   </div>
-                  <div className="flex justify-center">
-                    <button
-                      onClick={() => handleTrackClick(track.id)}
-                      aria-label={isPlaying ? 'Pause' : 'Play'}
-                      className="w-12 h-12 rounded-full border border-zinc-600 flex items-center justify-center text-zinc-400 hover:text-white hover:border-white transition-all duration-300"
-                    >
-                      {isPlaying ? (
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M10 9v6m4-6v6" /></svg>
-                      ) : (
-                        <svg className="w-3.5 h-3.5 ml-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2.5v11l9-5.5L4 2.5z"/></svg>
-                      )}
-                    </button>
-                  </div>
-                  <div className="flex justify-end">
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600">{isPlaying ? '0:42 / 1:34' : `${track.duration} / 1:34`}</span>
-                  </div>
+                  <h3 className="mt-8 font-display text-[2rem] leading-tight text-cream">
+                    {pillar.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-relaxed text-cream/60">
+                    {pillar.body}
+                  </p>
                 </div>
+              </Reveal>
+            ))}
+          </div>
 
-                {/* Waveform — visible for EXPANDED track, regardless of play/pause */}
-                {isExpanded && (
-                  <div
-                    className="w-full h-12 relative flex items-center justify-between mt-6 cursor-pointer"
-                    onClick={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const clickX = e.clientX - rect.left;
-                      const pct = Math.max(0, Math.min(1, clickX / rect.width));
-                      onSeek?.(track.id, pct * dur);
-                    }}
-                  >
-                    {/* 250 hyper-dense, 1px wide bars */}
-                    <div className="flex items-center justify-between w-full h-full">
-                      {getWaveHeights(track.id).map((h, i) => {
-                        const barPct = (i / WAVEFORM_BARS) * 100;
-                        const played = barPct <= progressPct;
-                        return (
-                          <div
-                            key={i}
-                            className={`w-[1px] rounded-none transition-colors duration-75 ${played ? 'bg-zinc-300' : 'bg-zinc-800'}`}
-                            style={{ height: `${Math.max(15, h)}%` }}
-                          />
-                        );
-                      })}
-                    </div>
-                    {/* Razor playhead */}
-                    <div
-                      className="absolute top-0 bottom-0 w-[1px] bg-white z-10 pointer-events-none transition-all duration-75"
-                      style={{ left: `${progressPct}%`, boxShadow: '0 0 4px rgba(255,255,255,0.7)' }}
-                    />
-                  </div>
-                )}
+          <Reveal delay={0.2}>
+            <div className="mt-16 border-t border-cream/15 pt-6">
+              <div className="string-rule mb-5 opacity-40" aria-hidden>
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
               </div>
-            );
-          })}
+              <p className="font-mono text-[9px] uppercase leading-relaxed tracking-[0.22em] text-cream/60">
+                Stratocaster · hand-wired valve amp · a pedalboard that has
+                earned every mark
+              </p>
+            </div>
+          </Reveal>
         </div>
-      </div>
-    </motion.div>
-  );
-}
+      </section>
 
-/* ════════════════════════════════════════════════════
-   ROOT PAGE
-═══════════════════════════════════════════════════ */
-export default function Home() {
-  const [activeDemo, setActiveDemo] = useState<any | null>(null);
-  const [playingTrackId, setPlayingTrackId] = useState<string | null>(null);
-  const [trackProgress, setTrackProgress] = useState({ id: '', time: 0, dur: 94 });
+      <FormationsShowcase />
+      <ServicesShowcase />
 
-  // Simulate progress ticker when a track is playing
-  useEffect(() => {
-    if (!playingTrackId) return;
-    const interval = setInterval(() => {
-      setTrackProgress(p => {
-        if (p.id !== playingTrackId) return { id: playingTrackId, time: 0, dur: 94 };
-        const next = p.time + 0.8;
-        return { ...p, time: next > p.dur ? 0 : next };
-      });
-    }, 800);
-    return () => clearInterval(interval);
-  }, [playingTrackId]);
-
-  const handleTrackToggle = (trackId: string) => {
-    setPlayingTrackId(prev => prev === trackId ? null : trackId);
-  };
-
-  const handleSeek = (trackId: string, time: number) => {
-    setTrackProgress(p => ({ id: trackId, time, dur: 94 }));
-  };
-
-  const handleClose = () => {
-    setActiveDemo(null);
-    setPlayingTrackId(null);
-    setTrackProgress({ id: '', time: 0, dur: 94 });
-  };
-
-  const playingTrack = activeDemo?.tracks?.find((t: any) => t.id === playingTrackId);
-
-  return (
-    <main className="bg-zinc-950 text-white antialiased flex flex-col gap-0 space-y-0">
-      <Hero />
-      <Marquee />
-      <SoundPhilosophy onPresetSelect={(preset: any) => {
-        setActiveDemo(preset);
-        setPlayingTrackId(null);
-      }} />
-
-      {/* In-page expandable tracklist */}
-      <AnimatePresence>
-        {activeDemo !== null && (
-          <ExpandedTracklist
-            demo={activeDemo}
-            playingTrackId={playingTrackId}
-            onTrackToggle={handleTrackToggle}
-            onClose={handleClose}
-            onSeek={handleSeek}
-            currentTime={trackProgress.id === playingTrackId ? trackProgress.time : 0}
+      {/* ── Fret 12 · Tone library ─────────────────────────────────── */}
+      <section className="surface-paper border-b border-[var(--rule)] bg-paper py-20 md:py-28">
+        <div className="mx-auto w-full max-w-[1560px] px-5 md:px-8">
+          <SectionHeading
+            index="12"
+            inlay
+            eyebrow="Tone library"
+            title={
+              <>
+                The rig,
+                <br />
+                <em className="italic text-rust">captured.</em>
+              </>
+            }
+            intro="For players: the same chains heard on stage, profiled for TONEX and HX Stomp. Each pack is built from a real amplifier, a real cabinet and a real room."
+            action={
+              <Link href="/store" className="link-rule">
+                All {packs.length} packs
+                <span aria-hidden>→</span>
+              </Link>
+            }
           />
-        )}
-      </AnimatePresence>
 
-      <Footer />
+          <div className="mt-14 grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {featured.map((pack, i) => (
+              <Reveal key={pack.id} delay={i * 0.08}>
+                <Link
+                  href={`/store/${pack.slug}`}
+                  className="group flex h-full flex-col"
+                >
+                  <PackCover title={pack.title} badge={pack.badge} index={i} />
+                  <div className="flex flex-1 flex-col border-t border-[var(--rule)] pt-4">
+                    <p className="font-mono text-[8.5px] uppercase tracking-[0.22em] text-rust">
+                      {pack.type} · Digital pack
+                    </p>
+                    <h3 className="mt-3 font-display text-2xl leading-snug text-ink transition-colors group-hover:text-rust">
+                      {pack.title}
+                    </h3>
+                    <div className="mt-auto flex items-center justify-between pt-6">
+                      <span className="font-mono text-sm text-ink">
+                        ${pack.price.toFixed(2)}
+                      </span>
+                      <span className="font-mono text-[9px] uppercase tracking-[0.2em] text-ink/60 transition-colors group-hover:text-rust">
+                        Explore rig →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Ambient idle visualizer */}
-      {playingTrackId && (
-        <AmbientVisualizer
-          title={playingTrack?.title || activeDemo?.title || ''}
-          isPlaying={true}
+      {/* ── Fret 15 · Pull quote ────────────────────────────────────── */}
+      <section className="surface-ink relative isolate flex min-h-[64svh] items-center overflow-hidden bg-ink-deep">
+        <Image
+          src="/images/site/full/So-Lounge.webp"
+          alt=""
+          aria-hidden
+          fill
+          sizes="100vw"
+          className="grade-print object-cover opacity-70"
         />
-      )}
+        <div aria-hidden className="absolute inset-0 bg-ink-deep/50" />
+
+        <div className="relative mx-auto w-full max-w-4xl px-6 py-24 text-center">
+          <Reveal>
+            <div className="mb-8 flex items-center justify-center gap-4">
+              <span className="fret-index" data-inlay="true">
+                15
+              </span>
+              <p className="font-mono text-[9px] uppercase tracking-[0.3em] text-cream/60">
+                From the bandstand
+              </p>
+            </div>
+            <blockquote className="display-lg text-cream text-balance">
+              The room decides the set list.
+              <br />
+              <em className="italic text-brass">
+                The guitar just has to listen.
+              </em>
+            </blockquote>
+            <p className="mt-9 font-mono text-[9px] uppercase tracking-[0.28em] text-cream/60">
+              Medfender · So Lounge, Marrakech
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ── Fret 17 · Frames ────────────────────────────────────────── */}
+      <section className="surface-paper bg-paper py-20 md:py-28">
+        <div className="mx-auto w-full max-w-[1560px] px-5 md:px-8">
+          <SectionHeading
+            index="17"
+            inlay
+            eyebrow="In the room"
+            title={
+              <>
+                Frames from
+                <br />
+                <em className="italic text-rust">the last few nights.</em>
+              </>
+            }
+            action={
+              <Link href="/media" className="link-rule">
+                All media
+                <span aria-hidden>→</span>
+              </Link>
+            }
+          />
+
+          <div className="mt-12 grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {frames.map((frame, i) => (
+              <Reveal key={frame.src} delay={i * 0.06}>
+                <Link href="/media" className="group block">
+                  <div className="relative aspect-[4/5] overflow-hidden border border-[var(--rule)] bg-paper-dim">
+                    <Image
+                      src={frame.src}
+                      alt={frame.title}
+                      fill
+                      sizes="(max-width: 1024px) 50vw, 25vw"
+                      className="grade-print object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
+                    />
+                    <div
+                      aria-hidden
+                      className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-100"
+                    />
+                    <span className="absolute left-3 top-3 font-mono text-[9px] uppercase tracking-[0.22em] text-cream/80">
+                      {frame.tag}
+                    </span>
+                    <p className="absolute inset-x-3 bottom-3 font-mono text-[8.5px] uppercase leading-relaxed tracking-[0.18em] text-cream/90">
+                      {frame.title}
+                    </p>
+                  </div>
+                  <p className="mt-3 flex items-center justify-between border-t border-[var(--rule)] pt-2 font-mono text-[9px] uppercase tracking-[0.2em] text-ink/60">
+                    <span>Fig. {String(i + 1).padStart(2, "0")}</span>
+                    <span className="transition-colors group-hover:text-rust">
+                      View ↗
+                    </span>
+                  </p>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Fret 19 · Listening room ───────────────────────────────── */}
+      <section className="surface-ink relative overflow-hidden border-y border-cream/12 bg-ink-deep py-20 md:py-28">
+        <div className="mx-auto grid w-full max-w-[1560px] grid-cols-1 items-center gap-12 px-5 md:px-8 lg:grid-cols-12 lg:gap-16">
+          <Reveal className="lg:col-span-5">
+            <div className="relative mx-auto aspect-square w-full max-w-[420px]">
+              {/* Disc */}
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    "radial-gradient(circle at 50% 50%, #171716 0%, #0c0c0b 58%, #141413 100%)",
+                  boxShadow:
+                    "0 50px 90px -40px rgba(0,0,0,0.9), 0 0 0 1px rgba(251,250,247,0.08)",
+                }}
+              >
+                <div
+                  className="absolute inset-[6%] rounded-full"
+                  style={{
+                    backgroundImage:
+                      "repeating-radial-gradient(circle at 50% 50%, rgba(239,232,218,0.075) 0px, rgba(239,232,218,0.075) 1px, transparent 1px, transparent 5px)",
+                  }}
+                />
+                <div
+                  className="absolute inset-[6%] rounded-full"
+                  style={{
+                    backgroundImage:
+                      "repeating-radial-gradient(circle at 50% 50%, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, transparent 1px, transparent 11px)",
+                  }}
+                />
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    backgroundImage:
+                      "conic-gradient(from 205deg at 50% 50%, transparent 0deg, rgba(247,242,231,0.16) 28deg, transparent 70deg, transparent 200deg, rgba(247,242,231,0.09) 240deg, transparent 285deg)",
+                  }}
+                />
+
+                <div className="absolute inset-[34%] rounded-full border border-[#8e7449]/40 bg-gradient-to-br from-[#e0c395] to-[#b3905c] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]">
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-4 text-center">
+                    <span className="font-mono text-[6.5px] uppercase tracking-[0.24em] text-[#3b2c14]">
+                      Side A
+                    </span>
+                    <span className="font-display text-[clamp(1rem,3.2vw,1.6rem)] leading-none text-[#241706]">
+                      Medfender
+                    </span>
+                    <span className="font-mono text-[6px] uppercase tracking-[0.2em] text-[#3b2c14]/80">
+                      33⅓ rpm · Marrakech
+                    </span>
+                  </div>
+                  <div className="absolute left-1/2 top-1/2 h-[7%] w-[7%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-deep" />
+                </div>
+              </div>
+            </div>
+          </Reveal>
+
+          <div className="lg:col-span-6 lg:col-start-7">
+            <Reveal>
+              <div className="mb-7 flex items-center gap-4">
+                <span className="fret-index" data-inlay="true">
+                  19
+                </span>
+                <span className="eyebrow-on-ink">The listening room</span>
+                <span aria-hidden className="h-px flex-1 bg-cream/15" />
+              </div>
+              <h2 className="display-xl text-cream text-balance">
+                The set list,
+                <br />
+                <em className="italic text-brass">on vinyl.</em>
+              </h2>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <p className="mt-7 max-w-md text-sm leading-relaxed text-cream/60 md:text-base">
+                A working turntable, a curated playlist, spectral analysis and
+                full transport — built into the site for players who want to
+                hear the details, not just read about them.
+              </p>
+            </Reveal>
+            <Reveal delay={0.18}>
+              <div className="mt-9 flex flex-wrap items-center gap-6">
+                <Link href="/audio" className="btn btn-brass">
+                  Open the listening room
+                  <span aria-hidden>→</span>
+                </Link>
+                <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-cream/55">
+                  Turntable · Playlist · Spectrum
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <BookingBand tone="paper" />
     </main>
   );
 }

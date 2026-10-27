@@ -84,7 +84,7 @@ function ShowcaseRow({
       onClick={onClick}
       className={`flex items-center justify-between gap-3 p-3 rounded-lg text-left transition-all group w-full ${
         isActive
-          ? "bg-cyan-500/[0.06] border border-cyan-500/30"
+          ? "bg-brass/[0.06] border border-brass/30"
           : "hover:bg-white/[0.03] border border-transparent"
       }`}
       aria-label={`Select ${(track as any).name || (track as any).title}`}
@@ -104,7 +104,7 @@ function ShowcaseRow({
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <h4 className={`text-sm font-semibold truncate ${isActive ? "text-cyan-300" : "text-neutral-200"}`}>
+        <h4 className={`text-sm font-semibold truncate ${isActive ? "text-brass-light" : "text-neutral-200"}`}>
           {(track as any).name || (track as any).title || "Untitled"}
         </h4>
         <p className="text-[10px] text-neutral-500 truncate mt-0.5 font-mono">
@@ -114,12 +114,12 @@ function ShowcaseRow({
       <div className="flex items-center gap-3 ml-1 shrink-0">
         {isActive && isPlaying ? (
           <div className="flex gap-0.5 h-4 items-end">
-            <div className="w-0.5 bg-cyan-400 h-full animate-pulse rounded-full" />
-            <div className="w-0.5 bg-cyan-400 h-2/3 animate-pulse rounded-full" style={{ animationDelay: "0.15s" }} />
-            <div className="w-0.5 bg-cyan-400 h-4/5 animate-pulse rounded-full" style={{ animationDelay: "0.3s" }} />
+            <div className="w-0.5 bg-brass h-full animate-pulse rounded-full" />
+            <div className="w-0.5 bg-brass h-2/3 animate-pulse rounded-full" style={{ animationDelay: "0.15s" }} />
+            <div className="w-0.5 bg-brass h-4/5 animate-pulse rounded-full" style={{ animationDelay: "0.3s" }} />
           </div>
         ) : isActive ? (
-          <Play className="text-cyan-400" size={14} />
+          <Play className="text-brass" size={14} />
         ) : (
           <Play className="text-neutral-600 opacity-0 group-hover:opacity-100 transition-opacity" size={12} />
         )}

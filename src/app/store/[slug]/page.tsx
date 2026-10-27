@@ -23,5 +23,9 @@ export default async function ProductDetailPage({
   const resolvedParams = await params;
   const pack = packs.find((p) => p.slug === resolvedParams.slug);
   if (!pack) notFound();
-  return <ProductDetailClient pack={pack} />;
+  return (
+    <>
+      <ProductDetailClient pack={pack} />
+    </>
+  );
 }

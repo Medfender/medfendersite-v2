@@ -66,7 +66,7 @@ function peakColor(r: number, g: number, b: number, amp: number): [number, numbe
     return [244, 63, 94]; // #f43f5e hot pink
   }
   if (amp > 0.65) {
-    return [0, 242, 254]; // #00f2fe neon cyan
+    return [0, 242, 254]; // #D0C0A6 neon cyan
   }
   return [r, g, b];
 }

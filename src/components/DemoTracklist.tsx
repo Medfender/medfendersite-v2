@@ -98,7 +98,6 @@ export function DemoTracklist({
         thumbnail: t.thumbnail,
       }))
     : (demo.tracks || []);
-  const displayTitle = hasLocal ? "Local Tracks" : (demo.title || "Demo Tracks");
 
   // Background preloading: double-buffered duration extraction
   useEffect(() => {
@@ -123,20 +122,22 @@ export function DemoTracklist({
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-      className="border-t border-zinc-900 bg-[#050505]"
+      className="bg-transparent"
     >
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header row */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-[0.55rem] font-black uppercase tracking-[0.25em] text-[#E5A93C]">DEMO TRACKS</span>
-            <span className="text-zinc-800">|</span>
-            <span className="text-[0.55rem] font-black uppercase tracking-[0.25em] text-zinc-500">{demo.title}</span>
+      <div className="py-2">
+        {/* Local-library label only; pack listings carry their own header. */}
+        {hasLocal ? (
+          <div className="mb-4 flex items-center gap-4">
+            <span className="eyebrow-on-ink">Local tracks</span>
+            <span aria-hidden className="h-px flex-1 bg-[var(--rule-ink-soft)]" />
+            <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-cream/55">
+              {tracks.length} imported
+            </span>
           </div>
-        </div>
+        ) : null}
 
         {/* Track rows */}
-        <div className="space-y-1">
+        <div>
           {tracks.map((track: any, idx: number) => {
             const isActive = activeTrackId === track.id;
             const isExpanded = internalExpandedId === track.id;
@@ -155,41 +156,59 @@ export function DemoTracklist({
             return (
               <div
                 key={track.id}
-                className="w-full flex flex-col py-3 border-b border-zinc-900/50 last:border-0 transition-all duration-500"
+                className="flex w-full flex-col border-b border-[var(--rule-ink-soft)] py-4 last:border-b-0"
               >
                 {/* Top control bar — 3-column grid */}
-                <div className="w-full grid grid-cols-3 items-center">
-                  <div className="flex items-center gap-6 md:gap-12 min-w-0">
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600 shrink-0">{String(idx + 1).padStart(3, "0")}</span>
-                    <span className={`text-xs md:text-sm font-light tracking-[0.15em] uppercase truncate transition-colors ${trackPlaying ? "text-white" : isExpanded ? "text-zinc-200" : "text-zinc-500"}`}>
+                <div className="grid w-full grid-cols-[1fr_auto] items-center gap-4 md:grid-cols-3">
+                  <div className="flex min-w-0 items-baseline gap-5">
+                    <span className="shrink-0 font-mono text-[9px] tracking-[0.2em] text-cream/60">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <span
+                      className={`truncate font-display text-lg leading-none transition-colors md:text-xl ${
+                        trackPlaying
+                          ? "text-brass-light"
+                          : isExpanded
+                            ? "text-cream"
+                            : "text-cream/60"
+                      }`}
+                    >
                       {track.title}
                     </span>
                   </div>
-                  <div className="flex justify-center">
+
+                  <div className="order-3 flex md:order-none md:justify-center">
                     <button
                       onClick={() => {
                         setInternalExpandedId(track.id);
                         if (onTrackToggle) onTrackToggle(track.id);
                       }}
                       aria-label={trackPlaying ? "Pause" : "Play"}
-                      className="w-12 h-12 rounded-full border border-zinc-600 flex items-center justify-center text-zinc-400 hover:text-white hover:border-white transition-all duration-300"
+                      className={`flex h-11 w-11 items-center justify-center border transition-colors duration-300 ${
+                        trackPlaying
+                          ? "border-brass bg-brass text-ink"
+                          : "border-[var(--rule-ink)] text-cream/70 hover:border-brass hover:text-brass-light"
+                      }`}
                     >
                       {trackPlaying ? (
-                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M10 9v6m4-6v6" /></svg>
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 9v6m4-6v6" /></svg>
                       ) : (
-                        <svg className="w-3.5 h-3.5 ml-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M4 2.5v11l9-5.5L4 2.5z"/></svg>
+                        <svg className="ml-0.5 h-3 w-3" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5L4 2.5z" /></svg>
                       )}
                     </button>
                   </div>
+
                   <div className="flex justify-end">
-                    <span className="text-[10px] font-mono tracking-[0.4em] text-zinc-600">{`${displayCurrentTime} / ${displayTotalTime}`}</span>
+                    <span className="font-mono text-[9px] tracking-[0.2em] text-cream/55">
+                      {displayCurrentTime} / {displayTotalTime}
+                    </span>
                   </div>
                 </div>
 
                 {/* Waveform — visible for EXPANDED track */}
                 {isExpanded && (
                   <div
-                    className="w-full h-12 relative flex items-center justify-between mt-6 cursor-pointer"
+                    className="relative mt-5 flex h-12 w-full cursor-pointer items-center justify-between"
                     onClick={(e) => {
                       const rect = e.currentTarget.getBoundingClientRect();
                       const clickX = e.clientX - rect.left;
@@ -200,14 +219,14 @@ export function DemoTracklist({
                     }}
                   >
                     {/* 250 hyper-dense bars */}
-                    <div className="flex items-center justify-between w-full h-full">
+                    <div className="flex h-full w-full items-center justify-between">
                       {getWaveHeights(track.id).map((h, i) => {
                         const barPct = (i / 250) * 100;
                         const played = barPct <= progressPct;
                         return (
                           <div
                             key={i}
-                            className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-zinc-300" : "bg-zinc-800"}`}
+                            className={`w-[1px] transition-colors duration-75 ${played ? "bg-brass" : "bg-cream/15"}`}
                             style={{ height: `${Math.max(15, h)}%` }}
                           />
                         );
@@ -215,8 +234,8 @@ export function DemoTracklist({
                     </div>
                     {/* Razor playhead */}
                     <div
-                      className="absolute top-0 bottom-0 w-[1px] bg-white z-10 pointer-events-none transition-all duration-75"
-                      style={{ left: `${progressPct}%`, boxShadow: "0 0 4px rgba(255,255,255,0.7)" }}
+                      className="pointer-events-none absolute bottom-0 top-0 z-10 w-px bg-cream transition-all duration-75"
+                      style={{ left: `${progressPct}%`, boxShadow: "0 0 4px rgba(239,232,218,0.7)" }}
                     />
                   </div>
                 )}

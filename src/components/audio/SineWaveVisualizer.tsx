@@ -42,8 +42,8 @@ export default function SineWaveVisualizer() {
         const bufferLength = freqData.length;
 
         ctx.lineWidth = 2.5;
-        ctx.strokeStyle = "#00d8f6";
-        ctx.shadowColor = "#00d8f6";
+        ctx.strokeStyle = "#D0C0A6";
+        ctx.shadowColor = "#D0C0A6";
         ctx.shadowBlur = 16;
 
         ctx.globalCompositeOperation = "lighter";
@@ -100,8 +100,8 @@ export default function SineWaveVisualizer() {
         // Subtle flat baseline with enhanced glow
         ctx.beginPath();
         ctx.lineWidth = 2.0;
-        ctx.strokeStyle = "rgba(0,216,246,0.3)";
-        ctx.shadowColor = "rgba(0,216,246,0.2)";
+        ctx.strokeStyle = "rgba(223,161,74,0.3)";
+        ctx.shadowColor = "rgba(223,161,74,0.2)";
         ctx.shadowBlur = 8;
 
         ctx.moveTo(0, h / 2);

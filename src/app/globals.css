@@ -1,30 +1,1056 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDFENDER — THE INSTRUMENT, DRAWN
+   Warm bone paper · lamp-black ink · brass · oxblood.
+   An instrument-maker's notebook: ruled by string gauge, indexed by fret,
+   set in an editorial serif with a measuring mono. Radii are 0; the only
+   curves are physical.
+═══════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Ink family (true neutral black) ─────────────────────────────── */
+  --color-ink: #121210;
+  --color-ink-deep: #0b0b0a;
+  --color-ink-raised: #1a1a18;
+  --color-ink-soft: #262623;
+
+  /* ── Paper family (gallery off-white, no yellow cast) ────────────── */
+  --color-paper: #f6f5f2;
+  --color-paper-dim: #ecebe6;
+  --color-paper-deep: #e5e4de;
+  --color-cream: #fbfaf7;
+  --color-cream-dim: #d8d4ca;
+  --color-sand: #a39e93;
+  --color-sand-deep: #6b675e;
+  --color-alabaster: #f6f5f2;
+  --color-alabaster-dim: #ecebe6;
+
+  /* ── Accent: brass hardware & oxblood ───────────────────────────── */
+  --color-brass: #c08a2b;
+  --color-brass-light: #e0b264;
+  --color-brass-deep: #8a5f16;
+  --color-brass-ink: #7a5310;
+  --color-copper: #a9762a;
+  --color-copper-deep: #8a5f16;
+  --color-rust: #7d3125;
+  --color-rust-deep: #5f241b;
+  --color-clay: #8a4a30;
+  --color-emerald: #2f3a33;
+  --color-emerald-deep: #1b231e;
+
+  /* ── Legacy accent ramp ──────────────────────────────────────────────
+     Older components still use `cyan-*` as the accent. Re-point the whole
+     ramp at brass so no surviving utility lands off-system. */
+  --color-cyan-50: #fbf6ea;
+  --color-cyan-100: #f6ead2;
+  --color-cyan-200: #ecd7ab;
+  --color-cyan-300: #e2c07d;
+  --color-cyan-400: #c08a2b;
+  --color-cyan-500: #a97722;
+  --color-cyan-600: #875d18;
+  --color-cyan-700: #674611;
+  --color-cyan-800: #47300c;
+  --color-cyan-900: #2e1f08;
+  --color-cyan-950: #1b1205;
+
+  /* ── Type ────────────────────────────────────────────────────────── */
+  --font-display: var(--font-newsreader), Newsreader, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f6f5f2;
+  --paper-dim: #ecebe6;
+  --paper-deep: #e5e4de;
+  --cream: #fbfaf7;
+  --ink: #121210;
+  --ink-deep: #0b0b0a;
+  --accent: #c08a2b;
+  --accent-deep: #8a5f16;
+  --brass: #c08a2b;
+  --rust: #7d3125;
+  --oxblood: #7d3125;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+
+  /* Hairlines: one on paper, one on ink. */
+  --rule: rgba(18, 18, 16, 0.15);
+  --rule-soft: rgba(18, 18, 16, 0.075);
+  --rule-ink: rgba(251, 250, 247, 0.18);
+  --rule-ink-soft: rgba(251, 250, 247, 0.08);
+
+  /* Legacy aliases — default to the paper rule. */
+  --hairline: var(--rule);
+  --hairline-soft: var(--rule-soft);
+
+  /* The one easing family: a plucked string settling, never a bounce. */
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-state: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --ease-lux: var(--ease-settle);
+
+  /* Six strings, low to high — used by the string rule. */
+  --gauge-6: 3px;
+  --gauge-5: 2.5px;
+  --gauge-4: 2px;
+  --gauge-3: 1.5px;
+  --gauge-2: 1px;
+  --gauge-1: 0.75px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  border-color: var(--rule-soft);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-padding-top: 5.5rem;
 }
 
 body {
-  background: #0a0a0a;
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01" 1, "cv11" 1;
   overflow-x: hidden;
 }
 
-/* Invisible scrollbar for playlist escalator */
+::selection {
+  background: rgba(217, 154, 62, 0.38);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--oxblood);
+  outline-offset: 3px;
+}
+
+.surface-ink :focus-visible {
+  outline-color: var(--color-brass-light);
+}
+
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0.75rem 1.1rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: transform 160ms var(--ease-state);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #e5e4de; }
+::-webkit-scrollbar-thumb {
+  background: #c2beb4;
+  border: 3px solid #e5e4de;
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rust); }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   SURFACES
+═══════════════════════════════════════════════════════════════════════ */
+
+.surface-paper {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.surface-ink {
+  background: var(--ink);
+  color: var(--paper);
+  --rule-soft: rgba(251, 250, 247, 0.08);
+  --rule: rgba(251, 250, 247, 0.18);
+}
+
+.surface-ink * {
+  border-color: var(--rule-ink-soft);
+}
+
+/* Paper with a faint tooth — no image, no blend mode. */
+.surface-tooth {
+  background-color: var(--paper);
+  background-image:
+    repeating-linear-gradient(0deg, rgba(18, 18, 16, 0.022) 0 1px, transparent 1px 4px);
+}
+
+.lux-surface { background: var(--paper); }
+
+.lux-panel {
+  background: rgba(251, 250, 247, 0.42);
+  border: 1px solid var(--rule);
+}
+
+.rule { height: 1px; width: 100%; background: var(--rule); }
+.rule-soft { height: 1px; width: 100%; background: var(--rule-soft); }
+.rule-fade {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, var(--rule), transparent);
+}
+
+/* Film grain — a whisper, never a texture pack. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  opacity: 0.016;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='0.85'/%3E%3C/svg%3E");
+  mix-blend-mode: multiply;
+}
+
+.photo-vignette::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(11, 11, 10, 0.92) 0%, rgba(11, 11, 10, 0.28) 42%, rgba(11, 11, 10, 0.02) 72%, rgba(11, 11, 10, 0.24) 100%);
+}
+
+.arch { border-radius: 999px 999px 2px 2px; }
+.arch-sm { border-radius: 999px 999px 0 0; }
+
+.inset-frame {
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(251, 250, 247, 0.18);
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .inset-frame { inset: 22px; }
+}
+
+/* A print "plate": the photograph, a hairline, and room to breathe. */
+.plate {
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+.plate img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 900ms var(--ease-settle), filter 900ms var(--ease-settle);
+}
+
+.plate:hover img { transform: scale(1.025); }
+
+.plate-ink { border-color: var(--rule-ink); }
+
+/* Print grade — honest colour, only a touch of restraint. */
+.grade-print img,
+img.grade-print {
+  filter: saturate(0.9) contrast(1.03) brightness(1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TYPE
+═══════════════════════════════════════════════════════════════════════ */
+
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+
+.display-hero {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: clamp(3rem, 7.6vw, 7.4rem);
+  line-height: 0.94;
+  letter-spacing: -0.032em;
+}
+
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: clamp(2.5rem, 5.4vw, 5.2rem);
+  line-height: 0.98;
+  letter-spacing: -0.028em;
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: clamp(2rem, 3.8vw, 3.6rem);
+  line-height: 1.04;
+  letter-spacing: -0.022em;
+}
+
+.display-md {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: clamp(1.65rem, 2.6vw, 2.4rem);
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+}
+
+.display-sm {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-size: clamp(1.3rem, 1.8vw, 1.7rem);
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+}
+
+/* Metadata: mono, uppercase, but never stretched into decoration. */
+.eyebrow {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-sand-deep);
+}
+
+.eyebrow-sand {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-sand-deep);
+}
+
+.eyebrow-copper {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+
+.eyebrow-on-ink {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(251, 250, 247, 0.62);
+}
+
+.folio {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  color: var(--rust);
+  font-variant-numeric: tabular-nums;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+.accent-italic {
+  font-style: italic;
+  color: var(--rust);
+}
+
+/* Retained names, now solid colour: gradients belonged to the old system. */
+.text-sand-gradient,
+.text-copper-gradient {
+  color: var(--rust);
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.surface-ink .text-sand-gradient {
+  color: var(--color-brass-light);
+}
+
+.surface-ink .text-copper-gradient {
+  color: var(--color-brass-light);
+}
+
+/* ── Fret index: the section number, set like a position marker ────── */
+.fret-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  padding: 0 0.35rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--rule);
+  color: var(--rust);
+  background: transparent;
+}
+
+.surface-ink .fret-index {
+  border-color: var(--rule-ink);
+  color: var(--color-brass-light);
+}
+
+.fret-index[data-inlay="true"]::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin-left: 0.3rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+
+/* ── Small caps label with rule, used in every section header ─────── */
+.label-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.label-rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+
+.surface-ink .label-rule::after { background: var(--rule-ink); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE STRING RULE
+   Six hairlines whose weights follow string gauge. The site's signature
+   divider; used at most once per page.
+═══════════════════════════════════════════════════════════════════════ */
+
+.string-rule {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 0.5rem 0;
+}
+
+.string-rule span {
+  display: block;
+  width: 100%;
+  background: var(--rule);
+}
+
+.string-rule span:nth-child(1) { height: var(--gauge-6); background: rgba(18, 18, 16, 0.34); }
+.string-rule span:nth-child(2) { height: var(--gauge-5); }
+.string-rule span:nth-child(3) { height: var(--gauge-4); }
+.string-rule span:nth-child(4) { height: var(--gauge-3); }
+.string-rule span:nth-child(5) { height: var(--gauge-2); }
+.string-rule span:nth-child(6) { height: var(--gauge-1); }
+
+.surface-ink .string-rule span:nth-child(1) { background: rgba(251, 250, 247, 0.34); }
+.surface-ink .string-rule span { background: rgba(251, 250, 247, 0.13); }
+
+/* ── Hero scrim for busy stage photography ─────────────────────────── */
+.hero-shade {
+  background: linear-gradient(
+    90deg,
+    rgba(11, 11, 10, 0.86) 0%,
+    rgba(11, 11, 10, 0.62) 38%,
+    rgba(11, 11, 10, 0.08) 72%,
+    rgba(11, 11, 10, 0.34) 100%
+  );
+}
+
+@media (max-width: 767px) {
+  .hero-shade {
+    background: linear-gradient(
+      180deg,
+      rgba(11, 11, 10, 0.42) 0%,
+      rgba(11, 11, 10, 0.58) 38%,
+      rgba(11, 11, 10, 0.78) 74%,
+      rgba(11, 11, 10, 0.9) 100%
+    );
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUTTONS & LINKS
+═══════════════════════════════════════════════════════════════════════ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 44px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.9rem 1.4rem;
+  border-radius: 0;
+  border: 1px solid transparent;
+  transition: background 200ms var(--ease-state), color 200ms var(--ease-state),
+    border-color 200ms var(--ease-state);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn [aria-hidden] {
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* Primary on paper: ink block that warms to oxblood. */
+.btn-solid,
+.btn-ink {
+  background: var(--ink);
+  color: var(--cream);
+  border-color: var(--ink);
+}
+
+.btn-solid:hover,
+.btn-ink:hover {
+  background: var(--rust);
+  border-color: var(--rust);
+  color: var(--cream);
+}
+
+/* Primary on ink: paper block. */
+.btn-brass {
+  background: var(--paper);
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+.btn-brass:hover {
+  background: var(--color-brass);
+  border-color: var(--color-brass);
+  color: var(--ink);
+}
+
+.btn-copper {
+  background: var(--rust);
+  color: var(--cream);
+  border-color: var(--rust);
+}
+.btn-copper:hover { background: var(--color-brass); border-color: var(--color-brass); color: var(--ink); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--paper);
+  border-color: rgba(251, 250, 247, 0.34);
+}
+
+.btn-ghost:hover {
+  border-color: var(--paper);
+  background: rgba(251, 250, 247, 0.08);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: rgba(18, 18, 16, 0.34);
+}
+.btn-outline:hover { border-color: var(--ink); background: rgba(18, 18, 16, 0.04); }
+
+.link-rule {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  padding-bottom: 0.4rem;
+}
+
+.link-rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.4rem;
+  height: 1px;
+  width: 100%;
+  background: var(--ink);
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform 260ms var(--ease-state), background 260ms var(--ease-state);
+}
+
+.link-rule:hover { color: var(--rust); }
+.link-rule:hover::after { transform: scaleX(1); background: var(--rust); }
+
+.link-rule-light {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper);
+  padding-bottom: 0.4rem;
+}
+
+.link-rule-light::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0.4rem;
+  height: 1px;
+  width: 100%;
+  background: var(--paper);
+  transform: scaleX(0.22);
+  transform-origin: left;
+  transition: transform 260ms var(--ease-state), background 260ms var(--ease-state);
+}
+
+.link-rule-light:hover { color: var(--color-brass-light); }
+.link-rule-light:hover::after { transform: scaleX(1); background: var(--color-brass-light); }
+
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 44px;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: inherit;
+  transition: color 160ms var(--ease-state), gap 160ms var(--ease-state);
+}
+.link-arrow:hover { color: var(--rust); gap: 0.75rem; }
+
+/* Arrows need a little more optical weight than the micro caps. */
+.link-rule [aria-hidden],
+.link-rule-light [aria-hidden],
+.link-arrow [aria-hidden] {
+  font-size: 0.95rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════════════════════════ */
+
+.lux-card {
+  position: relative;
+  border: 1px solid var(--rule);
+  background: rgba(251, 250, 247, 0.36);
+  transition: border-color 300ms var(--ease-state), background 300ms var(--ease-state);
+}
+
+.lux-card:hover {
+  border-color: rgba(18, 18, 16, 0.32);
+  background: rgba(251, 250, 247, 0.68);
+}
+
+.card-ink {
+  border: 1px solid var(--rule-ink-soft);
+  background: rgba(251, 250, 247, 0.03);
+  transition: border-color 300ms var(--ease-state), background 300ms var(--ease-state);
+}
+
+.card-ink:hover {
+  border-color: rgba(217, 154, 62, 0.4);
+  background: rgba(251, 250, 247, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   CHIPS & CONTROLS (the lab)
+═══════════════════════════════════════════════════════════════════════ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  transition: background 160ms var(--ease-state), border-color 160ms var(--ease-state),
+    color 160ms var(--ease-state);
+  cursor: pointer;
+}
+
+.chip:hover { border-color: rgba(18, 18, 16, 0.45); background: rgba(18, 18, 16, 0.04); }
+
+.chip:disabled,
+.chip[aria-disabled="true"] {
+  cursor: not-allowed;
+  border-color: rgba(18, 18, 16, 0.12);
+  color: rgba(18, 18, 16, 0.32);
+}
+
+.chip:disabled:hover,
+.chip[aria-disabled="true"]:hover {
+  border-color: rgba(18, 18, 16, 0.12);
+  background: transparent;
+}
+
+.chip[aria-pressed="true"],
+.chip[aria-selected="true"],
+.chip[data-active="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+.surface-ink .chip {
+  border-color: var(--rule-ink);
+  color: var(--paper);
+}
+
+.surface-ink .chip:hover { background: rgba(251, 250, 247, 0.06); }
+
+.surface-ink .chip:disabled,
+.surface-ink .chip[aria-disabled="true"] {
+  border-color: rgba(251, 250, 247, 0.14);
+  color: rgba(251, 250, 247, 0.32);
+}
+
+.surface-ink .chip:disabled:hover,
+.surface-ink .chip[aria-disabled="true"]:hover {
+  background: transparent;
+}
+
+.surface-ink .chip[aria-pressed="true"],
+.surface-ink .chip[aria-selected="true"],
+.surface-ink .chip[data-active="true"] {
+  background: var(--paper);
+  border-color: var(--paper);
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FORM
+═══════════════════════════════════════════════════════════════════════ */
+
+.lux-field,
+.field {
+  width: 100%;
+  background: rgba(251, 250, 247, 0.4);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 0.9rem 1rem;
+  min-height: 44px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  transition: border-color 160ms var(--ease-state), background 160ms var(--ease-state);
+}
+
+.lux-field::placeholder,
+.field::placeholder { color: #8b877d; }
+.lux-field:hover,
+.field:hover { border-color: rgba(18, 18, 16, 0.34); }
+.lux-field:focus,
+.field:focus {
+  outline: none;
+  border-color: var(--rust);
+  background: rgba(251, 250, 247, 0.85);
+}
+
+select.lux-field option,
+select.field option {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LONG-FORM
+═══════════════════════════════════════════════════════════════════════ */
+
+.lux-prose { max-width: 42rem; }
+
+.lux-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.6rem, 2.3vw, 2.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-top: 3rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--rule);
+}
+
+.lux-prose h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+
+.lux-prose h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--ink);
+  margin-top: 2rem;
+}
+
+.lux-prose p,
+.lux-prose li {
+  color: #45433d;
+  font-size: 1rem;
+  line-height: 1.75;
+  margin-top: 0.9rem;
+}
+
+.lux-prose ul,
+.lux-prose ol { margin-top: 1rem; padding-left: 0; }
+.lux-prose li { margin-top: 0.5rem; list-style: none; position: relative; padding-left: 1.1rem; }
+.lux-prose li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--rust);
+  opacity: 0.8;
+}
+
+.lux-prose strong { color: var(--ink); font-weight: 600; }
+
+.lux-prose a {
+  color: var(--rust);
+  text-decoration: underline;
+  text-decoration-color: rgba(124, 47, 34, 0.35);
+  text-underline-offset: 4px;
+  transition: color 160ms var(--ease-state);
+}
+
+.lux-prose a:hover { color: var(--ink); }
+
+/* Reading body for documents whose headings are styled in markup. */
+.doc-prose p,
+.doc-prose li {
+  color: #45433d;
+  font-size: 1rem;
+  line-height: 1.75;
+  margin-top: 0.85rem;
+}
+
+.doc-prose p:first-child { margin-top: 0; }
+
+.doc-prose ul,
+.doc-prose ol { margin-top: 1rem; padding-left: 0; }
+.doc-prose li {
+  list-style: none;
+  position: relative;
+  padding-left: 1.1rem;
+}
+.doc-prose li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--rust);
+  opacity: 0.8;
+}
+
+.doc-prose strong { color: var(--ink); font-weight: 600; }
+
+.doc-prose a {
+  color: var(--rust);
+  text-decoration: underline;
+  text-decoration-color: rgba(124, 47, 34, 0.35);
+  text-underline-offset: 4px;
+  transition: color 160ms var(--ease-state);
+}
+.doc-prose a:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   THE NECK
+   Drawing rules shared by the hero, the divider and the lab.
+═══════════════════════════════════════════════════════════════════════ */
+
+.neck-frame {
+  position: relative;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+}
+
+.neck-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.neck-svg text {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A note dot: the only round thing in the system. */
+.note-dot {
+  transition: transform 180ms var(--ease-state), opacity 180ms var(--ease-state);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.note-dot[data-active="true"] {
+  transform: scale(1.06);
+}
+
+.note-dot:focus-visible {
+  outline: none;
+}
+
+.note-dot:focus-visible circle:first-of-type {
+  stroke: var(--rust);
+  stroke-width: 2.5;
+}
+
+.surface-ink .note-dot:focus-visible circle:first-of-type {
+  stroke: var(--color-brass-light);
+}
+
+/* A fretboard that is allowed to be wider than the phone. */
+.fretboard-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(18, 18, 16, 0.28) transparent;
+}
+
+.fretboard-scroll > * {
+  min-width: 700px;
+}
+
+@media (min-width: 768px) {
+  .fretboard-scroll > * {
+    min-width: 0;
+  }
+}
+
+/* A score bar: the thin filled measure used for confidence. */
+.measure {
+  position: relative;
+  height: 2px;
+  width: 100%;
+  background: var(--rule);
+  overflow: hidden;
+}
+
+.measure > span {
+  display: block;
+  height: 100%;
+  background: var(--rust);
+}
+
+.surface-ink .measure { background: var(--rule-ink); }
+.surface-ink .measure > span { background: var(--color-brass); }
+
+@media (prefers-reduced-motion: reduce) {
+  .note-dot { transition: none; }
+  .note-dot[data-active="true"] { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOTION — the plucked string settles
+═══════════════════════════════════════════════════════════════════════ */
+
+@keyframes mf-settle {
+  0%   { opacity: 0; transform: translateY(10px); }
+  60%  { opacity: 1; transform: translateY(-1.5px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mf-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.mf-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: mf-marquee 70s linear infinite;
+}
+
+.mf-marquee:hover .mf-marquee-track { animation-play-state: paused; }
+
+@keyframes mf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.mf-float { animation: mf-float 7s ease-in-out infinite; }
+
+@keyframes mf-spin {
+  to { transform: rotate(360deg); }
+}
+
+.mf-spin-slow { animation: mf-spin 24s linear infinite; }
+
+@keyframes mf-fade-in {
+  0% { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mf-fade-up {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mf-scroll-cue {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+.scroll-cue { animation: mf-scroll-cue 2.6s var(--ease-settle) infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  [data-mf-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .mf-marquee-track,
+  .mf-float,
+  .mf-spin-slow,
+  .scroll-cue { animation: none !important; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

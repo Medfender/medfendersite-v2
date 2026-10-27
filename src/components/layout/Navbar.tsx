@@ -1,254 +1,248 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from "framer-motion";
 import { ShoppingCart } from "lucide-react";
 import BookSessionButton from "@/components/BookSessionButton";
 import { useCart } from "@/lib/CartContext";
 import CartDrawer from "./CartDrawer";
 
 /* ════════════════════════════════════════════════════
-   NAVIGATION LINKS
-═══════════════════════════════════════════════════ */
+   NAVIGATION — ordered the way a set is ordered:
+   the room, the sound, the school, the shop, the archive.
+   The Fretboard is the instrument; it sits after the archive.
+   ═══════════════════════════════════════════════════ */
 const navLinks = [
-  { label: "AUDIO", href: "/audio" },
-  { label: "STORE", href: "/store" },
-  { label: "MEDIA", href: "/media" },
-  { label: "SUPPORT", href: "/support/setup-guide" },
+  { label: "Live", href: "/live" },
+  { label: "Audio", href: "/audio" },
+  { label: "Academy", href: "/academy" },
+  { label: "Store", href: "/store" },
+  { label: "Media", href: "/media" },
+  { label: "Fretboard", href: "/fretboard" },
 ];
 
-/* ════════════════════════════════════════════════════
-   NAVBAR — UFC-style magic-line underline via layoutId
-═══════════════════════════════════════════════════ */
 export default function Navbar() {
   const pathname = usePathname();
   const { itemCount } = useCart();
 
   const [cartOpen, setCartOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [hidden, setHidden] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
 
-  // ── Scroll hide/reveal + transparent → solid ──
-  const { scrollY } = useScroll();
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    const previous = scrollY.getPrevious() ?? 0;
+  // The landing page opens on a full-bleed photograph: let the nav sit on the
+  // image, then turn solid once the page starts moving.
+  const isHome = pathname === "/";
+  const overHero = isHome && !scrolled && !mobileOpen;
 
-    // Hide on scroll down past 80px
-    if (latest > previous && latest > 80) {
-      setHidden(true);
-    } else {
-      setHidden(false);
-    }
-
-    // Solid brutalist background past 50px
-    setIsScrolled(latest > 50);
-  });
-
-  // ── Lock body scroll when mobile menu is open ──
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 28);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isHome]);
+
+  // Lock body scroll while the menu is open.
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
   }, [mobileOpen]);
 
+  // Escape closes the menu.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
+
   return (
     <>
-      {/* ── Main Header ── */}
-      <motion.nav
-        variants={{
-          visible: { y: 0 },
-          hidden: { y: "-120%" },
-        }}
-        animate={hidden ? "hidden" : "visible"}
-        transition={{ duration: 0.35, ease: "easeInOut" }}
-        className={`fixed top-0 w-full z-50 transition-colors duration-300 ${
-          isScrolled ? "bg-zinc-950 border-b border-zinc-900" : "bg-zinc-950/0 border-b border-transparent"
-        }`}
+      <header
+        className={[
+          "top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300",
+          isHome ? "fixed inset-x-0" : "sticky",
+          overHero
+            ? "border-transparent bg-transparent"
+            : "border-[var(--rule)] bg-paper/92 shadow-[0_1px_0_rgba(18,18,16,0.04)] backdrop-blur-[6px]",
+        ].join(" ")}
       >
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between gap-8">
-          {/* ── Brand + Browse Store button ── */}
-          <div className="flex items-center gap-6 shrink-0">
-            <Link
+        <div className="mx-auto flex h-16 w-full max-w-[1560px] items-center justify-between gap-6 px-5 md:h-[4.5rem] md:px-8">
+          {/* Wordmark */}
+          <Link
             href="/"
-            className="text-xl font-bold tracking-[0.2em] text-white uppercase shrink-0 hover:text-zinc-200 transition-colors"
-            aria-label="MEDFENDER Home"
+            className="group flex shrink-0 items-baseline gap-2.5"
+            aria-label="Medfender — home"
           >
-            Medfender
-          </Link>
-          </div>
-
-          {/* ── Center: Desktop Nav with Gliding Underline ── */}
-          <div
-            className="hidden md:flex items-center space-x-8 h-full relative"
-            onMouseLeave={() => setHoveredIndex(null)}
-            aria-label="Main navigation"
-          >
-            {navLinks.map((link, i) => (
-              <div
-                key={link.href}
-                className="relative flex items-center h-full px-2"
-                onMouseEnter={() => setHoveredIndex(i)}
-              >
-                <Link
-                  href={link.href}
-                  className={[
-                    "text-xs tracking-[0.2em] font-bold uppercase transition-colors z-10",
-                    pathname.startsWith(link.href) ? "text-white" : "text-zinc-300 hover:text-white",
-                  ].join(" ")}
-                >
-                  {link.label}
-                </Link>
-
-                {/* Magic line — single shared layoutId */}
-                <AnimatePresence>
-                  {hoveredIndex === i && (
-                    <motion.div
-                      layoutId="nav-underline"
-                      className="absolute bottom-4 left-0 right-0 h-[3px] bg-[#E5A93C]"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 300,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Right: Cart + CTA ── */}
-          <div className="flex items-center gap-4">
-            {/* Cart */}
-            <button
-              onClick={() => setCartOpen(true)}
-              aria-label={`Open cart (${itemCount} items)`}
-              className="relative w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+            <span
+              className={`font-display text-[1.55rem] leading-none tracking-[-0.02em] transition-colors duration-300 ${
+                overHero ? "text-cream" : "text-ink"
+              }`}
             >
-              <ShoppingCart size={18} strokeWidth={2} />
-              {itemCount > 0 && (
-                <span
-                  aria-hidden="true"
-                  className="absolute top-0 right-0 -mt-1 -mr-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#E5A93C] text-black text-[9px] font-black flex items-center justify-center"
-                >
+              Medfender
+            </span>
+            <span
+              className={`hidden font-mono text-[0.6rem] uppercase tracking-[0.16em] transition-colors duration-300 sm:inline ${
+                overHero ? "text-cream/60" : "text-ink/60"
+              }`}
+            >
+              Marrakech
+            </span>
+          </Link>
+
+          {/* Desktop navigation */}
+          <nav aria-label="Primary" className="hidden lg:block">
+            <ul className="flex items-center gap-1">
+              {navLinks.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={[
+                        "relative flex min-h-[44px] items-center px-3 font-mono text-[0.7rem] uppercase tracking-[0.12em] transition-colors",
+                        active
+                          ? overHero
+                            ? "text-brass-light"
+                            : "text-rust"
+                          : overHero
+                            ? "text-cream/72 hover:text-cream"
+                            : "text-ink/62 hover:text-ink",
+                      ].join(" ")}
+                    >
+                      {link.label}
+                      <span
+                        aria-hidden
+                        className={[
+                          "absolute inset-x-3 bottom-2 h-px origin-left bg-current transition-transform duration-200",
+                          active ? "scale-x-100" : "scale-x-0",
+                        ].join(" ")}
+                      />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+
+          {/* Cart + booking + mobile trigger */}
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setCartOpen(true)}
+              aria-label={`Open cart, ${itemCount} item${itemCount === 1 ? "" : "s"}`}
+              className={[
+                "relative flex h-11 w-11 items-center justify-center border border-transparent transition-colors",
+                overHero
+                  ? "text-cream/80 hover:border-cream/30 hover:text-cream"
+                  : "text-ink/70 hover:border-[var(--rule)] hover:text-ink",
+              ].join(" ")}
+            >
+              <ShoppingCart size={18} strokeWidth={1.75} aria-hidden />
+              {itemCount > 0 ? (
+                <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center bg-rust px-1 font-mono text-[0.55rem] leading-none text-cream">
                   {itemCount > 9 ? "9+" : itemCount}
                 </span>
-              )}
+              ) : null}
             </button>
 
-            {/* BOOK A SESSION CTA */}
-            <Link href="/contact" aria-label="Book a session" className="hidden md:block">
-              <BookSessionButton />
-            </Link>
+            <div className="hidden sm:block">
+              <BookSessionButton tone={overHero ? "paper" : "ink"} />
+            </div>
 
-            {/* Mobile: Hamburger */}
             <button
+              type="button"
               onClick={() => setMobileOpen(true)}
               aria-label="Open menu"
               aria-expanded={mobileOpen}
-              className="md:hidden w-10 h-10 flex flex-col items-center justify-center gap-[5px] text-zinc-400 hover:text-white transition-colors"
+              aria-controls="mobile-menu"
+              className={[
+                "flex h-11 w-11 flex-col items-center justify-center gap-[5px] border transition-colors lg:hidden",
+                overHero
+                  ? "border-cream/30 text-cream hover:border-cream/60"
+                  : "border-[var(--rule)] text-ink hover:border-ink",
+              ].join(" ")}
             >
-              <span className="block w-6 h-[2px] bg-current" />
-              <span className="block w-6 h-[2px] bg-current" />
-              <span className="block w-4 h-[2px] bg-current" />
+              <span aria-hidden className="block h-px w-5 bg-current" />
+              <span aria-hidden className="block h-px w-5 bg-current" />
+              <span aria-hidden className="block h-px w-3.5 bg-current" />
             </button>
           </div>
         </div>
-      </motion.nav>
+      </header>
 
-      {/* ── Mobile: Full-Screen Overlay ── */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            className="fixed inset-0 z-[60] bg-zinc-950 flex flex-col"
-            initial={{ opacity: 0, y: "-100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Header bar */}
-            <div className="flex items-center justify-between px-6 h-20 border-b border-zinc-900">
-              <span className="text-xl font-bold uppercase tracking-[0.2em] text-white">
-                Medfender
-              </span>
-              <button
-                onClick={() => setMobileOpen(false)}
-                aria-label="Close menu"
-                className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
-              >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                  <path d="M2 2L18 18M18 2L2 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="square" />
-                </svg>
-              </button>
-            </div>
+      {/* Mobile: a page of the notebook, not a full-screen advert */}
+      {mobileOpen ? (
+        <div
+          id="mobile-menu"
+          className="fixed inset-0 z-[60] flex flex-col bg-paper lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+        >
+          <div className="flex h-16 items-center justify-between border-b border-[var(--rule)] px-5">
+            <span className="font-display text-[1.55rem] leading-none text-ink">Medfender</span>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+              className="flex h-11 w-11 items-center justify-center border border-[var(--rule)] text-ink"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                <path d="M2 2L14 14M14 2L2 14" stroke="currentColor" strokeWidth="1.5" />
+              </svg>
+            </button>
+          </div>
 
-            {/* Nav links — blocky, massive */}
-            <nav className="flex-1 flex flex-col justify-center px-6 gap-1" aria-label="Mobile navigation">
-              {navLinks.map((link, i) => (
-                <motion.div
-                  key={link.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.1 + i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                >
+          <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-5 py-6">
+            <ul>
+              {navLinks.map((link, index) => (
+                <li key={link.href} className="border-b border-[var(--rule)]">
                   <Link
                     href={link.href}
+                    aria-current={isActive(link.href) ? "page" : undefined}
                     onClick={() => setMobileOpen(false)}
-                    aria-current={pathname.startsWith(link.href) ? "page" : undefined}
-                    className={[
-                      "block text-5xl md:text-6xl font-black uppercase tracking-tight leading-none py-3 transition-colors",
-                      pathname.startsWith(link.href) ? "text-white" : "text-zinc-600 hover:text-white",
-                    ].join(" ")}
+                    className="flex items-baseline justify-between gap-4 py-4"
                   >
-                    {link.label}
+                    <span
+                      className={`font-display text-[2rem] leading-none tracking-[-0.02em] ${
+                        isActive(link.href) ? "text-rust" : "text-ink"
+                      }`}
+                    >
+                      {link.label}
+                    </span>
+                    <span className="font-mono text-[0.7rem] tabular-nums text-ink/60">
+                      {String(index).padStart(2, "0")}
+                    </span>
                   </Link>
-                </motion.div>
+                </li>
               ))}
+            </ul>
 
-              {/* CTA */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + navLinks.length * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                className="mt-6"
+            <div className="mt-8 flex flex-col gap-3">
+              <BookSessionButton />
+              <Link
+                href="/contact"
+                className="link-rule"
+                onClick={() => setMobileOpen(false)}
               >
-                <Link
-                  href="mailto:contact@medfender.com"
-                  onClick={() => setMobileOpen(false)}
-                  className="inline-block bg-[#E5A93C] text-black font-black uppercase text-lg tracking-widest px-8 py-4 hover:bg-white transition-colors duration-150"
-                >
-                  BOOK A SESSION
-                </Link>
-              </motion.div>
-            </nav>
-
-            {/* Bottom bar */}
-            <div className="border-t border-zinc-900 px-6 py-6 flex gap-8">
-              <Link href="/contact" onClick={() => setMobileOpen(false)} className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors">
                 Contact
-              </Link>
-              <Link href="/" onClick={() => setMobileOpen(false)} className="text-xs font-bold uppercase tracking-[0.2em] text-zinc-600 hover:text-white transition-colors">
-                Home
+                <span aria-hidden>→</span>
               </Link>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </nav>
+        </div>
+      ) : null}
 
-      {/* ── Cart Drawer ── */}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );

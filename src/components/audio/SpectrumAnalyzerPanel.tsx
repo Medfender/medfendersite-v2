@@ -284,6 +284,8 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
+        role="img"
+        aria-label="Live spectrum and EQ curve, 20 Hz to 20 kHz. Pointer-interactive: drag a band to change its frequency and gain, double-click to add one."
         onMouseDown={handlePointerDown}
         onMouseMove={handlePointerMove}
         onMouseUp={handlePointerUp}
@@ -310,52 +312,22 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
         }}
       />
 
-      {/* Header — engraved studio label with cyan glow */}
+      {/* Curve / Bars toggle + display profile swatches */}
       <div
         style={{
           position: "absolute",
-          top: 10,
-          left: 16,
-          zIndex: 20,
-          pointerEvents: "none",
-          fontFamily: "'Courier Prime', 'JetBrains Mono', monospace",
-          fontSize: 11,
-          letterSpacing: "0.35em",
-          color: "#00d8f6",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          textShadow: "0 0 8px rgba(0,216,246,0.45), 0 0 20px rgba(0,216,246,0.15)",
-        }}
-      >
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          top: 10,
-          right: 16,
-          zIndex: 20,
-          pointerEvents: "none",
-          fontFamily: "'Courier Prime', monospace",
-          fontSize: 9,
-          letterSpacing: "0.2em",
-          color: "#64748b",
-          textTransform: "uppercase",
-          textShadow: "0 1px 4px rgba(0,0,0,0.8)",
-        }}
-      >
-      </div>
-
-      {/* Curve / Bars toggle + color theme buttons in header toolbar */}
-      <div
-        style={{
-          position: "absolute",
-          top: 3,
-          right: 16,
+          top: 8,
+          right: 10,
           zIndex: 20,
           pointerEvents: "auto",
           display: "flex",
           alignItems: "center",
           gap: 8,
+          padding: "4px 6px",
+          background: "rgba(10,8,6,0.72)",
+          backdropFilter: "blur(6px)",
+          border: "1px solid rgba(217,154,62,0.16)",
+          borderRadius: 4,
         }}
       >
         {(["curve", "bars"] as const).map((m) => (
@@ -368,9 +340,9 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
               fontFamily: "'JetBrains Mono', monospace",
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: viewMode === m ? "#f2e6c8" : "#64748b",
-              background: viewMode === m ? "rgba(0,216,246,0.12)" : "transparent",
-              border: viewMode === m ? "1px solid rgba(0,216,246,0.35)" : "1px solid rgba(100,116,139,0.25)",
+              color: viewMode === m ? "#f2e6c8" : "#9ca3a5",
+              background: viewMode === m ? "rgba(223,161,74,0.12)" : "transparent",
+              border: viewMode === m ? "1px solid rgba(223,161,74,0.35)" : "1px solid rgba(100,116,139,0.25)",
               borderRadius: 3,
               cursor: "pointer",
               transition: "all 0.15s ease",
@@ -393,8 +365,8 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
               borderRadius: "50%",
               border: `1.5px solid ${colorTheme === c ? "rgba(255,255,255,0.7)" : "rgba(100,116,139,0.3)"}`,
               background:
-                c === "cyan" ? "#00d8f6" : c === "neon" ? "#f87171" : "#34d399",
-              boxShadow: colorTheme === c ? `0 0 6px ${c === "cyan" ? "rgba(0,216,246,0.5)" : c === "neon" ? "rgba(248,113,113,0.5)" : "rgba(52,211,153,0.5)"}` : "none",
+                c === "cyan" ? "#D0C0A6" : c === "neon" ? "#f87171" : "#34d399",
+              boxShadow: colorTheme === c ? `0 0 6px ${c === "cyan" ? "rgba(223,161,74,0.5)" : c === "neon" ? "rgba(248,113,113,0.5)" : "rgba(52,211,153,0.5)"}` : "none",
               cursor: "pointer",
               transition: "all 0.15s ease",
             }}
@@ -412,26 +384,65 @@ export default function SpectrumAnalyzerPanel({ selectedBandId, setSelectedBandI
 function drawSilentFrame(ctx2d: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
   const w = canvas.clientWidth;
   const h = canvas.clientHeight;
+  if (w === 0 || h === 0) return;
   ctx2d.clearRect(0, 0, w, h);
-  // Draw only minimal grid (no peaks) to show silence visually
+
+  // The idle instrument face: full log-frequency grid + dB rulings, so the
+  // panel reads as a calibrated scale before any signal arrives.
+  drawGrid(ctx2d, w, h);
+
   ctx2d.save();
-  ctx2d.strokeStyle = "rgba(0,216,246,0.04)";
-  ctx2d.lineWidth = 0.5;
-  for (const f of [20, 100, 1000, 10000]) {
+
+  // Frequency ticks and labels along the floor of the scale.
+  const ticks: Array<[number, string]> = [
+    [20, "20"],
+    [50, "50"],
+    [100, "100"],
+    [200, "200"],
+    [500, "500"],
+    [1000, "1k"],
+    [2000, "2k"],
+    [5000, "5k"],
+    [10000, "10k"],
+    [20000, "20k"],
+  ];
+  ctx2d.font = "9px ui-monospace, 'Geist Mono', monospace";
+  ctx2d.textAlign = "center";
+  ctx2d.textBaseline = "bottom";
+  for (const [f, label] of ticks) {
     const x = freqToXNorm(f) * w;
+    ctx2d.strokeStyle = "rgba(217,154,62,0.22)";
+    ctx2d.lineWidth = 1;
     ctx2d.beginPath();
-    ctx2d.moveTo(x, 0);
-    ctx2d.lineTo(x, h);
+    ctx2d.moveTo(x, h - 26);
+    ctx2d.lineTo(x, h - 18);
     ctx2d.stroke();
+    ctx2d.fillStyle = "rgba(242,235,221,0.28)";
+    ctx2d.fillText(label, Math.min(w - 12, Math.max(12, x)), h - 5);
   }
-  // Flat zero-dB center line (visual indicator of silence / blocked state)
+
+  // Zero-dB datum: dashed brass rule.
   const zeroY = dbToYNorm(0) * h;
-  ctx2d.strokeStyle = "rgba(255,255,255,0.06)";
-  ctx2d.lineWidth = 2;
+  ctx2d.setLineDash([3, 5]);
+  ctx2d.strokeStyle = "rgba(217,154,62,0.4)";
+  ctx2d.lineWidth = 1;
   ctx2d.beginPath();
   ctx2d.moveTo(0, zeroY);
   ctx2d.lineTo(w, zeroY);
   ctx2d.stroke();
+  ctx2d.setLineDash([]);
+
+  // dB labels on the left edge.
+  ctx2d.font = "9px ui-monospace, 'Geist Mono', monospace";
+  ctx2d.textAlign = "left";
+  ctx2d.textBaseline = "middle";
+  for (const db of [12, 6, 0, -6, -12]) {
+    const y = dbToYNorm(db) * h;
+    if (y < 14 || y > h - 30) continue;
+    ctx2d.fillStyle = "rgba(242,235,221,0.22)";
+    ctx2d.fillText(db > 0 ? `+${db}` : `${db}`, 8, y);
+  }
+
   ctx2d.restore();
 }
 
@@ -466,7 +477,7 @@ function drawGrid(ctx2d: CanvasRenderingContext2D, w: number, h: number) {
   // Decade grid: 20, 100, 1k, 10k
   for (const f of [20, 100, 1000, 10000]) {
     const x = freqToXNorm(f) * w;
-    ctx2d.strokeStyle = "rgba(0,216,246,0.08)";
+    ctx2d.strokeStyle = "rgba(223,161,74,0.08)";
     ctx2d.lineWidth = 1;
     ctx2d.beginPath();
     ctx2d.moveTo(x, 0);
@@ -474,7 +485,7 @@ function drawGrid(ctx2d: CanvasRenderingContext2D, w: number, h: number) {
     ctx2d.stroke();
   }
   // Minor decade lines
-  ctx2d.strokeStyle = "rgba(0,216,246,0.03)";
+  ctx2d.strokeStyle = "rgba(223,161,74,0.03)";
   for (const f of [50, 200, 500, 2000, 5000, 20000]) {
     const x = freqToXNorm(f) * w;
     ctx2d.beginPath();
@@ -485,7 +496,7 @@ function drawGrid(ctx2d: CanvasRenderingContext2D, w: number, h: number) {
   // dB grid lines
   for (const db of [0, 6, 12, 18, -6, -12, -18]) {
     const y = dbToYNorm(db) * h;
-    ctx2d.strokeStyle = db === 0 ? "rgba(255,255,255,0.18)" : "rgba(0,216,246,0.04)";
+    ctx2d.strokeStyle = db === 0 ? "rgba(255,255,255,0.18)" : "rgba(223,161,74,0.04)";
     ctx2d.lineWidth = db === 0 ? 1 : 0.5;
     ctx2d.beginPath();
     ctx2d.moveTo(0, y);
@@ -518,14 +529,14 @@ function drawSpectrum(
   ctx2d.closePath();
   // Cyan gradient fill
   const grad = ctx2d.createLinearGradient(0, 0, 0, h);
-  grad.addColorStop(0, "rgba(0,216,246,0.35)");
-  grad.addColorStop(1, "rgba(0,216,246,0.05)");
+  grad.addColorStop(0, "rgba(223,161,74,0.35)");
+  grad.addColorStop(1, "rgba(223,161,74,0.05)");
   ctx2d.fillStyle = grad;
   ctx2d.fill();
   // Glowing outline
-  ctx2d.shadowColor = "#00d8f6";
+  ctx2d.shadowColor = "#D0C0A6";
   ctx2d.shadowBlur = 8;
-  ctx2d.strokeStyle = "#00d8f6";
+  ctx2d.strokeStyle = "#D0C0A6";
   ctx2d.lineWidth = 1.2;
   ctx2d.stroke();
   ctx2d.restore();
@@ -602,7 +613,7 @@ function drawBandHandles(
 
     // Guide crosshair
     ctx2d.save();
-    ctx2d.strokeStyle = b.enabled ? "rgba(0,216,246,0.3)" : "rgba(148,163,184,0.1)";
+    ctx2d.strokeStyle = b.enabled ? "rgba(223,161,74,0.3)" : "rgba(148,163,184,0.1)";
     ctx2d.lineWidth = 0.6;
     ctx2d.setLineDash([3, 3]);
     ctx2d.beginPath();
@@ -616,9 +627,9 @@ function drawBandHandles(
 
     // Hover halo ring
     ctx2d.save();
-    ctx2d.shadowColor = b.enabled ? "#00d8f6" : "#475569";
+    ctx2d.shadowColor = b.enabled ? "#D0C0A6" : "#475569";
     ctx2d.shadowBlur = 14;
-    ctx2d.fillStyle = b.enabled ? "#00d8f6" : "#475569";
+    ctx2d.fillStyle = b.enabled ? "#D0C0A6" : "#475569";
     ctx2d.beginPath();
     ctx2d.arc(x, y, 6, 0, Math.PI * 2);
     ctx2d.fill();
@@ -663,7 +674,7 @@ function drawDbLabels(ctx2d: CanvasRenderingContext2D, w: number, h: number) {
 function getThemeColors(themes: "cyan" | "neon" | "emerald") {
   if (themes === "neon") return { stroke: "#f87171", fillTop: "rgba(248,113,113,0.35)", fillBottom: "rgba(248,113,113,0.05)", shadow: "#f87171" };
   if (themes === "emerald") return { stroke: "#34d399", fillTop: "rgba(52,211,153,0.35)", fillBottom: "rgba(52,211,153,0.05)", shadow: "#34d399" };
-  return { stroke: "#00d8f6", fillTop: "rgba(0,216,246,0.35)", fillBottom: "rgba(0,216,246,0.05)", shadow: "#00d8f6" };
+  return { stroke: "#D0C0A6", fillTop: "rgba(223,161,74,0.35)", fillBottom: "rgba(223,161,74,0.05)", shadow: "#D0C0A6" };
 }
 
 function drawBarsSpectrum(

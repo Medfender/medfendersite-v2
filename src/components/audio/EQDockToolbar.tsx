@@ -59,12 +59,12 @@ export function EQDockToolbar({ selectedBandId, setSelectedBandId, activeType }:
         gap: 8,
         padding: "7px 14px",
         background: "rgba(6,8,12,0.72)",
-        border: "1px solid rgba(0,216,246,0.15)",
+        border: "1px solid rgba(223,161,74,0.15)",
         borderRadius: 28,
         backdropFilter: "blur(20px)",
         WebkitBackdropFilter: "blur(20px)",
         boxShadow:
-          "0 0 0 1px rgba(0,216,246,0.04) inset, 0 4px 32px rgba(0,216,246,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
+          "0 0 0 1px rgba(223,161,74,0.04) inset, 0 4px 32px rgba(223,161,74,0.06), inset 0 1px 0 rgba(255,255,255,0.05)",
         width: "fit-content",
         margin: "0 auto",
       }}
@@ -79,10 +79,10 @@ export function EQDockToolbar({ selectedBandId, setSelectedBandId, activeType }:
             disabled={selectedBandId == null}
             style={{
               ...btnBase,
-              color: isActive ? "#00d8f6" : selectedBandId != null ? "#94a3b8" : "#475569",
-              background: isActive ? "rgba(0,216,246,0.08)" : "transparent",
-              border: isActive ? "1px solid rgba(0,216,246,0.3)" : "1px solid rgba(148,163,184,0.2)",
-              boxShadow: isActive ? "0 0 6px rgba(0,216,246,0.15)" : "none",
+              color: isActive ? "#D0C0A6" : selectedBandId != null ? "#94a3b8" : "#475569",
+              background: isActive ? "rgba(223,161,74,0.08)" : "transparent",
+              border: isActive ? "1px solid rgba(223,161,74,0.3)" : "1px solid rgba(148,163,184,0.2)",
+              boxShadow: isActive ? "0 0 6px rgba(223,161,74,0.15)" : "none",
               opacity: selectedBandId != null ? 1 : 0.5,
               cursor: selectedBandId != null ? "pointer" : "not-allowed",
             }}
@@ -96,7 +96,7 @@ export function EQDockToolbar({ selectedBandId, setSelectedBandId, activeType }:
                   left: 8,
                   right: 8,
                   height: 1,
-                  background: "#00d8f6",
+                  background: "#D0C0A6",
                   borderRadius: 1,
                   opacity: 0.8,
                 }}
@@ -107,7 +107,7 @@ export function EQDockToolbar({ selectedBandId, setSelectedBandId, activeType }:
       })}
 
       {/* Divider */}
-      <div style={{ width: 1, height: 18, background: "rgba(0,216,246,0.15)", borderRadius: 1 }} />
+      <div style={{ width: 1, height: 18, background: "rgba(223,161,74,0.15)", borderRadius: 1 }} />
 
       {/* Toggle */}
       <button

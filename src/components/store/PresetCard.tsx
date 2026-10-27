@@ -2,9 +2,14 @@
 
 import React from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { PackData } from "@/data/storeData";
+import PackCover from "./PackCover";
 
+/**
+ * Tiny pub/sub so AudioContext / demo players can mute others when one
+ * starts. Preserved from the original implementation.
+ */
 export const previewController = {
   listeners: new Set<(id: string | null, playing: boolean) => void>(),
   activeId: null as string | null,
@@ -16,90 +21,47 @@ export const previewController = {
 
 interface PresetCardProps {
   preset: PackData;
-  /** Optional cover image src — falls back to a dark gradient placeholder */
-  coverImage?: string;
+  index?: number;
 }
 
-export default function PresetCard({ preset, coverImage }: PresetCardProps) {
+export default function PresetCard({ preset, index = 0 }: PresetCardProps) {
   const href = `/store/${preset.slug}`;
-
-  // Comma-separated platform list from badge + type
-  const platforms = [preset.badge, ...(preset.type !== preset.badge ? [preset.type] : [])].join(", ");
+  const platforms = preset.platforms ?? [preset.badge];
 
   return (
-    <Link
-      href={href}
-      className="group flex flex-col bg-neutral-900 border border-zinc-800 hover:border-cyan-600/60 transition-all duration-200 overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.6)] hover:shadow-[0_0_40px_rgba(0,216,246,0.08)]"
-    >
-      {/* Cover image — square aspect, dark overlay */}
-      <div className="relative w-full aspect-square overflow-hidden bg-neutral-950">
-        {coverImage ? (
-          <img
-            src={coverImage}
-            alt={preset.title}
-            className="w-full h-full object-cover opacity-70 group-hover:opacity-80 group-hover:scale-[1.03] transition-all duration-500"
-          />
-        ) : (
-          /* Abstract dark gradient placeholder */
-          <div
-            className="w-full h-full"
-            style={{
-              background:
-                "radial-gradient(ellipse at 30% 40%, rgba(6,182,212,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 60%, rgba(0,80,100,0.2) 0%, transparent 50%), linear-gradient(160deg, #0f1318 0%, #0b0f19 100%)",
-            }}
-          />
-        )}
-        {/* Bottom gradient fade */}
-        <div className="absolute inset-0 bg-gradient-to-t from-neutral-900 via-transparent to-transparent" />
+    <Link href={href} className="group flex h-full flex-col">
+      <PackCover title={preset.title} badge={preset.badge} index={index} />
 
-        {/* Badge overlay */}
-        <div className="absolute top-3 left-3">
-          <span className="px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.25em] text-cyan-300 border border-cyan-700/50 bg-black/60 backdrop-blur-sm">
-            {preset.badge}
-          </span>
-        </div>
-      </div>
-
-      {/* Card body */}
-      <div className="flex flex-col flex-1 px-5 pt-4 pb-0">
-        {/* Title */}
-        <h3 className="text-lg font-bold text-white leading-snug line-clamp-2 tracking-tight group-hover:text-cyan-100 transition-colors">
+      <div className="flex flex-1 flex-col pt-4">
+        <p className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-rust">
+          {preset.type} · digital pack
+        </p>
+        <h3 className="mt-2.5 font-display text-2xl leading-snug text-ink transition-colors group-hover:text-rust">
           {preset.title}
         </h3>
-
-        {/* Platforms */}
-        <p className="mt-1 text-[10px] font-mono text-zinc-500 uppercase tracking-wider">
-          {platforms}
+        <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-ink/60">
+          {preset.description}
         </p>
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Price + CTA row */}
-        <div className="mt-4 mb-0">
-          {/* Price */}
-          <div className="flex items-baseline justify-between mb-4">
-            <span className="text-3xl font-black text-white tracking-tight leading-none">
-              ${preset.price.toFixed(2)}
+        <div className="mt-4 flex flex-wrap gap-1.5">
+          {platforms.slice(0, 3).map((platform) => (
+            <span
+              key={platform}
+              className="border border-[var(--rule)] px-2 py-0.5 font-mono text-[7.5px] uppercase tracking-[0.2em] text-ink/50"
+            >
+              {platform}
             </span>
-            <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-600">
-              USD
-            </span>
-          </div>
+          ))}
+        </div>
 
-          {/* Full-width explore button */}
-          <div className="-mx-5 -mb-0">
-            <div
-            className="w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-cyan-600 text-white font-black uppercase tracking-widest text-xs py-3.5 transition-colors duration-150 group/btn"
-            onClick={(e) => { e.stopPropagation(); e.preventDefault(); }}
-          >
-            <span>Explore Rig</span>
-              <ArrowRight
-                size={13}
-                className="shrink-0 group-hover/btn:translate-x-0.5 transition-transform duration-150"
-              />
-            </div>
-          </div>
+        <div className="mt-auto flex items-center justify-between border-t border-[var(--rule)] pt-3.5">
+          <span className="font-mono text-sm text-ink">
+            ${preset.price.toFixed(2)}
+          </span>
+          <span className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.24em] text-ink/50 transition-colors group-hover:text-rust">
+            Explore rig
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </span>
         </div>
       </div>
     </Link>

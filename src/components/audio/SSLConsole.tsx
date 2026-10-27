@@ -45,9 +45,9 @@ function LCDScreen({ info }: { info: LCDInfo }) {
           <div
             className="w-1.5 h-1.5 rounded-full transition-all duration-300"
             style={{
-              backgroundColor: hasContent ? "#00d4ff" : "#1a3a2a",
+              backgroundColor: hasContent ? "#D0C0A6" : "#1a3a2a",
               boxShadow: hasContent
-                ? "0 0 6px #00d4ff, 0 0 2px #00d4ff"
+                ? "0 0 6px #D0C0A6, 0 0 2px #D0C0A6"
                 : "none",
             }}
           />
@@ -62,7 +62,7 @@ function LCDScreen({ info }: { info: LCDInfo }) {
         <div
           className="font-mono font-bold text-sm leading-snug mb-1 transition-all duration-200"
           style={{
-            color: hasContent ? "#00d4ff" : "rgba(0,212,255,0.25)",
+            color: hasContent ? "#D0C0A6" : "rgba(0,212,255,0.25)",
             textShadow: hasContent ? "0 0 8px rgba(0,212,255,0.5)" : "none",
           }}
         >
@@ -327,7 +327,7 @@ function FaderCap({
           className="absolute left-1/2 -translate-x-1/2 top-1 bottom-1 w-2 rounded-full z-10 pointer-events-none"
           style={{
             background:
-              "linear-gradient(180deg, #020202 0%, #050505 50%, #020202 100%)",
+              "linear-gradient(180deg, #020202 0%, #0A0D0F 50%, #020202 100%)",
             boxShadow:
               "inset 0 15px 20px -10px rgba(0,0,0,1), inset 0 -15px 20px -10px rgba(0,0,0,1), inset 3px 0 4px rgba(0,0,0,0.8), inset -3px 0 4px rgba(0,0,0,0.8)",
           }}

@@ -130,9 +130,9 @@ export default function AudioPlayer({
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-full bg-black/70 backdrop-blur-xl border border-white/10 shadow-2xl text-white text-sm font-medium hover:bg-black/80 transition-colors"
             aria-label="Open player"
           >
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-brass animate-pulse" />
             <span className="truncate max-w-[200px]">{title}</span>
-            <Play size={14} className="text-cyan-400" />
+            <Play size={14} className="text-brass" />
           </button>
         )}
 
@@ -152,11 +152,11 @@ export default function AudioPlayer({
             </div>
 
             <div className="flex-1 flex items-center justify-center px-8">
-              <div className="relative w-full max-w-[320px] aspect-square rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(0,216,246,0.12)] ring-1 ring-white/10">
+              <div className="relative w-full max-w-[320px] aspect-square rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(223,161,74,0.12)] ring-1 ring-white/10">
                 {thumbSrc ? (
                   <Image src={thumbSrc} alt={title} fill className="object-cover" priority sizes="(max-width: 768px) 320px, 280px" />
                 ) : (
-                  <div className="w-full h-full bg-zinc-900 rounded-md flex items-center justify-center"><ListMusic className="w-16 h-16 text-white/10" /></div>
+                  <div className="w-full h-full bg-[#121619] rounded-md flex items-center justify-center"><ListMusic className="w-16 h-16 text-white/10" /></div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
               </div>
@@ -200,7 +200,7 @@ export default function AudioPlayer({
                 {repeatMode === 'one' ? <Repeat1 className="w-5 h-5 text-white" /> : <Repeat className={`w-5 h-5 ${repeatMode === 'all' ? 'text-white' : ''}`} />}
               </button>
               <button aria-label="Previous" onClick={onSkipBack ?? playPrevious} className="text-white/50 hover:text-white transition-colors"><SkipBack size={28} strokeWidth={1.5} /></button>
-              <button aria-label={playing ? "Pause" : "Play"} onClick={handlePlay} className="w-14 h-14 rounded-full bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white transition-colors shadow-[0_0_30px_rgba(0,216,246,0.15)] hover:scale-105 active:scale-95">
+              <button aria-label={playing ? "Pause" : "Play"} onClick={handlePlay} className="w-14 h-14 rounded-full bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white transition-colors shadow-[0_0_30px_rgba(223,161,74,0.15)] hover:scale-105 active:scale-95">
                 {playing ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" className="pl-1" />}
               </button>
               <button aria-label="Next" onClick={onSkipForward ?? playNext} className="text-white/50 hover:text-white transition-colors"><SkipForward size={28} strokeWidth={1.5} /></button>
@@ -219,13 +219,13 @@ export default function AudioPlayer({
 
       {/* Desktop glassmorphic card */}
       <div className={`hidden md:block ${mode === "modal" ? "hidden" : ""}`}>
-        <div className="w-full max-w-3xl mx-auto rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_rgba(0,216,246,0.08)] overflow-hidden p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4">
+        <div className="w-full max-w-3xl mx-auto rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-[0_0_40px_rgba(223,161,74,0.08)] overflow-hidden p-4 md:px-6 md:py-4 flex flex-col md:flex-row items-center gap-4">
           {/* Album art */}
           <div className="shrink-0 w-20 h-20 md:w-24 md:h-24 relative rounded-md overflow-hidden ring-1 ring-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             {thumbSrc ? (
               <Image src={thumbSrc} alt={title} fill className="object-cover" priority sizes="96px" />
             ) : (
-              <div className="w-full h-full bg-zinc-900 rounded-md flex items-center justify-center"><ListMusic className="w-8 h-8 text-white/10" /></div>
+              <div className="w-full h-full bg-[#121619] rounded-md flex items-center justify-center"><ListMusic className="w-8 h-8 text-white/10" /></div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none" />
           </div>
@@ -270,7 +270,7 @@ export default function AudioPlayer({
                 {repeatMode === 'one' ? <Repeat1 className="w-5 h-5 text-white" /> : <Repeat className={`w-5 h-5 ${repeatMode === 'all' ? 'text-white' : ''}`} />}
               </button>
               <button aria-label="Previous" onClick={onSkipBack ?? playPrevious} className="text-white/50 hover:text-white transition-colors"><SkipBack size={28} strokeWidth={1.5} /></button>
-              <button aria-label={playing ? "Pause" : "Play"} onClick={handlePlay} className="w-14 h-14 rounded-full bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white transition-colors shadow-[0_0_30px_rgba(0,216,246,0.15)] hover:scale-105 active:scale-95">
+              <button aria-label={playing ? "Pause" : "Play"} onClick={handlePlay} className="w-14 h-14 rounded-full bg-[#2a2a2a] hover:bg-[#333] flex items-center justify-center text-white transition-colors shadow-[0_0_30px_rgba(223,161,74,0.15)] hover:scale-105 active:scale-95">
                 {playing ? <Pause size={26} fill="currentColor" /> : <Play size={26} fill="currentColor" className="pl-1" />}
               </button>
               <button aria-label="Next" onClick={onSkipForward ?? playNext} className="text-white/50 hover:text-white transition-colors"><SkipForward size={28} strokeWidth={1.5} /></button>

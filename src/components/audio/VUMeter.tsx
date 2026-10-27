@@ -177,7 +177,7 @@ export default function VUMeter({ className }: VUMeterProps) {
       <g ref={needleRef}>
         <line
           x1="100" y1="130" x2="100" y2="40"
-          stroke="#00d8f6"
+          stroke="#D0C0A6"
           strokeWidth="2"
           strokeLinecap="round"
           filter="url(#needle-glow)"
@@ -200,7 +200,7 @@ export default function VUMeter({ className }: VUMeterProps) {
 
       {/* Pivot jewel */}
       <circle cx="100" cy="130" r="8" fill="#1c0f08" stroke="#3d2b18" strokeWidth="1" />
-      <circle cx="100" cy="130" r="5" fill="#00d8f6" stroke="#8a6a28" strokeWidth="0.5" />
+      <circle cx="100" cy="130" r="5" fill="#D0C0A6" stroke="#8a6a28" strokeWidth="0.5" />
       <ellipse cx="98" cy="128" rx="2.5" ry="1.5" fill="rgba(255,255,255,0.5)" transform="rotate(-30 98 128)" />
 
       {/* Glass front reflection */}

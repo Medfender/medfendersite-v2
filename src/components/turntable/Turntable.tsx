@@ -767,7 +767,7 @@ export default function Turntable({
   }, [localTransport, audioRef]);
 
   const PLATTER_R = 175; const VINYL_R = 145; const LABEL_R = 48; const SPINDLE_R = 8;
-  const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 50; const WAND_W = 7;
+  const TPX = 490; const TPY = 75; const WAND_LEN = 220; const CW_LEN = 60; const WAND_W = 7;
   // Top-down center of the counterweight puck. Offset slightly downward
   // from the original back-of-arm anchor so the scale tick numbers fit
   // cleanly above the dial ring inside the SVG viewBox.
@@ -792,11 +792,11 @@ export default function Turntable({
   const sliderY = PITCH_Y + PITCH_LEN / 2 - pitch * (PITCH_LEN / 16);
 
   return (
-    <div className={`relative flex-shrink-0 ${className}`} style={{ filter: 'drop-shadow(2px 4px 4px rgba(0,0,0,0.8))', width: '100%', maxWidth: 'min(520px, 92vw)', minWidth: '280px', aspectRatio: '720 / 480', minHeight: 'min(180px, 52vw)' }}>
-      <div className="relative w-full h-full rounded-[36px] p-3 border border-white/[0.07]" style={{ background: "linear-gradient(180deg, #1a1d28 0%, #0c0e14 60%, #04050a 100%)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -2px 8px rgba(0,0,0,0.5), 0 30px 80px rgba(0,0,0,0.6)" }}>
-        <div className="relative w-full h-full rounded-[28px] overflow-hidden border border-white/[0.04]" style={{ background: "linear-gradient(135deg, #1a1c24 0%, #0a0b10 70%, #06070b 100%)", boxShadow: "inset 0 0 50px rgba(0,0,0,0.7), inset 0 0 1px rgba(255,255,255,0.05)" }}>
+    <div data-turntable-redesign="audio-tonearm-hardware-v4" data-redesign-build="2026-10-24T12:00Z" className={`relative flex-shrink-0 ${className}`} style={{ filter: 'drop-shadow(2px 14px 28px rgba(0,0,0,0.8)) contrast(1.05)', width: '100%', maxWidth: 'min(520px, 92vw)', minWidth: '280px', aspectRatio: '720 / 480', minHeight: 'min(180px, 52vw)' }}>
+      <div className="relative w-full h-full rounded-[42px] p-3 border border-black/70" style={{ background: "radial-gradient(170% 150% at 12% 10%, rgba(255,205,140,0.18), transparent 32%), radial-gradient(140% 130% at 88% 85%, rgba(110,45,12,0.30), transparent 34%), repeating-linear-gradient(94deg, rgba(255,205,130,0.025) 0px, rgba(255,205,130,0.025) 1px, transparent 1px, transparent 7px), linear-gradient(180deg, #6c4320 0%, #3e2410 52%, #150c07 100%)", boxShadow: "inset 0 3px 0 rgba(255,220,160,0.18), inset 0 -8px 22px rgba(0,0,0,0.85), 0 60px 120px rgba(0,0,0,0.9)" }}>
+        <div className="relative w-full h-full rounded-[32px] overflow-hidden border border-white/[0.09]" style={{ background: "radial-gradient(120% 80% at 48% 6%, rgba(255,255,255,0.08), transparent 48%), linear-gradient(135deg, #030509 0%, #0b1018 66%, #05070c 100%)", boxShadow: "inset 0 0 80px rgba(0,0,0,0.9), inset 0 0 1px rgba(255,255,255,0.12)" }}>
           <div className="relative w-full h-full overflow-hidden" style={{ aspectRatio: "720 / 480" }}>
-          <svg viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block", maxHeight: '100%' }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
+          <svg data-turntable-redesign="audio-tonearm-hardware-v4" viewBox="0 0 720 480" className="absolute inset-0 w-full h-full" style={{ display: "block", maxHeight: '100%' }} preserveAspectRatio="xMidYMid meet" aria-label="Turntable deck">
             <defs>
               <linearGradient id="anodized-dark" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#2a2e38"/><stop offset="40%" stopColor="#1c1f28"/><stop offset="100%" stopColor="#0e1015"/></linearGradient>
               <linearGradient id="brushed-al" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#5a6070"/><stop offset="8%" stopColor="#7a8298"/><stop offset="16%" stopColor="#5a6070"/><stop offset="24%" stopColor="#7a8298"/><stop offset="32%" stopColor="#5a6070"/><stop offset="40%" stopColor="#7a8298"/><stop offset="48%" stopColor="#5a6070"/><stop offset="56%" stopColor="#7a8298"/><stop offset="64%" stopColor="#5a6070"/><stop offset="72%" stopColor="#7a8298"/><stop offset="80%" stopColor="#5a6070"/><stop offset="88%" stopColor="#7a8298"/><stop offset="96%" stopColor="#5a6070"/><stop offset="100%" stopColor="#4a5068"/></linearGradient>
@@ -807,21 +807,22 @@ export default function Turntable({
               <linearGradient id="brass" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#e8c060"/><stop offset="30%" stopColor="#c89030"/><stop offset="65%" stopColor="#a87020"/><stop offset="100%" stopColor="#604010"/></linearGradient>
               <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#d4a830"/><stop offset="35%" stopColor="#f0c040"/><stop offset="65%" stopColor="#c89828"/><stop offset="100%" stopColor="#806010"/></linearGradient>
               <radialGradient id="chrome-spindle" cx="35%" cy="30%" r="75%"><stop offset="0%" stopColor="#ffffff"/><stop offset="20%" stopColor="#d8e0ec"/><stop offset="50%" stopColor="#9aaab8"/><stop offset="80%" stopColor="#5a6a78"/><stop offset="100%" stopColor="#2c3340"/></radialGradient>
+              <radialGradient id="platter-base" cx="38%" cy="32%" r="72%"><stop offset="0%" stopColor="#4a4f62"/><stop offset="46%" stopColor="#161925"/><stop offset="100%" stopColor="#040508"/></radialGradient>
               <linearGradient id="vinyl-deep" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#0e0f14"/><stop offset="40%" stopColor="#12141a"/><stop offset="70%" stopColor="#080810"/><stop offset="100%" stopColor="#06070e"/></linearGradient>
               <linearGradient id="vinyl-mid" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#141620"/><stop offset="50%" stopColor="#161828"/><stop offset="100%" stopColor="#101218"/></linearGradient>
               <linearGradient id="cart-blue" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#2a4880"/><stop offset="40%" stopColor="#1c3060"/><stop offset="100%" stopColor="#0c1830"/></linearGradient>
               <linearGradient id="cantilever-grad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#e8c840"/><stop offset="50%" stopColor="#d4af37"/><stop offset="100%" stopColor="#b89020"/></linearGradient>
               <linearGradient id="cue-al" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stopColor="#7a8098"/><stop offset="40%" stopColor="#a0a8b8"/><stop offset="100%" stopColor="#4a5068"/></linearGradient>
 
-              {/* Arm tube: premium satin-black composite with cylindrical volumetric shading */}
+              {/* Arm tube: cylindrical chrome/carbon tube with axial rollover highlights */}
               <linearGradient id="arm-tube-dark-metal" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#141620"/>
-                <stop offset="15%"  stopColor="#2a3045"/>
-                <stop offset="35%"  stopColor="#3e4660"/>
-                <stop offset="50%"  stopColor="#505a78"/>
-                <stop offset="65%"  stopColor="#3a4055"/>
-                <stop offset="85%"  stopColor="#181c2e"/>
-                <stop offset="100%" stopColor="#0d0f16"/>
+                <stop offset="0%"   stopColor="#111820"/>
+                <stop offset="14%"  stopColor="#2e3a4f"/>
+                <stop offset="38%"  stopColor="#8090ad"/>
+                <stop offset="50%"  stopColor="#ffffff"/>
+                <stop offset="62%"  stopColor="#62738f"/>
+                <stop offset="84%"  stopColor="#18314a"/>
+                <stop offset="100%" stopColor="#111827"/>
               </linearGradient>
               <linearGradient id="arm-tube-specular-band" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%"   stopColor="rgba(255,255,255,0.05)"/>
@@ -845,7 +846,8 @@ export default function Turntable({
             </defs>
 
             {/* PLATTER */}
-            <circle cx={PCX} cy={PCY} r={PLATTER_R + 5} fill="#0c0d12" />
+            <circle cx={PCX} cy={PCY} r={PLATTER_R + 8} fill="#08090f" />
+            <circle cx={PCX} cy={PCY} r={PLATTER_R + 5} fill="url(#platter-base)" stroke="rgba(255,255,255,0.18)" strokeWidth="0.7" />
             <g filter="url(#shadow-md)">
               <circle cx={PCX} cy={PCY} r={PLATTER_R} fill="none" stroke="url(#brushed-al)" strokeWidth="22" />
               <circle cx={PCX} cy={PCY} r={PLATTER_R - 11} fill="none" stroke="url(#brushed-al)" strokeWidth="8" />
@@ -950,13 +952,20 @@ export default function Turntable({
 
                 {/* Pivot housing — the deck-mounted bearing socket. DOES NOT rotate. */}
                 <g id="tonearm-pivot-housing" filter="url(#shadow-md)">
-                  <circle cx={TPX} cy={TPY} r="34" fill="url(#dark-alloy)" stroke="#0e1015" strokeWidth="0.8" />
-                  <circle cx={TPX} cy={TPY} r="30" fill="none" stroke="url(#precision-chrome)" strokeWidth="6" />
+                  <circle cx={TPX} cy={TPY} r="36" fill="url(#dark-alloy)" stroke="#06080d" strokeWidth="0.8" />
+                  <ellipse cx={TPX} cy={TPY} rx="36" ry="14" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.9" />
+                  <rect x={TPX - 42} y={TPY - 6} width="16" height="12" rx="4" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.6" />
+                  <rect x={TPX + 26} y={TPY - 6} width="16" height="12" rx="4" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.6" />
+                  <path d={`M ${TPX - 30},${TPY - 8} Q ${TPX},${TPY - 16} ${TPX + 30},${TPY - 8}`} fill="none" stroke="url(#precision-chrome)" strokeWidth="5" strokeLinecap="round" />
+                  <circle cx={TPX} cy={TPY} r="29" fill="none" stroke="url(#precision-chrome)" strokeWidth="6" />
+                  <circle cx={TPX} cy={TPY} r="16" fill="url(#polished-al)" stroke="#4b5262" strokeWidth="0.5" />
+                  <circle cx={TPX} cy={TPY} r="8" fill="#0a0d14" stroke="#04060b" strokeWidth="0.5" />
+                  <ellipse cx={TPX - 3} cy={TPY - 3} rx="8" ry="4" fill="rgba(230,240,255,0.26)" />
                   {Array.from({ length: 24 }, (_, i) => {
                     const a = (i * 360) / 24; const rad = (a * Math.PI) / 180;
-                    const x1 = +(TPX + Math.cos(rad) * 27).toFixed(3); const y1 = +(TPY + Math.sin(rad) * 27).toFixed(3);
-                    const x2 = +(TPX + Math.cos(rad) * 33).toFixed(3); const y2 = +(TPY + Math.sin(rad) * 33).toFixed(3);
-                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#0e1015" strokeWidth="0.5" opacity="0.7" />;
+                    const x1 = +(TPX + Math.cos(rad) * 28).toFixed(3); const y1 = +(TPY + Math.sin(rad) * 28).toFixed(3);
+                    const x2 = +(TPX + Math.cos(rad) * 34).toFixed(3); const y2 = +(TPY + Math.sin(rad) * 34).toFixed(3);
+                    return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#071018" strokeWidth="0.55" opacity="0.85" />;
                   })}
                 </g>
 
@@ -965,13 +974,18 @@ export default function Turntable({
                   <g id="anti-skate-control" filter="url(#shadow-sm)">
                     <g id="a-skate-dial" style={{ cursor: 'grab', touchAction: 'none' }}
                     onMouseDown={handleAntiSkateMouseDown}>
-                    <circle cx={TPX + 45} cy={TPY + 50} r="9" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.5" />
-                    <circle cx={TPX + 45} cy={TPY + 50} r="6.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
-                    <g transform={`rotate(${antiSkateAngle} ${TPX + 45} ${TPY + 50})`}>
-                      <line x1={TPX + 45} y1={TPY + 46} x2={TPX + 45} y2={TPY + 53} stroke="#1e1410" strokeWidth="1" />
+                    <circle cx={TPX + 45} cy={TPY + 50} r="10.5" fill="#06080d" stroke="#2b313e" strokeWidth="0.6" />
+                    <circle cx={TPX + 45} cy={TPY + 50} r="8.5" fill="url(#brass)" stroke="#4a3a18" strokeWidth="0.4" />
+                    <g transform={`rotate(${antiSkateAngle} ${TPX + 45} ${TPY + 50})`} style={{ transition: 'transform 0.08s linear' }}>
+                      <line x1={TPX + 45} y1={TPY + 44.5} x2={TPX + 45} y2={TPY + 50.5} stroke="#2d1c0d" strokeWidth="1.4" />
+                      <circle cx={TPX + 45} cy={TPY + 44} r="1.0" fill="#d85030" />
                     </g>
-                    <circle cx={TPX + 45} cy={TPY + 50} r="1.2" fill="#1a1410" />
-                    <text x={TPX + 45} y={TPY + 65} textAnchor="middle" fontSize="4" fill="#5a6478" fontFamily="monospace" letterSpacing="0.4">A-SKATE</text>
+                    {["0", "1", "2", "3"].map((n, i) => {
+                      const a = -70 + i * 45;
+                      const rad = (a * Math.PI) / 180;
+                      return <text key={n} x={TPX + 45 + Math.cos(rad) * 12.2} y={TPY + 50 + Math.sin(rad) * 12.2 + 1.3} textAnchor="middle" fontSize="3.2" fill="#1d1410" fontFamily="monospace" fontWeight="bold">{n}</text>;
+                    })}
+                    <text x={TPX + 45} y={TPY + 66} textAnchor="middle" fontSize="4" fill="#6a7489" fontFamily="sans-serif" letterSpacing="0.3">ANTI-SKATE</text>
                   </g>
                 </g>
 
@@ -996,6 +1010,14 @@ export default function Turntable({
                     2. #cue-lever-handle — rotates only at its base pivot.
                   Sits ABOVE static base but BELOW rotating arm.
                   ══════════════════════════════════════════════════════════ */}
+              {/* Mechanical cueing lever and vertical lift arm visible on the plinth */}
+              <g id="cue-lever-assembly" filter="url(#shadow-sm)">
+                <circle cx={TPX + 28} cy={TPY + 38} r="5" fill="url(#dark-alloy)" stroke="#252830" strokeWidth="0.5" />
+                <rect x={TPX + 26.5} y={TPY + 43} width="3" height="24" rx="1.5" fill="url(#cue-al)" stroke="#4a5268" strokeWidth="0.4" />
+                <rect x={TPX + 18} y={TPY + 63} width="12" height="4" rx="2" fill="#06080d" stroke="#252830" strokeWidth="0.4" />
+                <ellipse cx={TPX + 24.5} cy={TPY + 65} rx="8" ry="2.6" fill="#06080d" stroke="#252830" strokeWidth="0.4" />
+                <rect x={TPX + 24} y={TPY + 63.8} width="9" height="1.6" rx="0.8" fill="rgba(255,255,255,0.08)" />
+              </g>
               <text x="522" y="115" textAnchor="middle" fontSize="5" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.6">CUE</text>
 
 
@@ -1066,12 +1088,21 @@ export default function Turntable({
                   <line x1={TPX + 4.5} y1={TPY - CW_LEN + 22} x2={TPX + 4.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
                   <line x1={TPX + 6.5} y1={TPY - CW_LEN + 22} x2={TPX + 6.5} y2={TPY - CW_LEN + 32} stroke="#111318" strokeWidth="0.5" />
 
-                  {/* Number markings and scale ring */}
-                  <g id="counterweight-scale" opacity="0.85">
-                    <line x1={TPX - 9} y1={TPY - CW_LEN + 12} x2={TPX - 7} y2={TPY - CW_LEN + 12} stroke="#ffffff" strokeWidth="0.5" />
-                    <line x1={TPX - 9} y1={TPY - CW_LEN + 14} x2={TPX - 7.5} y2={TPY - CW_LEN + 14} stroke="#ffffff" strokeWidth="0.4" />
-                    <line x1={TPX - 9} y1={TPY - CW_LEN + 16} x2={TPX - 7} y2={TPY - CW_LEN + 16} stroke="#ffffff" strokeWidth="0.5" />
+                  {/* Cylindrical counterweight with VTF scale ring markings */}
+                  <ellipse cx={TPX} cy={TPY - CW_LEN + 1} rx="9.5" ry="3" fill="rgba(170,185,210,0.5)" />
+                  <g id="counterweight-scale" opacity="0.9">
+                    {[0.5, 1.0, 1.5, 2.0, 2.5, 3.0].map((n, i) => {
+                      const y = TPY - CW_LEN + 8 + i * 6.4;
+                      return (
+                        <g key={n}>
+                          <line x1={TPX - 9.3} y1={y} x2={TPX - 6.7} y2={y} stroke="rgba(255,255,255,0.7)" strokeWidth="0.45" />
+                          <text x={TPX - 5.4} y={y + 1.2} textAnchor="end" fontSize="2.8" fill="rgba(255,255,255,0.75)" fontFamily="monospace">{n.toFixed(1)}</text>
+                        </g>
+                      );
+                    })}
+                    <line x1={TPX - 9.1} y1={TPY - CW_LEN + 10} x2={TPX - 9.1} y2={TPY - 2} stroke="rgba(255,255,255,0.16)" strokeWidth="0.4" />
                   </g>
+                  <ellipse cx={TPX} cy={TPY - 1} rx="9.8" ry="3.2" fill="rgba(15,18,28,0.7)" />
 
                   {/* Rear end cap */}
                   <g id="counterweight-end-cap">
@@ -1091,22 +1122,22 @@ export default function Turntable({
                       - Pivot collar: machined connector to bearing
                       - Headshell stub: precision transition to headshell
                     All coordinates: pivot=(TPX,TPY), arm_len=WAND_LEN,
-                    centerline curves right then converges to headshell.
+                    straight tracked axis with headshell offset-angle instead of a cosmetic bend.
                     ════════════════════════════════════════════════════════ */}
                 <g id="tonearm-arm-tube"
                    onClick={handleArmClick}
                    style={{ cursor: isPowered ? 'pointer' : 'default' }}
                 >
                   {/* 1. Ambient Drop Shadow */}
-                  <path d="M 490,75 L 490,295" fill="none" stroke="rgba(0,0,0,0.6)" strokeWidth="10" strokeLinecap="round" transform="translate(6, 6)" filter="blur(3px)" />
+                  <path d="M 490,75 C 490,190 525,235 490,285" fill="none" stroke="rgba(0,0,0,0.58)" strokeWidth="8" strokeLinecap="round" transform="translate(6, 6)" filter="blur(3px)" />
                   {/* 2. Base Pipe (Dark outer edge for volumetric depth) */}
-                  <path d="M 490,75 L 490,295" fill="none" stroke="#111318" strokeWidth="9" strokeLinecap="round" />
+                  <path d="M 490,75 C 490,190 525,235 490,285" fill="none" stroke="#111822" strokeWidth="7" strokeLinecap="round" />
                   {/* 3. Midtone Machined Metal */}
-                  <path d="M 490,75 L 490,295" fill="none" stroke="#2d323d" strokeWidth="7" strokeLinecap="round" />
+                  <path d="M 490,75 C 490,190 525,235 490,285" fill="none" stroke="url(#arm-tube-dark-metal)" strokeWidth="5.5" strokeLinecap="round" />
                   {/* 4. Bright Core Metallic Reflection */}
-                  <path d="M 490,75 L 490,295" fill="none" stroke="#6a7387" strokeWidth="4" strokeLinecap="round" />
+                  <path d="M 490,75 C 490,190 525,235 490,285" fill="none" stroke="#aeb7c6" strokeWidth="3" strokeLinecap="round" />
                   {/* 5. God-Tier Specular Highlight (Offset slightly left to simulate directional lighting) */}
-                  <path d="M 490,75 L 490,295" fill="none" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" transform="translate(-1.5, -0.5)" filter="drop-shadow(0px 0px 2px rgba(255,255,255,0.6))" />
+                  <path d="M 490,75 C 490,190 525,235 490,285" fill="none" stroke="#ffffff" strokeWidth="1.1" strokeLinecap="round" transform="translate(2, -0.5)" filter="drop-shadow(0px 0px 2px rgba(255,255,255,0.6))" />
                 </g>
 
                 {/* Headshell — rigid child of arm. NO independent rotation.
@@ -1118,23 +1149,28 @@ export default function Turntable({
                 >
                   <g transform="scale(1.4)">
                     <g id="bayonet-collar">
-                      {/* Plug inserted inside the tube */}
-                      <rect x="-3.5" y="-4" width="7" height="8" fill="#111318" />
-                      {/* Well-rounded locking collar matching the arm tube diameter */}
-                      <rect x="-4.5" y="3" width="9" height="7" rx="1.5" fill="url(#precision-chrome)" stroke="#1a1c23" strokeWidth="0.5" />
-                      {/* Tighter, more realistic knurled grip lines */}
-                      <line x1="-3.2" y1="3" x2="-3.2" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="-2.4" y1="3" x2="-2.4" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="-1.6" y1="3" x2="-1.6" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="-0.8" y1="3" x2="-0.8" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="0" y1="3" x2="0" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="0.8" y1="3" x2="0.8" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="1.6" y1="3" x2="1.6" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="2.4" y1="3" x2="2.4" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      <line x1="3.2" y1="3" x2="3.2" y2="10" stroke="#111318" strokeWidth="0.4" />
-                      {/* Base flange connecting to the headshell body */}
-                      <path d="M -4.5,10 L 4.5,10 L 5,14 L -5,14 Z" fill="#2c3040" />
+                      {/* Locking screw channel inside the tube */}
+                      <rect x="-4" y="-3.5" width="8" height="7" fill="#05070b" stroke="#111318" strokeWidth="0.2" />
+                      {/* Threaded locking collar with cylindrical bevel */}
+                      <rect x="-5.2" y="3" width="10.4" height="8" rx="1.8" fill="url(#anodized-dark)" stroke="#252830" strokeWidth="0.4" />
+                      <rect x="-5.6" y="3.3" width="2.2" height="7.3" rx="1" fill="rgba(35,38,46,0.9)" />
+                      <rect x="3.4" y="3.3" width="2.2" height="7.3" rx="1" fill="rgba(35,38,46,0.9)" />
+                      {/* Knurled grip */}
+                      <line x1="-4.4" y1="4" x2="-4.4" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="-3.3" y1="4" x2="-3.3" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="-2.2" y1="4" x2="-2.2" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="-1.1" y1="4" x2="-1.1" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="0" y1="4" x2="0" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="1.1" y1="4" x2="1.1" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="2.2" y1="4" x2="2.2" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="3.3" y1="4" x2="3.3" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <line x1="4.4" y1="4" x2="4.4" y2="10.3" stroke="#0d1014" strokeWidth="0.35" />
+                      <ellipse cx="0" cy="6.8" rx="4.8" ry="1.5" fill="rgba(230,240,255,0.08)" />
+                      {/* Wiring shroud / index mark */}
+                      <path d="M 0,10.5 C 4.5,13 4.3,15.5 0,15.7 C -4.3,15.5 -4.5,13 0,10.5 Z" fill="url(#dark-alloy)" stroke="#252830" strokeWidth="0.4" />
+                      <rect x="-0.25" y="2" width="0.5" height="11" fill="#cfe3ff" opacity="0.55" />
                     </g>
+
                     <g transform="rotate(23 0 8.5)">
                       {/* CARTRIDGE & STYLUS — top-down orthographic */}
                       <g id="cartridge-assembly">
@@ -1250,23 +1286,38 @@ export default function Turntable({
               <text x={PITCH_X} y={PITCH_Y - 6} textAnchor="middle" fontSize="6" fill="#5a6478" fontFamily="sans-serif" letterSpacing="0.8">PITCH</text>
             </g>
           </svg>
+          {/* Cinematic top-light and peripheral vignette: improves realism without touching SVG interactions */}
+          <div className="pointer-events-none absolute inset-0 rounded-[28px]" style={{ background: "radial-gradient(72% 58% at 38% 23%, rgba(255,255,255,0.065), transparent 70%), radial-gradient(100% 100% at 50% 50%, transparent 48%, rgba(0,0,0,0.42) 100%)" }} />
+          {/* Acrylic dust-cover reflection and outer rim glass */}
+          <div className="pointer-events-none absolute inset-0 rounded-[28px]" style={{ zIndex: 20, background: "linear-gradient(124deg, rgba(255,255,255,0.045) 0%, transparent 34%, rgba(255,255,255,0.075) 62%, transparent 84%), linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.22))", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 2px 0 rgba(255,255,255,0.12), inset 0 -1px 0 rgba(0,0,0,0.35)" }} />
           </div>
 
           {/* Bottom-left: Power + Play transport — scaled down for narrow mobile */}
           <div className="absolute left-1 bottom-1 z-30 flex items-end gap-3 origin-bottom-left transition-transform duration-300 sm:left-2 sm:bottom-2 md:scale-100" style={{ transform: 'scale(0.65)' }}>
             <div className="flex flex-col items-center gap-1">
               <div className="relative">
-                <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center transition-all active:scale-[0.92] cursor-pointer overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.6)]" style={{
-                  background: isPowered ? 'linear-gradient(135deg, #3a3e4a 0%, #2a3040 50%, #0a0b12 100%)' : 'linear-gradient(135deg, #2a2e38 0%, #1a1d28 50%, #0c0e14 100%)',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                <button onClick={handlePowerButton} aria-label={isPowered ? "Power off" : "Power on"} aria-pressed={isPowered} className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center transition-all active:scale-[0.9] cursor-pointer overflow-hidden relative" style={{
+                  background: isPowered
+                    ? 'linear-gradient(160deg, #4d5461 0%, #2c313d 42%, #080a0f 100%)'
+                    : 'linear-gradient(160deg, #2d3139 0%, #181b25 42%, #05060a 100%)',
+                  border: '1px solid rgba(255,255,255,0.10)',
+                  boxShadow: '0 5px 14px rgba(0,0,0,0.85), 0 1px 0 rgba(255,255,255,0.10) inset, 0 -4px 10px rgba(0,0,0,0.65) inset',
                 }}>
-                  <span className="w-6 h-6 sm:w-9 sm:h-9 rounded-sm flex items-center justify-center shadow-[inset_0_1px_4px_rgba(255,255,255,0.08)]" style={{
-                    background: isPowered ? 'linear-gradient(180deg, #8a949c 0%, #5a6068 100%)' : 'linear-gradient(180deg, #4a5268 0%, #2c3038 100%)',
-                    boxShadow: isPowered ? '0 0 6px 1px rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.5)' : 'inset 0 1px 3px rgba(0,0,0,0.6)',
+                  <span className="pointer-events-none absolute inset-x-3 top-1 h-3 rounded-full bg-white/10 blur-[2px]" />
+                  <span className="w-6 h-6 sm:w-9 sm:h-9 rounded-sm flex items-center justify-center relative" style={{
+                    background: isPowered ? 'linear-gradient(180deg, #a7adb5 0%, #686f78 55%, #3f444c 100%)' : 'linear-gradient(180deg, #5a606d 0%, #343945 55%, #1d212b 100%)',
+                    border: '1px solid rgba(0,0,0,0.45)',
+                    boxShadow: isPowered
+                      ? '0 0 8px 1px rgba(255,80,80,0.34), inset 0 1px 2px rgba(255,255,255,0.35), inset 0 -2px 5px rgba(0,0,0,0.6)'
+                      : 'inset 0 1px 2px rgba(255,255,255,0.18), inset 0 -4px 8px rgba(0,0,0,0.8)',
                   }}>
-                    <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full" style={{
-                      background: isPowered ? '#ff3a3a' : '#1f2428',
-                      boxShadow: isPowered ? '0 0 5px 2px rgba(255,58,58,0.7)' : 'none',
+                    <span className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full" style={{
+                      background: isPowered
+                        ? 'radial-gradient(circle at 35% 30%, #ff8c8c, #ff3a3a 55%, #881111 100%)'
+                        : 'radial-gradient(circle at 35% 30%, #3a3f47, #20252d 60%, #12161d 100%)',
+                      boxShadow: isPowered
+                        ? '0 0 10px 3px rgba(255,58,58,0.65), inset 0 1px 1px rgba(255,255,255,0.4)'
+                        : 'inset 0 1px 2px rgba(0,0,0,0.8)',
                     }} />
                   </span>
                 </button>
@@ -1274,11 +1325,19 @@ export default function Turntable({
               <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">Power</span>
             </div>
             <div className={`flex flex-col items-center gap-1 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`}>
-              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-12 h-12 sm:w-14 sm:h-14 rounded-md border border-white/[0.08] flex items-center justify-center transition-all hover:scale-105 active:scale-95" style={{ background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)", boxShadow: localTransport === 'playing' ? "inset 0 0 12px rgba(0,216,246,0.25), 0 0 10px rgba(0,216,246,0.2), 0 3px 8px rgba(0,0,0,0.5)" : "inset 0 0 6px rgba(0,0,0,0.7), 0 3px 8px rgba(0,0,0,0.5)" }}>
+              <button onClick={handleDeckPlayPause} aria-label={localTransport === 'playing' ? "Pause" : "Play"} className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg border border-white/[0.10] flex items-center justify-center transition-all hover:scale-105 active:scale-95 relative overflow-hidden" style={{
+                background: localTransport === 'playing'
+                  ? 'linear-gradient(170deg, #304050 0%, #182738 52%, #0d1319 100%)'
+                  : 'linear-gradient(170deg, #2c3542 0%, #161822 52%, #0e1015 100%)',
+                boxShadow: localTransport === 'playing'
+                  ? '0 0 20px rgba(223,161,74,0.32), 0 6px 14px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.16), inset 0 0 18px rgba(223,161,74,0.18)'
+                  : '0 6px 14px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -5px 12px rgba(0,0,0,0.75)',
+              }}>
+                <span className="pointer-events-none absolute inset-x-3 top-1 h-3 rounded-full bg-white/10 blur-[2px]" />
                 {localTransport === 'playing' ? (
-                  <div className="flex gap-1"><div className="w-1 h-4 rounded-sm bg-cyan-400" /><div className="w-1 h-4 rounded-sm bg-cyan-400" /></div>
+                  <div className="relative flex gap-1"><span className="w-1 h-4 rounded-sm bg-brass-light shadow-[0_0_10px_2px_rgba(223,161,74,0.9)]" /><span className="w-1 h-4 rounded-sm bg-brass-light shadow-[0_0_10px_2px_rgba(223,161,74,0.9)]" /></div>
                 ) : (
-                  <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "8px solid #00d8f6", borderTop: "6px solid transparent", borderBottom: "6px solid transparent", filter: "drop-shadow(0 0 4px rgba(0,216,246,0.6))" }} />
+                  <div className="w-0 h-0 ml-0.5" style={{ borderLeft: "9px solid #00d8f6", borderTop: "6.5px solid transparent", borderBottom: "6.5px solid transparent", filter: "drop-shadow(0 0 7px rgba(223,161,74,0.85))" }} />
                 )}
               </button>
               <span className="text-[7px] font-mono tracking-[0.15em] uppercase">{localTransport === 'playing' ? "Pause" : "Play"}</span>
@@ -1288,20 +1347,21 @@ export default function Turntable({
               <button
                 onClick={isPowered ? handleDeckStop : undefined}
                 aria-label="Stop"
-                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-zinc-950/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-black/80 flex items-center justify-center transition-all hover:scale-105 active:scale-95 outline-none focus:outline-none focus:ring-0 relative overflow-hidden"
                 style={{
-                  background: "linear-gradient(180deg, #2c3542 0%, #161822 50%, #0e1015 100%)",
-                  boxShadow: !isPlaying
-                    ? "inset 0 0 8px rgba(239,68,68,0.3), 0 0 6px rgba(239,68,68,0.25), 0 1px 2px rgba(0,0,0,0.5)"
-                    : "inset 0 0 4px rgba(0,0,0,0.7), 0 1px 2px rgba(0,0,0,0.5)",
+                  background: "radial-gradient(150% 100% at 50% 20%, #3a3b42 0%, #1b1d27 58%, #08090d 100%)",
+                  boxShadow: isPowered && !(isPlaying || currentTime > 0)
+                    ? '0 6px 14px rgba(0,0,0,0.72), 0 0 18px rgba(239,68,68,0.28), inset 0 1px 0 rgba(255,255,255,0.09), inset 0 -5px 10px rgba(0,0,0,0.80)'
+                    : '0 6px 14px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -5px 10px rgba(0,0,0,0.84)',
                 }}
               >
-                <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-sm transition-all duration-200 ${
+                <span className="pointer-events-none absolute inset-1.5 rounded-full border border-red-500/30" />
+                <div className={`relative w-4 h-4 sm:w-5 sm:h-5 rounded-sm transition-all duration-200 ${
                   !isPowered
-                    ? "bg-zinc-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
+                    ? "bg-neutral-800 shadow-[inset_0_1px_2px_rgba(0,0,0,0.9)]"
                     : (isPlaying || currentTime > 0)
-                      ? "bg-red-900 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]"
-                      : "bg-red-500 shadow-[0_0_15px_3px_rgba(239,68,68,0.8)]"
+                      ? "bg-red-950 shadow-[inset_0_1px_2px_rgba(0,0,0,0.8)]"
+                      : "bg-red-500 shadow-[0_0_18px_4px_rgba(239,68,68,0.85), inset 0 1px 1px rgba(255,255,255,0.35)]"
                 }`} />
               </button>
               <span className="text-[7px] font-mono text-neutral-500 tracking-[0.15em] uppercase">STOP</span>
@@ -1310,14 +1370,15 @@ export default function Turntable({
 
           {/* Bottom-right: BPM/Tempo — scaled down for narrow mobile */}
           <div className={`absolute right-1 bottom-1 z-30 flex flex-col items-center gap-0.5 pointer-events-auto origin-bottom-right transition-transform duration-300 sm:right-2 sm:bottom-2 md:scale-100 ${isPowered ? '' : 'opacity-40 saturate-0 pointer-events-none'}`} style={{ transform: 'scale(0.65)', transformOrigin: '100% 100%' }}>
-            <div className="relative w-12 h-7 sm:w-16 sm:h-10 rounded-md border border-white/[0.08] flex flex-col items-center justify-center px-0.5 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "linear-gradient(180deg, #02060a 0%, #000000 100%)" : "linear-gradient(180deg, #181818 0%, #0a0a0a 100%)", boxShadow: isPowered ? "inset 0 0 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,216,246,0.18)" : "inset 0 0 4px rgba(0,0,0,0.5)" }}>
+            <div className="relative w-12 h-7 sm:w-16 sm:h-10 rounded-md border border-zinc-800 flex flex-col items-center justify-center px-0.5 whitespace-nowrap overflow-hidden" style={{ background: isPowered ? "radial-gradient(150% 100% at 50% -20%, rgba(223,161,74,0.10), transparent 55%), linear-gradient(180deg, #030b10 0%, #000203 100%)" : "linear-gradient(180deg, #151518 0%, #07070a 100%)", boxShadow: isPowered ? "inset 0 1px 0 rgba(255,255,255,0.04), inset 0 0 12px rgba(223,161,74,0.12), inset 0 -2px 4px rgba(0,0,0,0.9), 0 0 6px rgba(223,161,74,0.16)" : "inset 0 0 6px rgba(0,0,0,0.75)" }}>
+              <span className="pointer-events-none absolute inset-x-1 top-0 h-1.5 rounded-full bg-white/[0.06] blur-[1px]" />
               {/* Status LED — flashes when RPM changes to show hardware linkage */}
-              <span aria-hidden="true" className={`absolute top-1 right-1 w-1 h-1 rounded-full ${rpmFlash ? "bg-cyan-300 shadow-[0_0_6px_2px_rgba(0,216,246,0.9)]" : "bg-zinc-700"}`} />
+              <span aria-hidden="true" className={`absolute top-1 right-1 w-1 h-1 rounded-full ${rpmFlash ? "bg-brass-light shadow-[0_0_6px_2px_rgba(223,161,74,0.9)]" : "bg-zinc-700"}`} />
               <span className={`text-[6px] sm:text-[7px] font-mono tracking-[0.2em] uppercase leading-none ${isPowered ? 'text-neutral-500' : 'text-neutral-600'}`}>BPM</span>
               <span className={`text-[9px] sm:text-[11px] font-mono leading-none tabular-nums tracking-tight transition-all duration-300 ${isPowered ? (bpm === 'CAL' ? 'text-[#00ffaa] animate-pulse' : (Number(bpm) > 0 && isPlaying ? 'text-[#00ffaa]' : 'text-green-900')) : 'text-neutral-600'}`} style={{ textShadow: isPowered && (Number(bpm) > 0 || bpm === 'CAL') && isPlaying ? '0 0 10px rgba(0, 255, 170, 0.6)' : 'none' }}>
                 {liveBpmDisplay}
               </span>
-              <span className={`text-[7px] sm:text-[9px] font-mono leading-none tabular-nums transition-opacity duration-300 ${pitch === 0 ? 'opacity-0' : (isPowered ? (pitch > 0 ? 'text-cyan-300' : 'text-amber-300') : 'text-neutral-700/30')}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(0,216,246,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(0,216,246,0.4)' : 'none' }}>
+              <span className={`text-[7px] sm:text-[9px] font-mono leading-none tabular-nums transition-opacity duration-300 ${pitch === 0 ? 'opacity-0' : (isPowered ? (pitch > 0 ? 'text-brass-light' : 'text-amber-300') : 'text-neutral-700/30')}`} style={{ textShadow: isPowered && pitch !== 0 ? `0 0 6px ${pitch > 0 ? 'rgba(223,161,74,0.85)' : 'rgba(251,191,36,0.85)'}` : isPowered ? '0 0 3px rgba(223,161,74,0.4)' : 'none' }}>
                 {pitch === 0 ? '±0.0%' : `${pitch > 0 ? '+' : ''}${pitch.toFixed(1)}%`}
               </span>
             </div>
@@ -1348,11 +1409,15 @@ export default function Turntable({
                   aria-pressed={speed === r}
                   aria-disabled={isLocked}
                   title={isLocked ? "Stop the deck before changing speed" : `${r} RPM`}
-                  className={`w-7 h-4 sm:w-9 sm:h-5 rounded text-[9px] sm:text-[10px] font-mono font-bold transition-all ${speed === r ? "text-cyan-300" : "text-neutral-500"} hover:text-neutral-300 ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
+                  className={`w-7 h-4 sm:w-9 sm:h-5 rounded text-[9px] sm:text-[10px] font-mono font-bold transition-all ${speed === r ? "text-brass-light" : "text-neutral-500"} hover:text-neutral-300 ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
                   style={{
-                    background: speed === r ? "linear-gradient(180deg, #0a3540 0%, #082832 100%)" : "linear-gradient(180deg, #1a1c24 0%, #0c0d12 100%)",
-                    boxShadow: speed === r ? "inset 0 3px 6px rgba(0,0,0,0.8), 0 0 4px rgba(0,216,246,0.2)" : "inset 0 0 4px rgba(0,0,0,0.6)",
-                    border: speed === r ? "1px solid rgba(0,216,246,0.4)" : "1px solid rgba(255,255,255,0.05)",
+                    background: speed === r
+                      ? "radial-gradient(140% 130% at 50% 20%, rgba(223,161,74,0.20), transparent 62%), linear-gradient(180deg, #0b3a45 0%, #072a33 100%)"
+                      : "linear-gradient(180deg, #24262e 0%, #111218 100%)",
+                    boxShadow: speed === r
+                      ? "0 2px 5px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -3px 6px rgba(0,0,0,0.75), 0 0 8px rgba(223,161,74,0.32)"
+                      : "0 2px 5px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -3px 6px rgba(0,0,0,0.82)",
+                    border: speed === r ? "1px solid rgba(223,161,74,0.55)" : "1px solid rgba(255,255,255,0.08)",
                     pointerEvents: isLocked ? "none" : "auto",
                   }}
                 >
