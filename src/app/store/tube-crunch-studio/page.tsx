@@ -9,8 +9,9 @@ export function generateStaticParams() {
 export async function generateMetadata() {
   const pack = packs.find((p) => p.slug === "tube-crunch-studio");
   return {
-    title: pack ? `${pack.title} — Medfender` : "Tube Crunch Studio — Medfender",
+    title: pack ? pack.title : "Tube Crunch Studio",
     description: pack?.description ?? "Tube Crunch Studio preset pack by Medfender.",
+    alternates: { canonical: "/store/tube-crunch-studio" },
   };
 }
 

@@ -3,7 +3,7 @@ import DocumentHeader from "@/components/luxury/DocumentHeader";
 import LegalArticle, { type LegalSection } from "@/components/legal/LegalArticle";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — Medfender",
+  title: "Privacy Policy",
   description: "How Medfender collects, uses, and protects your personal information.",
   alternates: { canonical: "/privacy" },
 };

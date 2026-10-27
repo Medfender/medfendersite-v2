@@ -85,7 +85,7 @@ export default function FormationsShowcase() {
                       className={`shrink-0 text-sm transition-transform duration-500 ${
                         isActive
                           ? "translate-x-0 text-brass"
-                          : "-translate-x-1 text-ink/30 group-hover:translate-x-0"
+                          : "-translate-x-1 text-ink/60 group-hover:translate-x-0"
                       }`}
                     >
                       →

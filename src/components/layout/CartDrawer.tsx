@@ -1,9 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Trash2, ShoppingBag } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import { useCart } from "@/lib/CartContext";
+import { isCheckoutLive } from "@/lib/checkout";
 
 export default function CartDrawer({
   open,
@@ -14,112 +16,180 @@ export default function CartDrawer({
 }) {
   const { cartItems, removeFromCart, cartTotal, itemCount, clearCart } = useCart();
 
+  // Escape closes the drawer, and the page behind it does not scroll.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  const liveItems = cartItems.filter((item) => isCheckoutLive(item.pack.checkoutUrl));
+
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-[9998] bg-black/70 backdrop-blur-sm"
+            aria-hidden
+            className="fixed inset-0 z-[9998] bg-[rgba(18,18,16,0.55)] backdrop-blur-[2px]"
           />
-          {/* Drawer Panel */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Cart"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed top-0 right-0 bottom-0 z-[9999] w-full max-w-md bg-gradient-to-b from-zinc-950 via-zinc-950 to-black border-l-2 border-zinc-800 shadow-[-30px_0_60px_rgba(0,0,0,0.9),inset_0_1px_0_rgba(255,255,255,0.05)] flex flex-col"
+            className="fixed inset-y-0 right-0 z-[9999] flex w-full max-w-[430px] flex-col border-l border-[var(--rule)] bg-[var(--paper)] text-ink shadow-[-28px_0_60px_rgba(18,18,16,0.18)]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
-              <div className="flex items-center gap-3">
-                <ShoppingBag size={20} className="text-cyan-400" />
-                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-white">
+            <div className="flex items-center justify-between border-b border-[var(--rule)] px-6 py-5">
+              <div className="flex items-baseline gap-3">
+                <h2 className="font-mono text-[10px] uppercase tracking-[0.26em] text-ink">
                   Cart
                 </h2>
-                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 bg-zinc-900 border border-zinc-700 rounded-full px-2 py-0.5">
-                  {itemCount}
+                <span className="font-mono text-[10px] tabular-nums text-rust">
+                  {String(itemCount).padStart(2, "0")}
                 </span>
               </div>
               <button
+                type="button"
                 onClick={onClose}
                 aria-label="Close cart"
-                className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-400 hover:text-cyan-300 hover:border-cyan-400 transition-colors"
+                className="flex h-9 w-9 items-center justify-center border border-[var(--rule)] text-ink transition-colors hover:border-ink hover:bg-[rgba(18,18,16,0.04)]"
               >
-                <X size={14} />
+                <X size={15} strokeWidth={1.5} />
               </button>
             </div>
 
-            {/* Items */}
-            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+            <div className="flex-1 overflow-y-auto px-6">
               {cartItems.length === 0 ? (
-                <div className="text-center py-16 text-zinc-500 font-mono text-xs tracking-widest uppercase">
-                  Your cart is empty.
+                <div className="py-20 text-center">
+                  <p className="font-display text-2xl text-ink">Nothing in the cart.</p>
+                  <p className="mx-auto mt-3 max-w-[15rem] text-sm leading-relaxed text-ink/60">
+                    Every pack is one purchase, all platforms, free lifetime updates.
+                  </p>
+                  <Link
+                    href="/store"
+                    onClick={onClose}
+                    className="link-rule mt-6"
+                  >
+                    Browse the store <span aria-hidden>→</span>
+                  </Link>
                 </div>
               ) : (
-                cartItems.map((item) => (
-                  <div
-                    key={item.pack.id}
-                    className="flex gap-4 p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-zinc-700 transition-colors"
-                  >
-                    <div className="w-14 h-14 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 overflow-hidden">
-                      <span className="text-[10px] font-black text-cyan-400 uppercase tracking-[0.15em] text-center leading-none">
-                        {item.pack.badge}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-extrabold text-white truncate tracking-tight">
-                        {item.pack.title}
-                      </h3>
-                      <div className="flex items-baseline gap-2 mt-1">
-                        <span className="text-sm font-black text-amber-400 tracking-tight">
-                          ${item.pack.price.toFixed(2)}
-                        </span>
-                        <span className="text-[10px] text-zinc-600 font-mono">× {item.qty}</span>
-                      </div>
-                      <div className="text-[10px] text-zinc-500 font-mono mt-0.5">
-                        {item.pack.type}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => removeFromCart(item.pack.id)}
-                      aria-label={`Remove ${item.pack.title}`}
-                      className="self-start p-1.5 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-red-400 hover:border-red-800 transition-colors"
+                <ul>
+                  {cartItems.map((item, index) => (
+                    <li
+                      key={item.pack.id}
+                      className="flex gap-4 border-b border-[var(--rule-soft)] py-5"
                     >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center border border-[var(--rule)] bg-[rgba(255,253,246,0.6)] text-center">
+                        <span className="px-1 font-mono text-[7.5px] uppercase leading-tight tracking-[0.08em] text-rust">
+                          {item.pack.badge}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-display text-lg leading-tight text-ink">
+                          {item.pack.title}
+                        </p>
+                        <p className="mt-1.5 font-mono text-[8.5px] uppercase tracking-[0.2em] text-ink/60">
+                          {item.pack.type} · × {item.qty}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end justify-between">
+                        <span className="font-mono text-[11px] tabular-nums text-ink">
+                          ${(item.pack.price * item.qty).toFixed(2)}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(item.pack.id)}
+                          aria-label={`Remove ${item.pack.title}`}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--rule)] text-ink/60 transition-colors hover:border-rust hover:text-rust"
+                        >
+                          <Trash2 size={14} strokeWidth={1.5} />
+                        </button>
+                      </div>
+                      <span className="sr-only">Item {index + 1}</span>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 
-            {/* Footer */}
             {cartItems.length > 0 && (
-              <div className="px-6 py-5 border-t border-zinc-800 bg-black/40">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-500">Subtotal</span>
-                  <span className="text-2xl font-black text-tamber-400 tracking-tight">
+              <div className="border-t border-[var(--rule)] px-6 py-6">
+                <div className="flex items-baseline justify-between">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.24em] text-ink/60">
+                    Subtotal
+                  </span>
+                  <span className="font-display text-2xl tabular-nums text-ink">
                     ${cartTotal.toFixed(2)}
                   </span>
                 </div>
-                <a
-                  href={cartItems[0]?.pack.checkoutUrl ?? "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full text-center rounded-xl bg-gradient-to-b from-cyan-400 to-cyan-600 text-slate-950 font-black uppercase tracking-[0.15em] text-base px-6 py-4 shadow-[0_0_30px_rgba(0,216,246,0.3),inset_0_2px_4px_rgba(255,255,255,0.6)] hover:shadow-[0_0_50px_rgba(0,216,246,0.5)] transition-all active:translate-y-[1px] active:shadow-[inset_0_4px_8px_rgba(0,0,0,0.6)]"
-                >
-                  Proceed to Checkout (Lemon Squeezy)
-                </a>
+
+                {liveItems.length > 0 ? (
+                  <div className="mt-5 space-y-2">
+                    {liveItems.map((item) => (
+                      <a
+                        key={item.pack.id}
+                        href={item.pack.checkoutUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ink w-full"
+                      >
+                        {liveItems.length > 1
+                          ? `Checkout · ${item.pack.title}`
+                          : "Proceed to checkout"}
+                        <span aria-hidden>→</span>
+                      </a>
+                    ))}
+                    {liveItems.length < cartItems.length ? (
+                      <p className="pt-1 font-mono text-[8px] uppercase leading-relaxed tracking-[0.18em] text-ink/60">
+                        Packs with a closed checkout are bought by message.
+                      </p>
+                    ) : null}
+                    {liveItems.length > 1 ? (
+                      <p className="font-mono text-[8px] uppercase leading-relaxed tracking-[0.18em] text-ink/60">
+                        One pack per checkout.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="mt-5">
+                    <p className="text-sm leading-relaxed text-ink/70">
+                      Card checkout is being switched on. Write to us and the pack
+                      arrives the same day.
+                    </p>
+                    <Link
+                      href="/contact#booking"
+                      onClick={onClose}
+                      className="btn btn-ink mt-4 w-full"
+                    >
+                      Message to order <span aria-hidden>→</span>
+                    </Link>
+                  </div>
+                )}
+
                 <button
+                  type="button"
                   onClick={clearCart}
-                  className="w-full mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-red-400 transition-colors"
+                  className="mt-4 w-full font-mono text-[8.5px] uppercase tracking-[0.22em] text-ink/60 transition-colors hover:text-rust"
                 >
-                  Clear Cart
+                  Clear cart
                 </button>
               </div>
             )}

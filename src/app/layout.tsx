@@ -53,8 +53,6 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     siteName: "Medfender",
-    title: "Medfender — Live Band & Composer · Marrakech",
-    description: site.tagline,
     images: [
       {
         url: "/images/site/hero-stage.webp",
@@ -66,12 +64,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Medfender — Live Band & Composer · Marrakech",
-    description: site.tagline,
     images: ["/images/site/hero-stage.webp"],
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "/" },
 };
 
 const structuredData = {

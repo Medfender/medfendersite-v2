@@ -90,7 +90,7 @@ export default function AcademyLibrary() {
                 ].join(" ")}
               >
                 {DIFFICULTY_LABEL[d]}
-                <span className="ml-1.5 text-ink/30">{counts[d] ?? 0}</span>
+                <span className="ml-1.5 text-ink/60">{counts[d] ?? 0}</span>
               </button>
             ))}
           </div>
@@ -115,7 +115,7 @@ export default function AcademyLibrary() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search lessons…"
-              className="w-48 border border-[var(--rule)] bg-transparent px-3 py-2 font-mono text-[9px] uppercase tracking-[0.2em] text-ink placeholder:text-ink/35 focus:border-ink focus:outline-none"
+              className="w-48 border border-[var(--rule)] bg-transparent px-3 py-2 font-mono text-[9px] uppercase tracking-[0.2em] text-ink placeholder:text-ink/60 focus:border-ink focus:outline-none"
               aria-label="Search lessons"
             />
           </div>

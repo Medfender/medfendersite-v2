@@ -215,7 +215,7 @@ export default function ContactSection() {
                       <span>{social.label}</span>
                       <span
                         aria-hidden
-                        className="text-ink/30 transition-all group-hover:translate-x-0.5 group-hover:text-rust"
+                        className="text-ink/60 transition-all group-hover:translate-x-0.5 group-hover:text-rust"
                       >
                         ↗
                       </span>

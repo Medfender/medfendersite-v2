@@ -149,7 +149,7 @@ export default function ServicesShowcase() {
                   </h3>
                   <span
                     aria-hidden
-                    className="font-mono text-[10px] text-ink/35 transition-all duration-300 group-hover:translate-x-1 group-hover:text-rust"
+                    className="font-mono text-[10px] text-ink/60 transition-all duration-300 group-hover:translate-x-1 group-hover:text-rust"
                   >
                     ↗
                   </span>

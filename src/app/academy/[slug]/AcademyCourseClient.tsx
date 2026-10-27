@@ -114,7 +114,7 @@ export default function AcademyCourseClient({ course }: { course: AcademyCourse 
                   Now playing
                 </span>
                 <span aria-hidden className="h-px flex-1 bg-[var(--rule)]" />
-                <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/50">
+                <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/60">
                   {active?.duration ?? "—"}
                 </span>
               </div>
@@ -204,7 +204,7 @@ export default function AcademyCourseClient({ course }: { course: AcademyCourse 
                       ) : (
                         <PlayCircle
                           className={`h-3.5 w-3.5 ${
-                            isActive ? "text-ink" : "text-ink/35"
+                            isActive ? "text-ink" : "text-ink/60"
                           }`}
                           strokeWidth={1.5}
                         />

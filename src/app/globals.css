@@ -411,6 +411,10 @@ img.grade-print {
   background: transparent;
 }
 
+.surface-ink .folio {
+  color: var(--color-brass-light);
+}
+
 .surface-ink .fret-index {
   border-color: var(--rule-ink);
   color: var(--color-brass-light);

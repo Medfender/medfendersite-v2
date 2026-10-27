@@ -3,7 +3,7 @@ import Link from "next/link";
 import DocumentHeader from "@/components/luxury/DocumentHeader";
 
 export const metadata: Metadata = {
-  title: "Installation & Setup Guides — Medfender",
+  title: "Installation & Setup Guides",
   description:
     "Everything you need to load your Medfender tones into your DSP ecosystem.",
   alternates: { canonical: "/support/setup-guide" },

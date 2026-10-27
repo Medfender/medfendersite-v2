@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Zap, Check, Headphones, Waves } from "lucide-react";
 import type { PackData, ToneModel } from "@/data/storeData";
 import { useCart } from "@/lib/CartContext";
+import { isCheckoutLive } from "@/lib/checkout";
 import { DemoTracklist } from "@/components/DemoTracklist";
 import SpectrumVisualizer from "@/components/audio/SpectrumVisualizer";
 import PageHero from "@/components/luxury/PageHero";
@@ -14,6 +15,7 @@ import Reveal from "@/components/luxury/Reveal";
 
 export default function ProductDetailClient({ pack }: { pack: PackData }) {
   const { addToCart } = useCart();
+  const checkoutLive = isCheckoutLive(pack.checkoutUrl);
   const [added, setAdded] = useState(false);
   const [activeTone, setActiveTone] = useState<ToneModel | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -124,7 +126,7 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
             }
             intro="Direct captures from the amplifiers that built the pack — no post-processing, no re-amping. The analyzer follows the same signal."
             action={
-              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.26em] text-cream/45">
+              <div className="flex items-center gap-3 font-mono text-[9px] uppercase tracking-[0.26em] text-cream/65">
                 <Waves className="h-4 w-4 text-brass" strokeWidth={1.5} />
                 Live spectrum
               </div>
@@ -169,7 +171,7 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
               <span className="folio">03</span>
               <span className="eyebrow-on-ink">Demo tracks</span>
               <span aria-hidden className="h-px flex-1 bg-[var(--rule-ink-soft)]" />
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-cream/45">
+              <span className="font-mono text-[8.5px] uppercase tracking-[0.26em] text-cream/65">
                 {pack.toneModels.length} tones
               </span>
             </div>
@@ -337,16 +339,16 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
 
                 <ol className="mt-8 border-t border-[var(--rule)]">
                   {pack.includedGear.map((item, i) => (
-                    <Reveal key={item} delay={i * 0.03}>
-                      <li className="flex items-baseline gap-5 border-b border-[var(--rule-soft)] py-4">
+                    <li key={item} className="border-b border-[var(--rule-soft)]">
+                      <Reveal delay={i * 0.03} className="flex items-baseline gap-5 py-4">
                         <span className="font-mono text-[9px] tracking-[0.18em] text-rust">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span className="flex-1 text-sm leading-relaxed text-ink/75">
                           {item}
                         </span>
-                      </li>
-                    </Reveal>
+                      </Reveal>
+                    </li>
                   ))}
                 </ol>
                 <p className="mt-6 font-mono text-[8.5px] uppercase tracking-[0.26em] text-sand-deep">
@@ -380,7 +382,7 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
                       USD
                     </span>
                   </div>
-                  <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.22em] text-ink/50">
+                  <p className="mt-3 font-mono text-[9px] uppercase tracking-[0.22em] text-ink/60">
                     Instant download · {pack.toneModels.length} tones
                   </p>
 
@@ -430,7 +432,9 @@ export default function ProductDetailClient({ pack }: { pack: PackData }) {
                   </div>
 
                   <p className="mt-5 font-mono text-[8.5px] uppercase leading-relaxed tracking-[0.24em] text-sand-deep">
-                    Secure checkout via Lemon Squeezy
+                    {checkoutLive
+                      ? "Secure checkout via Lemon Squeezy"
+                      : "Card checkout is being activated · order by message"}
                   </p>
                 </div>
               </div>

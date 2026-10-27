@@ -132,7 +132,7 @@ export default function FretboardPage() {
 
           <div className="mt-12 border border-cream/15 bg-cream/[0.03] px-4 pb-2 pt-5 md:mt-16 md:px-8">
             <div className="flex flex-wrap items-baseline justify-between gap-2 pb-4">
-              <p className="font-mono text-[8px] uppercase tracking-[0.22em] text-cream/45">
+              <p className="font-mono text-[8px] uppercase tracking-[0.22em] text-cream/65">
                 {heroRoot}maj7 · {heroBook.family} · column {heroBook.column} · p.{" "}
                 {heroBook.page}
               </p>

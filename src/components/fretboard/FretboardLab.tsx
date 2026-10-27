@@ -393,7 +393,7 @@ export default function FretboardLab() {
                   {BEATO_SOURCE}
                 </p>
                 {family === "Drop 3" ? (
-                  <p className="mt-3 font-mono text-[8px] uppercase leading-relaxed tracking-[0.14em] text-ink/45">
+                  <p className="mt-3 font-mono text-[8px] uppercase leading-relaxed tracking-[0.14em] text-ink/60">
                     The book&apos;s Drop 3 Dimmaj7♭13 page (p. 148) repeats the
                     Maj7sus4 page (p. 144) byte for byte, so it is not duplicated
                     here.
@@ -650,7 +650,7 @@ export default function FretboardLab() {
                         <span className="font-mono text-[8px] tracking-[0.16em] text-rust">
                           {entry.book.column}
                         </span>
-                        <span className="font-mono text-[8px] tabular-nums text-ink/50">
+                        <span className="font-mono text-[8px] tabular-nums text-ink/60">
                           p. {entry.book.page}
                         </span>
                       </div>
@@ -1118,7 +1118,7 @@ function MoveTable({ ledger }: { ledger: VoiceLeading }) {
               <td className="py-2 pr-3 font-mono text-[10px] tabular-nums">
                 {move.fromFret === null || move.toFret === null ? (
                   move.fromFret === null && move.toFret === null ? (
-                    <span className="text-ink/40">—</span>
+                    <span className="text-ink/60">—</span>
                   ) : (
                     <span className="text-ink/60">
                       {move.fromFret === null ? "in" : "out"}

@@ -6,12 +6,22 @@ import { useAudio } from "@/context/AudioContext";
 import { useResolvedThumbnail } from "@/lib/audio/thumbnailResolver";
 import { deckControls } from "@/lib/audio/DeckControls";
 
-function Thumbnail({ src, size = 32, accent = "cyan" }: { src: string | null; size?: number; accent?: "cyan" | "amber" }) {
+function Thumbnail({ src, size = 32, active = false }: { src: string | null; size?: number; active?: boolean }) {
   const [err, setErr] = useState(false);
-  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-brass/30 shadow-[0_0_6px_rgba(223,161,74,0.25)]";
+  const ring = active ? "border-brass/70" : "border-cream/15";
   return (
-    <div className={`relative shrink-0 rounded-sm overflow-hidden border ${ring} bg-[#0e0e12]`} style={{ width: size, height: size }} aria-hidden>
-      {src && !err ? <img src={src} alt="" className="w-full h-full object-cover" onError={() => setErr(true)} /> : <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-neutral-700" /></div>}
+    <div
+      className={`relative shrink-0 overflow-hidden border ${ring} bg-ink-deep`}
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
+      {src && !err ? (
+        <img src={src} alt="" className="h-full w-full object-cover" onError={() => setErr(true)} />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="h-1.5 w-1.5 rounded-full bg-cream/25" />
+        </div>
+      )}
     </div>
   );
 }
@@ -95,19 +105,19 @@ export default function PlaylistPanel({ onSeek }: { onSeek?: (percentage: number
     <div className="flex flex-col h-full">
       {/* Active-track hero — minimal, flat, no box */}
       {activeTrack && (
-        <div className="flex items-center gap-3 px-2 py-3 border-b border-white/[0.06]/50">
-          <Thumbnail src={activeCoverSrc} size={48} accent="amber" />
+        <div className="flex items-center gap-3 border-b border-[var(--rule-ink)] px-2 py-3">
+          <Thumbnail src={activeCoverSrc} size={48} active />
           <div className="min-w-0 flex-1">
-            <div className="text-[9px] font-mono text-cream/55 uppercase tracking-[0.2em]">Active</div>
-            <div className="text-sm font-bold text-white truncate">{(activeTrack as any).name || (activeTrack as any).title}</div>
-            <div className="text-[10px] font-mono text-cream/55 truncate">{(activeTrack as any).gearTag || (activeTrack as any).artist}</div>
+            <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-brass">Active</div>
+            <div className="truncate text-sm font-semibold text-cream">{(activeTrack as any).name || (activeTrack as any).title}</div>
+            <div className="truncate font-mono text-[10px] text-cream/60">{(activeTrack as any).gearTag || (activeTrack as any).artist}</div>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between px-2 pt-3 pb-1">
-        <h3 className="text-[10px] font-mono uppercase tracking-[0.25em] text-cream/55">Playlist</h3>
-        <span className="text-[10px] font-mono text-cream/55">{playlist.length} tracks</span>
+        <h3 className="font-mono text-[10px] uppercase tracking-[0.25em] text-cream/65">Playlist</h3>
+        <span className="font-mono text-[10px] text-cream/60">{playlist.length} tracks</span>
       </div>
 
       {/* Flat full-width rows — no gap, border-separated */}
@@ -127,7 +137,7 @@ export default function PlaylistPanel({ onSeek }: { onSeek?: (percentage: number
             />
           );
         })}
-        {playlist.length === 0 && <p className="text-cream/55 text-xs py-6 text-center">No tracks loaded.</p>}
+        {playlist.length === 0 && <p className="py-6 text-center text-xs text-cream/60">No tracks loaded.</p>}
       </div>
     </div>
   );
@@ -166,24 +176,24 @@ function PlaylistRow({
     return () => { mounted = false; };
   }, [audioUrl]);
 
-  const durStr = (track as any).duration || "0:00";
+  const durStr: string | undefined = (track as any).duration;
 
   return (
     <div
       onClick={onClick}
-      className="w-full flex flex-col border-b border-white/[0.06]/40 py-3 transition-colors hover:bg-white/[0.02] cursor-pointer group"
+      className="group flex w-full cursor-pointer flex-col border-b border-[var(--rule-ink-soft)] py-3 transition-colors hover:bg-cream/[0.03]"
     >
       {/* Row info line */}
       <div className="flex items-center justify-between w-full px-2">
         {/* Left: index + thumb + title/sub */}
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <span className="text-xs text-cream/55 font-mono w-7 shrink-0">{String(index).padStart(2, "0")}</span>
-          <Thumbnail src={coverSrc} size={36} accent={isActive ? "cyan" : "amber"} />
+          <span className="w-7 shrink-0 font-mono text-xs tabular-nums text-cream/60">{String(index).padStart(2, "0")}</span>
+          <Thumbnail src={coverSrc} size={36} active={isActive} />
           <div className="min-w-0 flex-1">
-            <h4 className={`text-sm font-semibold truncate ${isActive ? "text-brass-light" : "text-neutral-200"}`}>
+            <h4 className={`truncate text-sm font-semibold ${isActive ? "text-brass-light" : "text-cream/90"}`}>
               {(track as any).name || (track as any).title || "Untitled"}
             </h4>
-            <p className="text-[10px] text-cream/55 truncate font-mono">{(track as any).gearTag || (track as any).artist || "—"}</p>
+            <p className="truncate font-mono text-[10px] uppercase tracking-[0.12em] text-cream/60">{(track as any).gearTag || (track as any).artist || "—"}</p>
           </div>
         </div>
 
@@ -192,15 +202,19 @@ function PlaylistRow({
           <button
             aria-label={isPlaying ? "Pause" : "Play"}
             onClick={(e) => { e.stopPropagation(); onClick(); }}
-            className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
+            className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all ${
               isActive
-                ? "border-zinc-400 text-zinc-200"
-                : "border-zinc-700 text-[#A1A8A3] opacity-0 group-hover:opacity-100 hover:border-zinc-500 hover:text-white"
+                ? "border-brass/60 bg-brass/10 text-cream"
+                : "border-cream/20 text-cream/60 opacity-0 group-hover:opacity-100 hover:border-brass/50 hover:text-cream"
             }`}
           >
             {isPlaying ? <Pause size={12} strokeWidth={1.5} /> : <Play size={12} strokeWidth={1.5} className="ml-0.5" />}
           </button>
-          <span className="text-xs text-cream/55 font-mono w-10 text-right">{durStr}</span>
+          {durStr ? (
+            <span className="w-10 text-right font-mono text-xs tabular-nums text-cream/60">
+              {durStr}
+            </span>
+          ) : null}
         </div>
       </div>
 
@@ -222,7 +236,7 @@ function PlaylistRow({
               return (
                 <div
                   key={i}
-                  className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-zinc-300" : "bg-zinc-800"}`}
+                  className={`w-[1px] transition-colors duration-75 ${played ? "bg-brass/85" : "bg-cream/20"}`}
                   style={{ height: `${Math.max(30, h * 0.7)}%` }}
                 />
               );
@@ -230,8 +244,8 @@ function PlaylistRow({
           </div>
           {/* 1px white playhead scrubber */}
           <div
-            className="absolute top-0 bottom-0 w-[1px] bg-white z-10 pointer-events-none"
-            style={{ left: `${Math.min(100, Math.max(0, progressPercent))}%`, boxShadow: "0 0 3px rgba(255,255,255,0.6)" }}
+            className="pointer-events-none absolute bottom-0 top-0 z-10 w-[1px] bg-brass-light"
+            style={{ left: `${Math.min(100, Math.max(0, progressPercent))}%` }}
           />
         </div>
       )}

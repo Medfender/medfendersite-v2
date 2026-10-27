@@ -10,8 +10,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const resolvedParams = await params;
   const pack = packs.find((p) => p.slug === resolvedParams.slug);
   return {
-    title: pack ? `${pack.title} — Medfender` : "Product — Medfender",
+    title: pack ? pack.title : "Product",
     description: pack?.description ?? "Preset pack details.",
+    alternates: { canonical: `/store/${resolvedParams.slug}` },
   };
 }
 

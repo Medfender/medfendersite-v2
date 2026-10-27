@@ -353,5 +353,5 @@ export const featuredTrack = {
   title: "Sidi Bouganga",
   artist: "MEDFENDER",
   gearTag: "Fender Strat - TONEX Capture - Line 6 HX Stomp",
-  audioUrl: "/audio/featured/Sidi%20Bouganga%20feat%20Younes%20Hadir.mp3",
+  audioUrl: "/audio/featured-artists/Sidi%20Bouganga%20feat%20Younes%20Hadir.mp3",
 };

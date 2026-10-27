@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check } from "lucide-react";
 import Reveal from "@/components/luxury/Reveal";
 import { academyPlans } from "@/data/academyData";
+import { isCheckoutLive } from "@/lib/checkout";
 import { useAcademyAccess } from "@/context/AcademyAccessContext";
 
 export default function AcademyMembership() {
@@ -69,7 +70,7 @@ export default function AcademyMembership() {
                   <p className="mt-3 font-display text-6xl leading-none text-cream">
                     €{plan.price}
                   </p>
-                  <p className="mt-3 font-mono text-[8.5px] uppercase tracking-[0.24em] text-cream/45">
+                  <p className="mt-3 font-mono text-[8.5px] uppercase tracking-[0.24em] text-cream/65">
                     {plan.billing}
                   </p>
                   {plan.savings ? (
@@ -94,19 +95,38 @@ export default function AcademyMembership() {
                   ))}
                 </ul>
 
-                <a
-                  href={plan.checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`lemonsqueezy-button mt-auto inline-flex w-full items-center justify-center gap-2 px-5 py-3.5 font-mono text-[9px] uppercase tracking-[0.26em] transition-colors ${
-                    plan.recommended
-                      ? "btn-brass"
-                      : "border border-cream/25 text-cream hover:border-brass hover:text-brass"
-                  }`}
-                >
-                  Become a member
-                  <span aria-hidden>→</span>
-                </a>
+                {isCheckoutLive(plan.checkoutUrl) ? (
+                  <a
+                    href={plan.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`lemonsqueezy-button mt-auto inline-flex w-full items-center justify-center gap-2 px-5 py-3.5 font-mono text-[9px] uppercase tracking-[0.26em] transition-colors ${
+                      plan.recommended
+                        ? "btn-brass"
+                        : "border border-cream/25 text-cream hover:border-brass hover:text-brass"
+                    }`}
+                  >
+                    Become a member
+                    <span aria-hidden>→</span>
+                  </a>
+                ) : (
+                  <div className="mt-auto">
+                    <Link
+                      href="/contact#booking"
+                      className={`inline-flex w-full items-center justify-center gap-2 px-5 py-3.5 font-mono text-[9px] uppercase tracking-[0.26em] transition-colors ${
+                        plan.recommended
+                          ? "btn-brass"
+                          : "border border-cream/25 text-cream hover:border-brass hover:text-brass"
+                      }`}
+                    >
+                      Join by message
+                      <span aria-hidden>→</span>
+                    </Link>
+                    <p className="mt-2.5 font-mono text-[8px] uppercase leading-relaxed tracking-[0.2em] text-cream/60">
+                      Card checkout is being activated.
+                    </p>
+                  </div>
+                )}
               </article>
             </Reveal>
           ))}

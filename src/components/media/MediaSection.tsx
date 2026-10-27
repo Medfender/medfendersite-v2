@@ -131,7 +131,7 @@ export default function MediaSection() {
               />
             </button>
           ))}
-          <span className="ml-auto hidden pb-4 font-mono text-[8.5px] uppercase tracking-[0.24em] text-ink/35 sm:block">
+          <span className="ml-auto hidden pb-4 font-mono text-[8.5px] uppercase tracking-[0.24em] text-ink/60 sm:block">
             Medfender · Archive
           </span>
         </div>
@@ -164,7 +164,7 @@ export default function MediaSection() {
                   {f}
                 </button>
               ))}
-              <span className="ml-auto font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/35">
+              <span className="ml-auto font-mono text-[8.5px] uppercase tracking-[0.26em] text-ink/60">
                 {filtered.length} of {gallery.length} frames
               </span>
             </div>
@@ -196,7 +196,7 @@ export default function MediaSection() {
                       <span className="line-clamp-2">
                         {item.title.replace(/IMG_\d+ - /, "")}
                       </span>
-                      <span className="shrink-0 text-ink/30">
+                      <span className="shrink-0 text-ink/60">
                         {String(i + 1).padStart(2, "0")}
                       </span>
                     </p>

@@ -3,7 +3,7 @@ import DocumentHeader from "@/components/luxury/DocumentHeader";
 import LegalArticle, { type LegalSection } from "@/components/legal/LegalArticle";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Medfender",
+  title: "Terms of Service",
   description:
     "Terms and conditions governing the use of Medfender's digital products and services.",
   alternates: { canonical: "/terms" },

@@ -4,7 +4,7 @@ import ContactSection from "@/components/contact/ContactSection";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Contact & bookings — Medfender",
+  title: "Contact & bookings",
   description:
     "Reach Medfender for private-event bookings, custom tone captures, collaborations and press. Ensembles from trio to full stage.",
   alternates: { canonical: "/contact" },

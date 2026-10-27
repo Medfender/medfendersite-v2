@@ -19,7 +19,7 @@ export interface LocalTrack {
 }
 
 const MAX_LOCAL = 10;
-const FALLBACK_COVER = "/images/Thumbnails/TONEX.jpg";
+const FALLBACK_COVER = "/brand/medfender-monogram.svg";
 
 function parseFilenameArtistTitle(filename: string): { artist?: string; title?: string } {
   const base = filename.replace(/\.[^.]+$/, "");
@@ -43,12 +43,22 @@ function revokeUrl(url: string) {
   try { URL.revokeObjectURL(url); } catch {}
 }
 
-function Thumbnail({ src, size = 36, accent = "cyan" }: { src: string | null; size?: number; accent?: "cyan" | "amber" }) {
+function Thumbnail({ src, size = 36, active = false }: { src: string | null; size?: number; active?: boolean }) {
   const [err, setErr] = useState(false);
-  const ring = accent === "amber" ? "border-amber-500/40 shadow-[0_0_6px_rgba(245,158,11,0.3)]" : "border-brass/30 shadow-[0_0_6px_rgba(223,161,74,0.25)]";
+  const ring = active ? "border-brass/70" : "border-cream/15";
   return (
-    <div className={`relative shrink-0 rounded-sm overflow-hidden border ${ring} bg-[#0e0e12]`} style={{ width: size, height: size }} aria-hidden>
-      {src && !err ? <img src={src} alt="" className="w-full h-full object-cover" onError={() => setErr(true)} /> : <div className="w-full h-full flex items-center justify-center"><div className="w-1.5 h-1.5 rounded-full bg-neutral-700" /></div>}
+    <div
+      className={`relative shrink-0 overflow-hidden border ${ring} bg-ink-deep`}
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
+      {src && !err ? (
+        <img src={src} alt="" className="h-full w-full object-cover" onError={() => setErr(true)} />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <div className="h-1.5 w-1.5 rounded-full bg-cream/25" />
+        </div>
+      )}
     </div>
   );
 }
@@ -56,8 +66,7 @@ function Thumbnail({ src, size = 36, accent = "cyan" }: { src: string | null; si
 export default function LocalTrackPanel() {
   const { activeTrack, playTrack, isPlaying, currentTime, duration, seek } = useAudio();
   const [localTracks, setLocalTracks] = useState<LocalTrack[]>([]);
-  const [countMsg, setCountMsg] = useState(`0 / ${MAX_LOCAL} local tracks`);
-  const [lookingUpId, setLookingUpId] = useState<string | null>(null);
+  const countMsg = `${localTracks.length} / ${MAX_LOCAL} local tracks`;
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -93,7 +102,25 @@ export default function LocalTrackPanel() {
     (async () => { await clearAllTracks(); })();
   }, []);
 
-  useEffect(() => { setCountMsg(`${localTracks.length} / ${MAX_LOCAL} local tracks`); }, [localTracks.length]);
+
+  async function extractEmbeddedArt(file: File): Promise<string | null> {
+    try {
+      const metadata = await parseBlob(file);
+      if (metadata.common && metadata.common.picture && metadata.common.picture.length > 0) {
+        const picture = metadata.common.picture[0];
+        if (picture.data && picture.format) {
+          const uint8 = new Uint8Array(picture.data);
+          const blob = new Blob([uint8], { type: `image/${picture.format}` });
+          return await new Promise<string>((res) => {
+            const reader = new FileReader();
+            reader.onload = () => res(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch {}
+    return null;
+  }
 
   const handleImport = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -121,21 +148,6 @@ export default function LocalTrackPanel() {
     if (inputRef.current) inputRef.current.value = "";
   }, [localTracks.length]);
 
-  async function extractEmbeddedArt(file: File): Promise<string | null> {
-    try {
-      const metadata = await parseBlob(file);
-      if (metadata.common && metadata.common.picture && metadata.common.picture.length > 0) {
-        const picture = metadata.common.picture[0];
-        if (picture.data && picture.format) {
-          const uint8 = new Uint8Array(picture.data);
-          const blob = new Blob([uint8], { type: `image/${picture.format}` });
-          return await new Promise<string>((res) => { const reader = new FileReader(); reader.onload = () => res(reader.result as string); reader.readAsDataURL(blob); });
-        }
-      }
-    } catch {}
-    return null;
-  }
-
   const removeTrack = useCallback((id: string) => {
     setLocalTracks((prev) => {
       const removed = prev.find((t) => t.id === id);
@@ -143,37 +155,6 @@ export default function LocalTrackPanel() {
       return prev.filter((t) => t.id !== id);
     });
     (async () => { await deletePersistedTrack(id); })();
-  }, []);
-
-  const handleFindCover = useCallback(async (id: string) => {
-    setLookingUpId(id);
-    try {
-      const track = localTracks.find((t) => t.id === id);
-      if (!track) return;
-      const metaName = track.name || "";
-      const metaArtist = track.artist || "";
-      const qBase = metaName || metaArtist ? `${metaArtist} ${metaName}`.trim() : (parseFilenameArtistTitle(track.file.name).artist ? `${parseFilenameArtistTitle(track.file.name).artist} ${parseFilenameArtistTitle(track.file.name).title}` : track.file.name);
-      if (!qBase) return;
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(qBase)}&entity=song&limit=3`);
-      if (!res.ok) return;
-      const data = await res.json();
-      const match = data.results?.[0];
-      if (match && match.artworkUrl) {
-        const artworkUrl = match.artworkUrl.replace(/100x100$/, "600x600");
-        setLocalTracks((prev) => prev.map((t) => t.id !== id ? t : { ...t, selectedCoverUrl: artworkUrl, thumbnail: artworkUrl }));
-        const existing = await loadTracks();
-        const pt = existing.find((e) => e.id === id);
-        if (pt) await saveTrack({ ...pt, thumbnailUrl: artworkUrl, embeddedArtworkUrl: pt.embeddedArtworkUrl || null });
-      }
-    } catch {}
-    finally { setLookingUpId(null); }
-  }, [localTracks]);
-
-  const handleRemoveCover = useCallback(async (id: string) => {
-    setLocalTracks((prev) => prev.map((t) => t.id !== id ? t : { ...t, selectedCoverUrl: null, thumbnail: t.embeddedArtworkUrl || null }));
-    const existing = await loadTracks();
-    const pt = existing.find((e) => e.id === id);
-    if (pt) await saveTrack({ ...pt, thumbnailUrl: null, embeddedArtworkUrl: pt.embeddedArtworkUrl || null });
   }, []);
 
   const displayCover = (track: LocalTrack): string => resolveArtwork(track) || FALLBACK_COVER;
@@ -229,18 +210,18 @@ export default function LocalTrackPanel() {
 
       <div className="flex flex-col">
         {localTracks.map((track, idx) => {
-          const isActive = (activeTrack as any)?.id === track.id;
+          const isActive = activeTrack?.id === track.id;
           const coverSrc = displayCover(track);
           return (
             <div
               key={track.id}
-              onClick={() => playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER } as any)}
+              onClick={() => playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER })}
               className={`w-full flex flex-col border-b border-[var(--rule-ink)] py-3 transition-colors hover:bg-cream/[0.02] cursor-pointer group ${isActive ? "bg-cream/[0.02]" : ""}`}
             >
               <div className="flex items-center justify-between w-full px-1">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <span className="text-[10px] text-cream/55 font-mono w-7 shrink-0 tabular-nums">{String(idx + 1).padStart(2, "0")}</span>
-                  <Thumbnail src={coverSrc} size={36} accent={isActive ? "cyan" : "amber"} />
+                  <Thumbnail src={coverSrc} size={36} active={isActive} />
                   <div className="min-w-0 flex-1">
                     <h4 className={`text-sm truncate ${isActive ? "text-brass-light" : "text-cream/90"}`}>
                       {track.name || "Untitled"}
@@ -253,7 +234,7 @@ export default function LocalTrackPanel() {
                   <button onClick={(e) => { e.stopPropagation(); removeTrack(track.id); }} className="text-cream/55 hover:text-[var(--color-brass-light)] transition" aria-label="Remove track"><Trash2 size={12} /></button>
                   <button
                     aria-label={isActive && isPlaying ? "Pause" : "Play"}
-                    onClick={(e) => { e.stopPropagation(); playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER } as any); }}
+                    onClick={(e) => { e.stopPropagation(); playTrack({ id: track.id, name: track.name, gearTag: track.artist || "Local", audioUrl: track.audioUrl, thumbnail: resolveArtwork(track) || FALLBACK_COVER }); }}
                     className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
                       isActive
                         ? "border-brass/60 text-cream bg-brass/10"
@@ -262,7 +243,6 @@ export default function LocalTrackPanel() {
                   >
                     {isActive && isPlaying ? <Pause size={12} strokeWidth={1.5} /> : <Play size={12} strokeWidth={1.5} className="ml-0.5" />}
                   </button>
-                  <span className="text-[10px] text-cream/60 font-mono w-10 text-right tabular-nums">{(track as any).duration || "0:00"}</span>
                 </div>
               </div>
 
@@ -283,7 +263,7 @@ export default function LocalTrackPanel() {
                       return (
                         <div
                           key={i}
-                          className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-brass/80" : "bg-cream/10"}`}
+                          className={`w-[1px] rounded-none transition-colors duration-75 ${played ? "bg-brass/85" : "bg-cream/20"}`}
                           style={{ height: `${Math.max(30, 15 + (i % 3) * 20)}%` }}
                         />
                       );

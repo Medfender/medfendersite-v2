@@ -9,8 +9,9 @@ export function generateStaticParams() {
 export async function generateMetadata() {
   const pack = packs.find((p) => p.slug === "gnawa-blues-deluxe");
   return {
-    title: pack ? `${pack.title} — Medfender` : "Gnawa Blues Deluxe — Medfender",
+    title: pack ? pack.title : "Gnawa Blues Deluxe",
     description: pack?.description ?? "Gnawa Blues Deluxe preset pack by Medfender.",
+    alternates: { canonical: "/store/gnawa-blues-deluxe" },
   };
 }
 
