@@ -109,67 +109,62 @@ export default function HomePage() {
           The instrument · Marrakech
         </p>
 
-        <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-10 pt-40 md:px-8 md:pb-12">
-          <div className="grid grid-cols-1 items-end gap-10 lg:grid-cols-12 lg:gap-12">
-            <div className="lg:col-span-8">
-              <div className="flex items-center gap-4">
-                <span className="fret-index" data-inlay="false">
-                  0
-                </span>
-                <span className="eyebrow-on-ink">
-                  Live band · Composer · Marrakech
-                </span>
-                <span aria-hidden className="h-px w-16 bg-cream/25 md:w-28" />
-              </div>
-
-              <h1 className="display-hero mt-8 text-cream">
-                Gnawa soul.
-                <br />
-                <em className="italic text-brass">Electric blues.</em>
-              </h1>
-
-              <p className="mt-8 max-w-xl text-sm leading-relaxed text-cream/70 md:text-base">
-                A band built for the room — from an intimate trio to fifteen
-                musicians with Gnaoua and brass sections. Private dinners, hotel
-                residencies, weddings and festivals across Morocco and abroad.
-              </p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <Link href="/contact#booking" className="btn btn-brass">
-                  Request availability
-                  <span aria-hidden>→</span>
-                </Link>
-                <Link href="/audio" className="link-rule-light">
-                  Hear the room
-                  <span aria-hidden>↗</span>
-                </Link>
-                <Link href="/fretboard" className="link-rule-light">
-                  Play the atlas
-                  <span aria-hidden>→</span>
-                </Link>
-              </div>
+        <div className="relative z-10 mx-auto w-full max-w-[1560px] px-5 pb-16 pt-44 md:px-8 md:pb-24">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-4">
+              <span className="fret-index" data-inlay="false">
+                0
+              </span>
+              <span className="eyebrow-on-ink">
+                Live band · Composer · Marrakech
+              </span>
+              <span aria-hidden className="h-px w-16 bg-cream/25 md:w-28" />
             </div>
 
-            <div className="lg:col-span-4 lg:pb-2">
-              <dl className="grid grid-cols-2 gap-x-6 gap-y-5 border-t border-cream/20 pt-6">
-                {[
-                  { k: "Instrument", v: "Guitar · Composition" },
-                  { k: "Roster", v: "Trio → 15 players" },
-                  { k: "Territory", v: "Morocco & abroad" },
-                  { k: "Reply", v: "Within 48 hours" },
-                ].map((item) => (
-                  <div key={item.k}>
-                    <dt className="font-mono text-[9px] uppercase tracking-[0.26em] text-cream/60">
-                      {item.k}
-                    </dt>
-                    <dd className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-cream/85">
-                      {item.v}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+            <h1 className="display-hero mt-10 text-cream md:mt-16">
+              Gnawa soul.
+              <br />
+              <em className="italic text-brass">Electric blues.</em>
+            </h1>
+
+            <p className="mt-8 max-w-sm text-sm leading-relaxed text-cream/55 sm:max-w-md md:mt-10 md:text-base">
+              From an intimate trio to fifteen players with Gnaoua and brass —
+              for private dinners, hotel residencies, weddings and festivals.
+            </p>
+
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-x-8">
+              <Link href="/contact#booking" className="btn btn-brass sm:w-auto">
+                Request availability
+                <span aria-hidden>→</span>
+              </Link>
+              <Link href="/audio" className="link-rule-light">
+                Hear the room
+                <span aria-hidden>↗</span>
+              </Link>
             </div>
+
+            <p className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-cream/40 sm:hidden">
+              Guitar & composition · Trio → 15 · Morocco & abroad · Reply within 48h
+            </p>
           </div>
+
+          <dl className="mt-20 hidden grid-cols-4 gap-x-8 border-t border-cream/15 pt-6 sm:grid md:mt-28 max-w-3xl">
+            {[
+              { k: "Instrument", v: "Guitar · Composition" },
+              { k: "Roster", v: "Trio → 15 players" },
+              { k: "Territory", v: "Morocco & abroad" },
+              { k: "Reply", v: "Within 48 hours" },
+            ].map((item) => (
+              <div key={item.k}>
+                <dt className="font-mono text-[9px] uppercase tracking-[0.26em] text-cream/45">
+                  {item.k}
+                </dt>
+                <dd className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-cream/75">
+                  {item.v}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
       </section>
 
