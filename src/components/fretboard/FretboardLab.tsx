@@ -24,6 +24,7 @@ import {
 } from "@/lib/theory/beatoVoicings";
 import type { BeatoChart, BeatoFamily } from "@/lib/theory/beatoVoicings";
 import BookShape from "@/components/fretboard/BookShape";
+import HarmonyLab from "@/components/fretboard/HarmonyLab";
 import NeckMap from "@/components/neck/NeckMap";
 import type { NeckNote } from "@/components/neck/NeckMap";
 import { usePluck } from "@/hooks/usePluck";
@@ -108,7 +109,7 @@ function clamp(value: number, count: number): number {
 export default function FretboardLab() {
   const pluck = usePluck();
 
-  const [view, setView] = useState<"charts" | "progression">("charts");
+  const [view, setView] = useState<"charts" | "progression" | "theory">("charts");
   const [status, setStatus] = useState(
     "Chart browser. Every shape is a printed diagram from the Beato Book.",
   );
@@ -311,14 +312,17 @@ export default function FretboardLab() {
 
   /* ── Render ──────────────────────────────────────────────────────── */
   return (
-    <section id="lab" className="surface-paper relative bg-paper">
+    <section
+      id="lab"
+      className="surface-paper relative bg-paper lg:flex lg:h-[calc(100dvh-5.5rem)] lg:min-h-[600px] lg:flex-col lg:overflow-hidden"
+    >
       <p aria-live="polite" className="sr-only">
         {status}
       </p>
 
-      <div className="mx-auto w-full max-w-[1560px] px-5 py-12 md:px-8 md:py-16">
+      <div className="mx-auto flex w-full max-w-[1560px] flex-col px-5 py-12 md:px-8 md:py-16 lg:h-full lg:min-h-0 lg:py-4">
         {/* Mode + sound */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--rule)] pb-6">
+        <div className="flex flex-none flex-wrap items-center justify-between gap-3 border-b border-[var(--rule)] pb-4 lg:pb-3">
           <div role="group" aria-label="Atlas mode" className="flex gap-2">
             <button
               type="button"
@@ -342,6 +346,17 @@ export default function FretboardLab() {
             >
               Progression
             </button>
+            <button
+              type="button"
+              className="chip"
+              aria-pressed={view === "theory"}
+              onClick={() => {
+                setView("theory");
+                setStatus("Theory workspace.");
+              }}
+            >
+              Theory
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -359,335 +374,362 @@ export default function FretboardLab() {
             >
               Sound {pluck.enabled ? "on" : "off"}
             </button>
-            <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60">
+            <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/60">
               {BEATO_SHAPE_COUNT} printed shapes · 18 charts
             </span>
           </div>
         </div>
 
         {view === "charts" ? (
-          <div className="pt-8">
-            {/* Family + chart */}
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,300px)_1fr]">
-              <div>
-                <h2 className="label-rule text-rust">Family</h2>
-                <div
-                  role="group"
-                  aria-label="Drop family"
-                  className="mt-4 grid grid-cols-2 gap-2"
-                >
-                  {BEATO_FAMILIES.map((entry) => (
-                    <button
-                      key={entry}
-                      type="button"
-                      className="chip"
-                      aria-pressed={family === entry}
-                      onClick={() => changeFamily(entry)}
-                    >
-                      {entry}
-                    </button>
-                  ))}
-                </div>
-
-                <p className="mt-6 font-mono text-[8.5px] uppercase leading-relaxed tracking-[0.16em] text-ink/60">
-                  {BEATO_SOURCE}
-                </p>
-                {family === "Drop 3" ? (
-                  <p className="mt-3 font-mono text-[8px] uppercase leading-relaxed tracking-[0.14em] text-ink/60">
-                    The book&apos;s Drop 3 Dimmaj7♭13 page (p. 148) repeats the
-                    Maj7sus4 page (p. 144) byte for byte, so it is not duplicated
-                    here.
-                  </p>
-                ) : null}
-              </div>
-
-              <div>
-                <h2 className="label-rule text-rust">Chart</h2>
-                <div
-                  role="group"
-                  aria-label="Chord chart type"
-                  className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4"
-                >
-                  {BEATO_CHART_ORDER.map((entry) => (
-                    <button
-                      key={entry}
-                      type="button"
-                      className="chip flex-col items-start justify-center gap-0.5 px-3 py-2 text-left"
-                      aria-pressed={chart === entry}
-                      onClick={() => changeChart(entry)}
-                    >
-                      <span className="text-[0.8rem] leading-tight">
-                        {BEATO_CHARTS[entry].label}
-                      </span>
-                      <span className="font-mono text-[7.5px] uppercase tracking-[0.12em] opacity-60">
-                        {FORMULA_LABEL(entry)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Root + string set */}
-            <div className="mt-8 grid grid-cols-1 gap-6 border-t border-[var(--rule)] pt-6 md:grid-cols-[minmax(0,1fr)_auto]">
-              <div>
-                <h2 className="label-rule text-rust">Root</h2>
-                <div
-                  role="group"
-                  aria-label="Chord root"
-                  className="mt-4 flex flex-wrap gap-2"
-                >
-                  {ROOTS.map((root) => (
-                    <button
-                      key={root}
-                      type="button"
-                      className="chip min-w-[52px] px-3"
-                      aria-pressed={chartRoot === root}
-                      onClick={() => changeChartRoot(root)}
-                    >
-                      {root}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="label-rule text-rust">String set</h2>
-                <div
-                  role="group"
-                  aria-label="String set"
-                  className="mt-4 flex flex-wrap gap-2"
-                >
-                  <button
-                    type="button"
-                    className="chip px-3"
-                    aria-pressed={activeSet === "all"}
-                    onClick={() => {
-                      setStringFilter("all");
-                      setShapeIndex(0);
-                    }}
+          <div className="pt-8 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:overflow-hidden lg:pt-3">
+            <div className="grid grid-cols-1 gap-8 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,250px)_minmax(0,1fr)] lg:gap-5">
+              {/* Controls rail */}
+              <div className="flex flex-col gap-2 lg:min-h-0 lg:overflow-y-auto lg:pr-2">
+                <div>
+                  <h2 className="label-rule text-[0.72rem] text-rust">Family</h2>
+                  <div
+                    role="group"
+                    aria-label="Drop family"
+                    className="mt-1.5 grid grid-cols-2 gap-1.5"
                   >
-                    All
-                  </button>
-                  {setOptions
-                    .filter((entry) => entry !== "all")
-                    .map((entry) => (
+                    {BEATO_FAMILIES.map((entry) => (
                       <button
                         key={entry}
                         type="button"
-                        className="chip px-3"
-                        aria-pressed={activeSet === entry}
-                        onClick={() => {
-                          setStringFilter(entry);
-                          setShapeIndex(0);
-                        }}
+                        className="chip chip-sm justify-center"
+                        aria-pressed={family === entry}
+                        onClick={() => changeFamily(entry)}
                       >
                         {entry}
                       </button>
                     ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Selected shape on the neck */}
-            <div className="mt-8 border border-[var(--rule)] bg-cream/45">
-              <div className="flex flex-col gap-4 border-b border-[var(--rule)] px-4 py-4 md:flex-row md:items-end md:justify-between md:px-6">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <p className="font-display text-[1.9rem] leading-none text-ink">
-                      {chartSymbol}
+                  </div>
+                  {family === "Drop 3" ? (
+                    <p className="mt-2 font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.1em] text-ink/60">
+                      p. 148 repeats the Maj7sus4 page (p. 144) byte for byte, so
+                      it is not duplicated here.
                     </p>
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-rust">
-                      {chartInfo.name}
+                  ) : null}
+                </div>
+
+                <div>
+                  <h2 className="label-rule text-[0.72rem] text-rust">Chart</h2>
+                  <div
+                    role="group"
+                    aria-label="Chord chart type"
+                    className="mt-1.5 grid grid-cols-2 gap-1 lg:grid-cols-3"
+                  >
+                    {BEATO_CHART_ORDER.map((entry) => (
+                      <button
+                        key={entry}
+                        type="button"
+                        className="chip chip-sm flex-col items-start justify-center gap-0 text-left leading-tight"
+                        aria-pressed={chart === entry}
+                        onClick={() => changeChart(entry)}
+                      >
+                        <span className="text-[0.74rem] leading-tight lg:text-[0.7rem]">
+                          {BEATO_CHARTS[entry].label}
+                        </span>
+                        <span className="font-mono text-[9px] uppercase leading-tight tracking-[0.08em] opacity-60">
+                          {FORMULA_LABEL(entry)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="label-rule text-[0.72rem] text-rust">Root</h2>
+                  <div
+                    role="group"
+                    aria-label="Chord root"
+                    className="mt-1.5 grid grid-cols-6 gap-1"
+                  >
+                    {ROOTS.map((root) => (
+                      <button
+                        key={root}
+                        type="button"
+                        className="chip chip-sm justify-center px-0"
+                        aria-pressed={chartRoot === root}
+                        onClick={() => changeChartRoot(root)}
+                      >
+                        {root}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h2 className="label-rule text-[0.72rem] text-rust">String set</h2>
+                  <div
+                    role="group"
+                    aria-label="String set"
+                    className="mt-1.5 flex flex-wrap gap-1.5"
+                  >
+                    <button
+                      type="button"
+                      className="chip chip-sm"
+                      aria-pressed={activeSet === "all"}
+                      onClick={() => {
+                        setStringFilter("all");
+                        setShapeIndex(0);
+                      }}
+                    >
+                      All
+                    </button>
+                    {setOptions
+                      .filter((entry) => entry !== "all")
+                      .map((entry) => (
+                        <button
+                          key={entry}
+                          type="button"
+                          className="chip chip-sm"
+                          aria-pressed={activeSet === entry}
+                          onClick={() => {
+                            setStringFilter(entry);
+                            setShapeIndex(0);
+                          }}
+                        >
+                          {entry}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+
+                <p className="font-mono text-[9.5px] uppercase leading-relaxed tracking-[0.1em] text-ink/55 lg:hidden">
+                  {BEATO_SOURCE}
+                </p>
+              </div>
+
+              {/* Neck above, printed diagrams below, one column of height */}
+              <div className="flex min-h-0 flex-col gap-4">
+              {/* Selected shape on the neck */}
+              <div className="flex flex-none flex-col border border-[var(--rule)] bg-cream/45">
+                <div className="flex flex-none flex-wrap items-end justify-between gap-2 border-b border-[var(--rule)] px-4 py-2.5">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                      <p className="font-display 1.6 leading-none text-ink">
+                        {chartSymbol}
+                      </p>
+                      <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-rust">
+                        {chartInfo.name}
+                      </p>
+                    </div>
+                    <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink/60">
+                      {selectedShape ? (
+                        <>
+                          {selectedShape.book.family} ·{" "}
+                          <span className="normal-case">{selectedShape.book.column}</span>{" "}
+                          · bass {intervalLabel(selectedShape.bassPc - chartRootPc)} ·
+                          {selectedShape.book.stringSet} · p.{" "}
+                          {selectedShape.book.page}
+                        </>
+                      ) : (
+                        "No printed shape for this combination"
+                      )}
                     </p>
                   </div>
-                  <p className="mt-2 font-mono text-[8.5px] uppercase tracking-[0.16em] text-ink/60">
-                    {selectedShape ? (
-                      <>
-                        {selectedShape.book.family} · column{" "}
-                        <span className="normal-case">{selectedShape.book.column}</span>{" "}
-                        · bass {intervalLabel(selectedShape.bassPc - chartRootPc)} ·
-                        strings {selectedShape.book.stringSet} · p.{" "}
-                        {selectedShape.book.page}
-                      </>
-                    ) : (
-                      "No printed shape for this combination"
-                    )}
-                  </p>
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {visibleShapes.length > 1 ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          className="chip chip-sm"
+                          aria-label="Previous printed shape"
+                          onClick={() =>
+                            setShapeIndex(
+                              (safeShapeIndex - 1 + visibleShapes.length) %
+                                visibleShapes.length,
+                            )
+                          }
+                        >
+                          ←
+                        </button>
+                        <span className="min-w-[54px] text-center font-mono text-[10.5px] tabular-nums text-ink/60">
+                          {safeShapeIndex + 1} / {visibleShapes.length}
+                        </span>
+                        <button
+                          type="button"
+                          className="chip chip-sm"
+                          aria-label="Next printed shape"
+                          onClick={() =>
+                            setShapeIndex((safeShapeIndex + 1) % visibleShapes.length)
+                          }
+                        >
+                          →
+                        </button>
+                      </div>
+                    ) : null}
+
+                    <button
+                      type="button"
+                      className="chip chip-sm"
+                      onClick={() => {
+                        if (selectedShape) pluck.strum(midiOrder(selectedShape));
+                      }}
+                      disabled={!pluck.enabled || !selectedShape}
+                      title={
+                        !selectedShape
+                          ? "No printed shape to strum"
+                          : pluck.enabled
+                            ? "Strum the shape from the low string"
+                            : "Turn sound on first"
+                      }
+                    >
+                      Strum
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  {visibleShapes.length > 1 ? (
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        className="chip px-3"
-                        aria-label="Previous printed shape"
-                        onClick={() =>
-                          setShapeIndex(
-                            (safeShapeIndex - 1 + visibleShapes.length) %
-                              visibleShapes.length,
-                          )
-                        }
-                      >
-                        ←
-                      </button>
-                      <span className="min-w-[64px] text-center font-mono text-[9px] tabular-nums text-ink/60">
-                        {safeShapeIndex + 1} / {visibleShapes.length}
-                      </span>
-                      <button
-                        type="button"
-                        className="chip px-3"
-                        aria-label="Next printed shape"
-                        onClick={() =>
-                          setShapeIndex((safeShapeIndex + 1) % visibleShapes.length)
-                        }
-                      >
-                        →
-                      </button>
-                    </div>
-                  ) : null}
+                <div className="fretboard-scroll flex min-h-0 flex-1 items-center px-4 py-3 lg:min-h-[150px]">
+                  {selectedShape ? (
+                    <NeckMap
+                      lastFret={Math.max(15, selectedShape.maxFret)}
+                      notes={toNeckNotes(selectedShape)}
+                      mutedStrings={mutedStringsOf(selectedShape)}
+                      onNoteClick={pluckNote}
+                      ariaLabel={`${chartSymbol}, ${selectedShape.book.family} shape from page ${selectedShape.book.page}, printed under the ${selectedShape.book.column} column`}
+                    />
+                  ) : (
+                    <p className="max-w-xl px-4 py-8 text-sm leading-relaxed text-ink/60">
+                      {family === "Drop 3" && chart === "Dimmaj7b13"
+                        ? "The book's Drop 3 Dimmaj7♭13 page (p. 148) repeats the Maj7sus4 page (p. 144) byte for byte, so it is not duplicated here. Choose another family or chart."
+                        : "No printed shape matches this root and string set."}
+                    </p>
+                  )}
+                </div>
 
-                  <button
-                    type="button"
-                    className="chip"
-                    onClick={() => {
-                      if (selectedShape) pluck.strum(midiOrder(selectedShape));
-                    }}
-                    disabled={!pluck.enabled || !selectedShape}
-                    title={
-                      !selectedShape
-                        ? "No printed shape to strum"
-                        : pluck.enabled
-                          ? "Strum the shape from the low string"
-                          : "Turn sound on first"
-                    }
-                  >
-                    Strum
-                  </button>
+                <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[var(--rule)] px-4 py-2 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink/60">
+                  <span className="font-mono text-[10.5px] tracking-[0.12em] text-ink">
+                    {selectedShape ? shapeNumber(selectedShape) : "—"}
+                  </span>
+                  <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
+                  <span>{chartInfo.formula}</span>
+                  <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      aria-hidden
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ background: ROLE_SWATCH.root }}
+                    />
+                    Root
+                  </span>
+                  <span>All other dots are the printed chord tones</span>
                 </div>
               </div>
 
-              <div className="fretboard-scroll px-2 py-4 md:px-6 md:py-6">
-                {selectedShape ? (
-                  <NeckMap
-                    lastFret={Math.max(15, selectedShape.maxFret)}
-                    notes={toNeckNotes(selectedShape)}
-                    mutedStrings={mutedStringsOf(selectedShape)}
-                    onNoteClick={pluckNote}
-                    ariaLabel={`${chartSymbol}, ${selectedShape.book.family} shape from page ${selectedShape.book.page}, printed under the ${selectedShape.book.column} column`}
-                  />
-                ) : (
-                  <p className="max-w-xl px-4 py-10 text-sm leading-relaxed text-ink/60">
-                    {family === "Drop 3" && chart === "Dimmaj7b13"
-                      ? "The book's Drop 3 Dimmaj7♭13 page (p. 148) repeats the Maj7sus4 page (p. 144) byte for byte, so it is not duplicated here. Choose another family or chart."
-                      : "No printed shape matches this root and string set."}
+              {/* Shape browser */}
+              <div className="flex min-h-0 flex-1 flex-col border border-[var(--rule)] bg-cream/20">
+                <div className="flex flex-none flex-wrap items-baseline justify-between gap-x-2 gap-y-1 border-b border-[var(--rule)] px-3 py-2">
+                  <h2 className="label-rule text-[0.72rem] text-rust">
+                    {family} · {BEATO_CHARTS[chart].label} · {chartRoot}
+                  </h2>
+                  <p className="font-mono text-[9.5px] uppercase tracking-[0.12em] text-ink/60">
+                    {visibleShapes.length} diagram
+                    {visibleShapes.length === 1 ? "" : "s"} · p.{" "}
+                    {beatoPage(chart, family)}
                   </p>
+                </div>
+
+                <p className="hidden flex-none border-b border-[var(--rule)] px-3 py-1 font-mono text-[9px] uppercase leading-relaxed tracking-[0.1em] text-ink/50 lg:block">
+                  {BEATO_SOURCE}
+                </p>
+
+                {visibleShapes.length === 0 ? (
+                  <p className="px-4 py-6 text-sm leading-relaxed text-ink/60">
+                    {family === "Drop 3" && chart === "Dimmaj7b13"
+                      ? "The book's Drop 3 Dimmaj7♭13 page (p. 148) repeats the Maj7sus4 page (p. 144) byte for byte, so it is not counted twice. Choose another family or chart."
+                      : "No printed diagram for this root and string set."}
+                  </p>
+                ) : (
+                  <div className="min-h-0 flex-1 overflow-y-auto p-2">
+                    <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                      {visibleShapes.map((entry, index) => {
+                        const active = index === safeShapeIndex;
+                        return (
+                          <button
+                            key={`${entry.book.page}-${entry.book.column}-${entry.book.stringSet}-${entry.shape.join(",")}`}
+                            type="button"
+                            aria-pressed={active}
+                            onClick={() => {
+                              setShapeIndex(index);
+                              setStatus(
+                                `${chartSymbol}: ${entry.book.family} shape under the ${entry.book.column} column, page ${entry.book.page}.`,
+                              );
+                            }}
+                            className={`border p-2 text-left transition-colors ${
+                              active
+                                ? "border-ink bg-ink/[0.06]"
+                                : "border-[var(--rule)] bg-cream/40 hover:border-ink/40"
+                            }`}
+                          >
+                            <div className="flex items-baseline justify-between">
+                              <span className="font-mono text-[9.5px] tracking-[0.14em] text-rust">
+                                {entry.book.column}
+                              </span>
+                              <span className="font-mono text-[9.5px] tabular-nums text-ink/60">
+                                p. {entry.book.page}
+                              </span>
+                            </div>
+                            <BookShape
+                              shape={entry.shape}
+                              rootPc={chartRootPc}
+                              showStrings
+                              className="mx-auto mt-1 h-[150px] w-full"
+                            />
+                            <div className="mt-1.5 flex items-baseline justify-between border-t border-[var(--rule-soft)] pt-1.5">
+                              <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink/60">
+                                {entry.book.stringSet}
+                              </span>
+                              <span className="font-mono text-[9.5px] uppercase tracking-[0.1em] text-ink/60">
+                                frets {entry.minFret}–{entry.maxFret}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
-
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--rule)] px-4 py-3 font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60 md:px-6">
-                <span className="font-mono text-[10px] tracking-[0.14em] text-ink">
-                  {selectedShape ? shapeNumber(selectedShape) : "—"}
-                </span>
-                <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
-                <span>{chartInfo.formula}</span>
-                <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
-                <span className="inline-flex items-center gap-1.5">
-                  <span
-                    aria-hidden
-                    className="inline-block h-2 w-2 rounded-full"
-                    style={{ background: ROLE_SWATCH.root }}
-                  />
-                  Root
-                </span>
-                <span>All other dots are the printed chord tones</span>
-              </div>
-            </div>
-
-            {/* Shape cards */}
-            <div className="mt-8">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="label-rule text-rust">
-                  {family} · {BEATO_CHARTS[chart].label} · {chartRoot}
-                </h2>
-                <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60">
-                  {visibleShapes.length} diagram
-                  {visibleShapes.length === 1 ? "" : "s"} · p.{" "}
-                  {beatoPage(chart, family)}
-                </p>
-              </div>
-
-              {visibleShapes.length === 0 ? (
-                <p className="mt-4 border border-[var(--rule)] bg-cream/40 px-5 py-8 text-sm leading-relaxed text-ink/60">
-                  {family === "Drop 3" && chart === "Dimmaj7b13"
-                    ? "The book's Drop 3 Dimmaj7♭13 page (p. 148) repeats the Maj7sus4 page (p. 144) byte for byte, so it is not counted twice. Choose another family or chart."
-                    : "No printed diagram for this root and string set."}
-                </p>
-              ) : null}
-
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-6">
-                {visibleShapes.map((entry, index) => {
-                  const active = index === safeShapeIndex;
-                  return (
-                    <button
-                      key={`${entry.book.page}-${entry.book.column}-${entry.book.stringSet}-${entry.shape.join(",")}`}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => {
-                        setShapeIndex(index);
-                        setStatus(
-                          `${chartSymbol}: ${entry.book.family} shape under the ${entry.book.column} column, page ${entry.book.page}.`,
-                        );
-                      }}
-                      className={`border p-3 text-left transition-colors ${
-                        active
-                          ? "border-ink bg-ink/[0.06]"
-                          : "border-[var(--rule)] bg-cream/40 hover:border-ink/40"
-                      }`}
-                    >
-                      <div className="flex items-baseline justify-between">
-                        <span className="font-mono text-[8px] tracking-[0.16em] text-rust">
-                          {entry.book.column}
-                        </span>
-                        <span className="font-mono text-[8px] tabular-nums text-ink/60">
-                          p. {entry.book.page}
-                        </span>
-                      </div>
-                      <BookShape
-                        shape={entry.shape}
-                        rootPc={chartRootPc}
-                        showStrings
-                        className="mx-auto mt-1 h-[142px] w-full"
-                      />
-                      <div className="mt-2 flex items-baseline justify-between border-t border-[var(--rule-soft)] pt-2">
-                        <span className="font-mono text-[7.5px] uppercase tracking-[0.12em] text-ink/60">
-                          {entry.book.stringSet}
-                        </span>
-                        <span className="font-mono text-[7.5px] uppercase tracking-[0.12em] text-ink/60">
-                          frets {entry.minFret}–{entry.maxFret}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
               </div>
             </div>
           </div>
+
+        ) : view === "theory" ? (
+          <div className="flex min-h-0 flex-col pt-8 lg:flex-1 lg:overflow-hidden lg:pt-0">
+            <HarmonyLab
+              onUseProgression={(symbols) => {
+                const text = symbols.join(" ");
+                setInput(text);
+                setSubmitted(text);
+                setActivePreset(null);
+                setKeyChoice("auto");
+                setModeChoice("auto");
+                setStepIndex(0);
+                setSelections({});
+                setView("progression");
+              }}
+              currentSymbols={splitChords(submitted)}
+              pluck={pluck}
+              onStatus={setStatus}
+            />
+          </div>
         ) : (
-          <div className="pt-8">
+          <div className="pt-8 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:pt-5">
             {/* Presets + input */}
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-none flex-col gap-2">
               <div
                 role="group"
                 aria-label="Example progressions"
-                className="flex flex-wrap gap-2"
+                className="flex flex-wrap gap-1.5"
               >
                 {PRESETS.map((preset) => (
                   <button
                     key={preset.id}
                     type="button"
-                    className="chip"
+                    className="chip chip-sm"
                     aria-pressed={activePreset === preset.id}
                     onClick={() => choosePreset(preset)}
                   >
@@ -697,14 +739,14 @@ export default function FretboardLab() {
               </div>
 
               <form
-                className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto_auto] md:items-end"
+                className="grid grid-cols-1 gap-2 md:grid-cols-[minmax(0,1fr)_auto_auto_auto] md:items-end"
                 onSubmit={(event) => {
                   event.preventDefault();
                   applyInput();
                 }}
               >
                 <label className="block">
-                  <span className="mb-2 block font-mono text-[8px] uppercase tracking-[0.22em] text-ink/60">
+                  <span className="mb-1 block font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink/60">
                     Chords · space separated
                   </span>
                   <input
@@ -713,7 +755,7 @@ export default function FretboardLab() {
                       setInput(event.target.value);
                       setActivePreset(null);
                     }}
-                    className="field"
+                    className="field field-sm w-full"
                     placeholder="Dm7 G7 Cmaj7"
                     spellCheck={false}
                     autoComplete="off"
@@ -722,7 +764,7 @@ export default function FretboardLab() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block font-mono text-[8px] uppercase tracking-[0.22em] text-ink/60">
+                  <span className="mb-1 block font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink/60">
                     Key
                   </span>
                   <select
@@ -732,7 +774,7 @@ export default function FretboardLab() {
                       setStepIndex(0);
                       setSelections({});
                     }}
-                    className="field md:w-28"
+                    className="field field-sm md:w-24"
                   >
                     <option value="auto">Auto</option>
                     {ROOTS.map((root) => (
@@ -744,7 +786,7 @@ export default function FretboardLab() {
                 </label>
 
                 <label className="block">
-                  <span className="mb-2 block font-mono text-[8px] uppercase tracking-[0.22em] text-ink/60">
+                  <span className="mb-1 block font-mono text-[9.5px] uppercase tracking-[0.2em] text-ink/60">
                     Mode
                   </span>
                   <select
@@ -754,7 +796,7 @@ export default function FretboardLab() {
                       setStepIndex(0);
                       setSelections({});
                     }}
-                    className="field md:w-32"
+                    className="field field-sm md:w-28"
                     disabled={keyChoice === "auto"}
                   >
                     <option value="auto">Inferred</option>
@@ -770,7 +812,7 @@ export default function FretboardLab() {
               </form>
               <p
                 id="chord-input-hint"
-                className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-ink/60"
+                className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink/55"
               >
                 Sevenths, sixths and the book&apos;s altered sevenths · slash chords
                 welcome · a quality with no chart says so
@@ -778,191 +820,196 @@ export default function FretboardLab() {
             </div>
 
             {analysis && step ? (
-              <>
-                {/* Analysis summary */}
-                <div className="mt-8 flex flex-col gap-6 border-t border-[var(--rule)] pt-8 md:flex-row md:items-end md:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="fret-index" data-inlay="true">
-                        {String(safeStepIndex + 1).padStart(2, "0")}
-                      </span>
-                      <p className="eyebrow">
-                        {analysis.key} {analysis.mode} · {analysis.steps.length} chord
-                        {analysis.steps.length === 1 ? "" : "s"}
-                      </p>
-                    </div>
-                    <p className="mt-4 font-display text-[2.1rem] leading-tight text-ink md:text-[2.8rem]">
-                      {step.roman}
-                    </p>
-                  </div>
-
-                  <dl className="grid grid-cols-3 gap-6 border-t border-[var(--rule)] pt-4 md:min-w-[380px]">
+              <div className="mt-6 grid grid-cols-1 gap-5 lg:mt-4 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_340px]">
+                <div className="flex min-h-0 flex-col gap-3">
+                  {/* Analysis summary */}
+                  <div className="flex flex-none flex-wrap items-end justify-between gap-3">
                     <div>
-                      <dt className="font-mono text-[8px] uppercase tracking-[0.2em] text-ink/60">
-                        Smoothness
-                      </dt>
-                      <dd className="mt-1.5 font-mono text-sm tabular-nums text-ink">
-                        {Math.round(analysis.smoothness * 100)}%
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-mono text-[8px] uppercase tracking-[0.2em] text-ink/60">
-                        Mean move
-                      </dt>
-                      <dd className="mt-1.5 font-mono text-sm tabular-nums text-ink">
-                        {analysis.averageMovement.toFixed(1)} st
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="font-mono text-[8px] uppercase tracking-[0.2em] text-ink/60">
-                        Total
-                      </dt>
-                      <dd className="mt-1.5 font-mono text-sm tabular-nums text-ink">
-                        {analysis.totalMovement} st
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-
-                {/* Chord rail */}
-                <div
-                  role="group"
-                  aria-label="Chords in the progression"
-                  className="mt-8 flex flex-wrap gap-2"
-                >
-                  {analysis.steps.map((entry, index) => (
-                    <button
-                      key={`${entry.symbol}-${index}`}
-                      type="button"
-                      className="chip"
-                      aria-pressed={index === safeStepIndex}
-                      onClick={() => chooseStep(index)}
-                    >
-                      <span className="text-[0.8rem]">{entry.symbol}</span>
-                      <span className="text-[0.62rem] opacity-65">{entry.roman}</span>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Neck panel */}
-                <div className="mt-8 border border-[var(--rule)] bg-cream/45">
-                  <div className="flex flex-col gap-4 border-b border-[var(--rule)] px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                        <p className="font-display text-[1.8rem] leading-none text-ink">
-                          {step.symbol}
-                        </p>
-                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-rust">
-                          {step.roman}
-                        </p>
-                        <p className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-ink/60">
-                          {FUNCTION_LABEL[step.fn] ?? step.fn}
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <span className="fret-index" data-inlay="true">
+                          {String(safeStepIndex + 1).padStart(2, "0")}
+                        </span>
+                        <p className="eyebrow">
+                          {analysis.key} {analysis.mode} · {analysis.steps.length}{" "}
+                          chord
+                          {analysis.steps.length === 1 ? "" : "s"}
                         </p>
                       </div>
-                      <p className="mt-2 font-mono text-[9px] uppercase tracking-[0.16em] text-ink/60">
-                        {voicing ? (
-                          <>
-                            {voicing.book.family} · column{" "}
-                            <span className="normal-case">{voicing.book.column}</span> ·
-                            bass {intervalLabel(voicing.bassPc - chordRootPc(step.chord))} ·
-                            strings {voicing.book.stringSet} · p. {voicing.book.page}
-                          </>
-                        ) : step.chord.isValid ? (
-                          stepChart ? (
-                            "No printed shape in this range"
-                          ) : (
-                            `The book prints no ${step.chord.quality} chart`
-                          )
-                        ) : (
-                          step.chord.error ?? "Unreadable chord symbol"
-                        )}
+                      <p className="mt-2 font-display 1.7 leading-tight text-ink">
+                        {step.roman}
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2">
-                      {candidates.length > 1 ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            className="chip px-3"
-                            onClick={() => changeCandidate(-1)}
-                            aria-label="Previous printed shape"
-                          >
-                            ←
-                          </button>
-                          <span className="min-w-[64px] text-center font-mono text-[9px] tabular-nums text-ink/60">
-                            {candidateIndex + 1} / {candidates.length}
-                          </span>
-                          <button
-                            type="button"
-                            className="chip px-3"
-                            onClick={() => changeCandidate(1)}
-                            aria-label="Next printed shape"
-                          >
-                            →
-                          </button>
-                        </div>
-                      ) : null}
+                    <dl className="grid grid-cols-3 gap-4 border-t border-[var(--rule)] pt-2 md:min-w-[300px]">
+                      <div>
+                        <dt className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-ink/60">
+                          Smoothness
+                        </dt>
+                        <dd className="mt-1 font-mono text-xs tabular-nums text-ink">
+                          {Math.round(analysis.smoothness * 100)}%
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-ink/60">
+                          Mean move
+                        </dt>
+                        <dd className="mt-1 font-mono text-xs tabular-nums text-ink">
+                          {analysis.averageMovement.toFixed(1)} st
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-ink/60">
+                          Total
+                        </dt>
+                        <dd className="mt-1 font-mono text-xs tabular-nums text-ink">
+                          {analysis.totalMovement} st
+                        </dd>
+                      </div>
+                    </dl>
+                  </div>
 
+                  {/* Chord rail */}
+                  <div
+                    role="group"
+                    aria-label="Chords in the progression"
+                    className="flex flex-none flex-wrap gap-1.5"
+                  >
+                    {analysis.steps.map((entry, index) => (
                       <button
+                        key={`${entry.symbol}-${index}`}
                         type="button"
-                        className="chip"
-                        onClick={() => {
-                          if (voicing) pluck.strum(midiOrder(voicing));
-                        }}
-                        disabled={!pluck.enabled || !voicing}
-                        title={
-                          !voicing
-                            ? "No printed shape to strum"
-                            : pluck.enabled
-                              ? "Strum the shape from the low string"
-                              : "Turn sound on first"
-                        }
+                        className="chip chip-sm"
+                        aria-pressed={index === safeStepIndex}
+                        onClick={() => chooseStep(index)}
                       >
-                        Strum
+                        <span className="text-[0.8rem]">{entry.symbol}</span>
+                        <span className="text-[0.7rem] opacity-65">{entry.roman}</span>
                       </button>
+                    ))}
+                  </div>
+
+                  {/* Neck panel */}
+                  <div className="flex min-h-0 flex-1 flex-col border border-[var(--rule)] bg-cream/45">
+                    <div className="flex flex-none flex-col gap-2 border-b border-[var(--rule)] px-4 py-2.5 md:flex-row md:items-center md:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+                          <p className="font-display 1.5 leading-none text-ink">
+                            {step.symbol}
+                          </p>
+                          <p className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-rust">
+                            {step.roman}
+                          </p>
+                          <p className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink/60">
+                            {FUNCTION_LABEL[step.fn] ?? step.fn}
+                          </p>
+                        </div>
+                        <p className="mt-1 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink/60">
+                          {voicing ? (
+                            <>
+                              {voicing.book.family} ·{" "}
+                              <span className="normal-case">{voicing.book.column}</span> ·
+                              bass {intervalLabel(voicing.bassPc - chordRootPc(step.chord))} ·
+                              {voicing.book.stringSet} · p. {voicing.book.page}
+                            </>
+                          ) : step.chord.isValid ? (
+                            stepChart ? (
+                              "No printed shape in this range"
+                            ) : (
+                              `The book prints no ${step.chord.quality} chart`
+                            )
+                          ) : (
+                            step.chord.error ?? "Unreadable chord symbol"
+                          )}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {candidates.length > 1 ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              className="chip chip-sm"
+                              onClick={() => changeCandidate(-1)}
+                              aria-label="Previous printed shape"
+                            >
+                              ←
+                            </button>
+                            <span className="min-w-[54px] text-center font-mono text-[10.5px] tabular-nums text-ink/60">
+                              {candidateIndex + 1} / {candidates.length}
+                            </span>
+                            <button
+                              type="button"
+                              className="chip chip-sm"
+                              onClick={() => changeCandidate(1)}
+                              aria-label="Next printed shape"
+                            >
+                              →
+                            </button>
+                          </div>
+                        ) : null}
+
+                        <button
+                          type="button"
+                          className="chip chip-sm"
+                          onClick={() => {
+                            if (voicing) pluck.strum(midiOrder(voicing));
+                          }}
+                          disabled={!pluck.enabled || !voicing}
+                          title={
+                            !voicing
+                              ? "No printed shape to strum"
+                              : pluck.enabled
+                                ? "Strum the shape from the low string"
+                                : "Turn sound on first"
+                          }
+                        >
+                          Strum
+                        </button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="fretboard-scroll px-2 py-4 md:px-6 md:py-6">
-                    <NeckMap
-                      lastFret={voicing ? Math.max(15, voicing.maxFret) : 15}
-                      notes={voicing ? toNeckNotes(voicing) : []}
-                      mutedStrings={voicing ? mutedStringsOf(voicing) : []}
-                      onNoteClick={pluckNote}
-                      ariaLabel={
-                        voicing
-                          ? `${step.symbol}, printed ${voicing.book.family} shape from page ${voicing.book.page}`
-                          : `${step.symbol} has no printed shape`
-                      }
-                    />
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--rule)] px-4 py-3 font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60 md:px-6">
-                    <span className="font-mono text-[10px] tracking-[0.14em] text-ink">
-                      {voicing ? shapeNumber(voicing) : "—"}
-                    </span>
-                    <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
-                    <span className="inline-flex items-center gap-1.5">
-                      <span
-                        aria-hidden
-                        className="inline-block h-2 w-2 rounded-full"
-                        style={{ background: ROLE_SWATCH.root }}
+                    <div className="fretboard-scroll flex min-h-0 flex-1 items-center px-4 py-3">
+                      <div className="mx-auto w-full max-w-[1040px]">
+                      <NeckMap
+                        lastFret={voicing ? Math.max(15, voicing.maxFret) : 15}
+                        notes={voicing ? toNeckNotes(voicing) : []}
+                        mutedStrings={voicing ? mutedStringsOf(voicing) : []}
+                        onNoteClick={pluckNote}
+                        ariaLabel={
+                          voicing
+                            ? `${step.symbol}, printed ${voicing.book.family} shape from page ${voicing.book.page}`
+                            : `${step.symbol} has no printed shape`
+                        }
                       />
-                      Root
-                    </span>
-                    <span>All other dots are the printed chord tones</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-none flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-[var(--rule)] px-4 py-2 font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink/60">
+                      <span className="font-mono text-[10.5px] tracking-[0.12em] text-ink">
+                        {voicing ? shapeNumber(voicing) : "—"}
+                      </span>
+                      <span aria-hidden className="h-3 w-px bg-[var(--rule)]" />
+                      <span className="inline-flex items-center gap-1.5">
+                        <span
+                          aria-hidden
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ background: ROLE_SWATCH.root }}
+                        />
+                        Root
+                      </span>
+                      <span>All other dots are the printed chord tones</span>
+                    </div>
                   </div>
                 </div>
 
                 {/* The hand · the move · the book */}
-                <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
-                  <div className="lg:col-span-5">
-                    <h2 className="label-rule text-rust">The hand</h2>
+                <div className="flex min-h-0 flex-col gap-4 lg:overflow-y-auto lg:pr-2">
+                  <div>
+                    <h2 className="label-rule text-[0.72rem] text-rust">The hand</h2>
                     {voicing ? (
                       <ShapeTable voicing={voicing} />
                     ) : (
-                      <p className="mt-4 text-sm leading-relaxed text-ink/60">
+                      <p className="mt-2 0.8 leading-relaxed text-ink/60">
                         {step.chord.isValid && !stepChart
                           ? "The book has no four-note chart for this quality. Try a seventh chord, or one of the presets above."
                           : "No printed shape was found for this symbol."}
@@ -970,20 +1017,20 @@ export default function FretboardLab() {
                     )}
                   </div>
 
-                  <div className="lg:col-span-4">
-                    <h2 className="label-rule text-rust">The move</h2>
+                  <div>
+                    <h2 className="label-rule text-[0.72rem] text-rust">The move</h2>
                     {ledger ? (
                       <MoveTable ledger={ledger} />
                     ) : (
-                      <p className="mt-4 text-sm leading-relaxed text-ink/60">
+                      <p className="mt-2 0.8 leading-relaxed text-ink/60">
                         The opening chord has no previous shape. Select the next
                         chord to read the voice leading.
                       </p>
                     )}
                   </div>
 
-                  <div className="lg:col-span-3">
-                    <h2 className="label-rule text-rust">The book</h2>
+                  <div>
+                    <h2 className="label-rule text-[0.72rem] text-rust">The book</h2>
                     <BookPlate
                       step={step}
                       chart={stepChart}
@@ -1000,12 +1047,10 @@ export default function FretboardLab() {
                     />
                   </div>
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="mt-8 border border-[var(--rule)] bg-cream/40 px-6 py-12">
-                <p className="font-display text-2xl text-ink">
-                  Nothing to read yet.
-                </p>
+              <div className="mt-6 border border-[var(--rule)] bg-cream/40 px-6 py-10">
+                <p className="font-display text-2xl text-ink">Nothing to read yet.</p>
                 <p className="mt-2 max-w-md text-sm leading-relaxed text-ink/60">
                   Enter at least one chord symbol, or choose one of the
                   progressions above. Symbols such as <code>Dm7</code>,{" "}
@@ -1036,7 +1081,7 @@ function ShapeTable({ voicing }: { voicing: Voicing }) {
               <th
                 key={heading}
                 scope="col"
-                className="py-2 pr-4 font-mono text-[8px] font-medium uppercase tracking-[0.18em] text-ink/60"
+                className="py-2 pr-4 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-ink/60"
               >
                 {heading}
               </th>
@@ -1049,19 +1094,19 @@ function ShapeTable({ voicing }: { voicing: Voicing }) {
               key={`${position.string}-${position.fret}`}
               className="border-b border-[var(--rule-soft)]"
             >
-              <td className="py-2 pr-4 font-mono text-[10px] text-ink/60">
+              <td className="py-2 pr-4 font-mono text-[10.5px] text-ink/60">
                 {6 - position.string}
               </td>
-              <td className="py-2 pr-4 font-mono text-[10px] tabular-nums text-ink">
+              <td className="py-2 pr-4 font-mono text-[10.5px] tabular-nums text-ink">
                 {position.fret}
               </td>
               <td className="py-2 pr-4 font-display text-lg leading-none text-ink">
                 {position.name}
               </td>
-              <td className="py-2 pr-4 font-mono text-[10px] text-rust">
+              <td className="py-2 pr-4 font-mono text-[10.5px] text-rust">
                 {position.label}
               </td>
-              <td className="py-2 pr-4 font-mono text-[9px] uppercase tracking-[0.12em] text-ink/65">
+              <td className="py-2 pr-4 font-mono text-[10.5px] uppercase tracking-[0.12em] text-ink/65">
                 {ROLE_NAMES[position.role]}
                 {position.isBass ? " · bass" : ""}
               </td>
@@ -1077,10 +1122,10 @@ function MoveTable({ ledger }: { ledger: VoiceLeading }) {
   return (
     <div className="mt-4">
       <div className="flex items-baseline justify-between border-b border-[var(--rule)] pb-2">
-        <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60">
+        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/60">
           {ledger.summary}
         </p>
-        <p className="font-mono text-[10px] tabular-nums text-ink">
+        <p className="font-mono text-[10.5px] tabular-nums text-ink">
           {Math.round(ledger.score * 100)}%
         </p>
       </div>
@@ -1094,7 +1139,7 @@ function MoveTable({ ledger }: { ledger: VoiceLeading }) {
               <th
                 key={heading}
                 scope="col"
-                className="py-2 pr-3 font-mono text-[8px] font-medium uppercase tracking-[0.18em] text-ink/60"
+                className="py-2 pr-3 font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-ink/60"
               >
                 {heading}
               </th>
@@ -1104,18 +1149,18 @@ function MoveTable({ ledger }: { ledger: VoiceLeading }) {
         <tbody>
           {ledger.moves.map((move) => (
             <tr key={move.string} className="border-b border-[var(--rule-soft)]">
-              <td className="py-2 pr-3 font-mono text-[10px] text-ink/60">
+              <td className="py-2 pr-3 font-mono text-[10.5px] text-ink/60">
                 {6 - move.string}
               </td>
-              <td className="py-2 pr-3 font-mono text-[10px] text-ink/70">
+              <td className="py-2 pr-3 font-mono text-[10.5px] text-ink/70">
                 {move.fromFret === null
                   ? "—"
                   : `${move.fromNote ?? ""} ${move.fromFret}`}
               </td>
-              <td className="py-2 pr-3 font-mono text-[10px] text-ink">
+              <td className="py-2 pr-3 font-mono text-[10.5px] text-ink">
                 {move.toFret === null ? "—" : `${move.toNote ?? ""} ${move.toFret}`}
               </td>
-              <td className="py-2 pr-3 font-mono text-[10px] tabular-nums">
+              <td className="py-2 pr-3 font-mono text-[10.5px] tabular-nums">
                 {move.fromFret === null || move.toFret === null ? (
                   move.fromFret === null && move.toFret === null ? (
                     <span className="text-ink/60">—</span>
@@ -1137,7 +1182,7 @@ function MoveTable({ ledger }: { ledger: VoiceLeading }) {
           ))}
         </tbody>
       </table>
-      <p className="mt-3 font-mono text-[8px] uppercase leading-relaxed tracking-[0.16em] text-ink/60">
+      <p className="mt-3 font-mono text-[10px] uppercase leading-relaxed tracking-[0.16em] text-ink/60">
         {ledger.commonTones.length} common tone
         {ledger.commonTones.length === 1 ? "" : "s"} · bass moves{" "}
         {ledger.bassMovement > 0 ? "+" : ""}
@@ -1196,59 +1241,59 @@ function BookPlate({
   return (
     <div className="mt-4">
       <p className="font-display text-2xl leading-tight text-ink">{info.name}</p>
-      <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.16em] text-rust">
+      <p className="mt-1 font-mono text-[10.5px] uppercase tracking-[0.16em] text-rust">
         {info.formula}
       </p>
 
       <dl className="mt-4 divide-y divide-[var(--rule-soft)] border-y border-[var(--rule)]">
         <div className="flex items-baseline justify-between py-2">
-          <dt className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink/60">
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/60">
             Chart
           </dt>
-          <dd className="font-mono text-[10px] text-ink">{info.label}</dd>
+          <dd className="font-mono text-[10.5px] text-ink">{info.label}</dd>
         </div>
         <div className="flex items-baseline justify-between py-2">
-          <dt className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink/60">
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/60">
             Family
           </dt>
-          <dd className="font-mono text-[10px] text-ink">
+          <dd className="font-mono text-[10.5px] text-ink">
             {voicing?.book.family ?? "—"}
           </dd>
         </div>
         <div className="flex items-baseline justify-between py-2">
-          <dt className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink/60">
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/60">
             Page
           </dt>
-          <dd className="font-mono text-[10px] tabular-nums text-ink">
+          <dd className="font-mono text-[10.5px] tabular-nums text-ink">
             {voicing?.book.page ?? info.firstPage}
           </dd>
         </div>
         <div className="flex items-baseline justify-between py-2">
-          <dt className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink/60">
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/60">
             Printed root
           </dt>
-          <dd className="font-mono text-[10px] text-ink">
+          <dd className="font-mono text-[10.5px] text-ink">
             {voicing ? pitchClassToNote(voicing.book.printedRootPc, preferFlats) : rootNote}
           </dd>
         </div>
         <div className="flex items-baseline justify-between py-2">
-          <dt className="font-mono text-[8px] uppercase tracking-[0.16em] text-ink/60">
+          <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-ink/60">
             Shift
           </dt>
-          <dd className="font-mono text-[10px] tabular-nums text-ink">
+          <dd className="font-mono text-[10.5px] tabular-nums text-ink">
             {voicing ? `${voicing.book.shift >= 0 ? "+" : ""}${voicing.book.shift} st` : "—"}
           </dd>
         </div>
       </dl>
 
-      <p className="mt-4 font-mono text-[8px] uppercase leading-relaxed tracking-[0.14em] text-ink/55">
+      <p className="mt-4 font-mono text-[10px] uppercase leading-relaxed tracking-[0.14em] text-ink/55">
         The printed shape is moved whole along the neck. Its intervals never
         change.
       </p>
 
       {candidates.length > 1 ? (
         <div className="mt-4">
-          <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-ink/60">
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-ink/60">
             Printed shapes
           </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -1256,7 +1301,7 @@ function BookPlate({
               <button
                 key={`${candidate.book.page}-${candidate.book.column}-${candidate.shape.join(",")}`}
                 type="button"
-                className="chip min-h-0 px-2 py-1 font-mono text-[8px] tracking-[0.1em]"
+                className="chip min-h-0 px-2 py-1 font-mono text-[10px] tracking-[0.1em]"
                 aria-pressed={index === candidateIndex}
                 onClick={() => onChoose(index)}
                 title={`${candidate.book.family}, page ${candidate.book.page}, ${candidate.book.column} column`}
